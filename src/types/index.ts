@@ -46,7 +46,16 @@ export interface Comment {
   userName: string;
   userRole: UserRole;
   content: string;
+  attachments?: CommentAttachment[];
   createdAt: Date;
+}
+
+export interface CommentAttachment {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
 }
 
 export interface Document {

@@ -18,7 +18,8 @@ interface AppContextType {
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
-  addComment: (taskId: string, content: string) => void;
+  addComment: (taskId: string, content: string, attachments?: { name: string; size: number; type: string; url: string }[]) => void;
+  addDocumentToTask: (taskId: string, document: { name: string; url: string }) => void;
   addTask: (taskData: NewTaskData) => void;
   isAuthenticated: boolean;
   login: (role: UserRole) => void;
@@ -41,7 +42,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ));
   };
 
-  const addComment = (taskId: string, content: string) => {
+  const addComment = (taskId: string, content: string, attachments?: { name: string; size: number; type: string; url: string }[]) => {
     if (!currentUser) return;
     
     const comment = {
@@ -50,12 +51,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
       userName: currentUser.name,
       userRole: currentUser.role,
       content,
+      attachments: attachments?.map((a, idx) => ({
+        id: `attachment-${Date.now()}-${idx}`,
+        ...a
+      })),
       createdAt: new Date(),
     };
 
     setTasks(prev => prev.map(task =>
       task.id === taskId
         ? { ...task, comments: [...task.comments, comment], updatedAt: new Date() }
+        : task
+    ));
+  };
+
+  const addDocumentToTask = (taskId: string, document: { name: string; url: string }) => {
+    if (!currentUser) return;
+    
+    const newDoc = {
+      id: `doc-${Date.now()}`,
+      name: document.name,
+      url: document.url,
+      uploadedBy: currentUser.id,
+      uploadedAt: new Date(),
+    };
+
+    setTasks(prev => prev.map(task =>
+      task.id === taskId
+        ? { ...task, documents: [...task.documents, newDoc], updatedAt: new Date() }
         : task
     ));
   };
@@ -114,6 +137,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setTasks,
       updateTask,
       addComment,
+      addDocumentToTask,
       addTask,
       isAuthenticated: !!currentUser,
       login,
