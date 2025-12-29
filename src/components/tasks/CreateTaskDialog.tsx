@@ -245,7 +245,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
                 <SelectValue placeholder="Select cadence..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">None (One-time)</SelectItem>
+                <SelectItem value="none">None (One-time)</SelectItem>
                 <SelectItem value="once">Once</SelectItem>
                 <SelectItem value="weekly">Weekly</SelectItem>
                 <SelectItem value="monthly">Monthly</SelectItem>
