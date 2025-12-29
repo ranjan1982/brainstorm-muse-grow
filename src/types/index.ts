@@ -20,13 +20,24 @@ export interface Task {
   phase: Phase;
   owner: UserRole | 'system';
   assignedTo?: string;
+  approver?: UserRole; // us-strategy or client
   status: TaskStatus;
   cadence?: 'once' | 'monthly' | 'weekly' | 'ongoing';
   comments: Comment[];
   documents: Document[];
+  attachments?: Attachment[];
   createdAt: Date;
   updatedAt: Date;
   dueDate?: Date;
+}
+
+export interface Attachment {
+  id: string;
+  name: string;
+  size: number;
+  type: string;
+  url: string;
+  uploadedAt: Date;
 }
 
 export interface Comment {
