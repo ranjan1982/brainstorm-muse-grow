@@ -66,12 +66,63 @@ export interface Document {
   uploadedAt: Date;
 }
 
+export type SubscriptionTier = 'starter' | 'growth' | 'enterprise';
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  phone?: string;
+  address?: string;
+  avatar?: string;
+  createdAt: Date;
+  isActive: boolean;
+}
+
 export interface Subscription {
   id: string;
-  tier: 'starter' | 'growth' | 'enterprise';
-  status: 'active' | 'cancelled' | 'pending';
-  startDate: Date;
   clientId: string;
+  tier: SubscriptionTier;
+  status: 'active' | 'cancelled' | 'pending' | 'expired';
+  startDate: Date;
+  endDate?: Date;
+  nextBillingDate?: Date;
+  monthlyPrice: number;
+}
+
+export interface PaymentHistory {
+  id: string;
+  clientId: string;
+  subscriptionId: string;
+  amount: number;
+  status: 'paid' | 'pending' | 'failed' | 'refunded';
+  paymentDate: Date;
+  paymentMethod: string;
+  invoiceNumber: string;
+}
+
+export interface TaskTemplate {
+  id: string;
+  taskId: string;
+  title: string;
+  description?: string;
+  phase: Phase;
+  owner: UserRole | 'system';
+  cadence?: 'once' | 'monthly' | 'weekly' | 'ongoing';
+  isActive: boolean;
+  order: number;
+}
+
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+  trigger: 'task_assigned' | 'task_completed' | 'subscription_reminder' | 'welcome' | 'custom';
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface KPIData {
@@ -81,6 +132,18 @@ export interface KPIData {
   tasksCompleted: number;
   totalTasks: number;
 }
+
+export const SUBSCRIPTION_TIER_LABELS: Record<SubscriptionTier, string> = {
+  'starter': 'Starter',
+  'growth': 'Growth',
+  'enterprise': 'Enterprise'
+};
+
+export const SUBSCRIPTION_TIER_PRICES: Record<SubscriptionTier, number> = {
+  'starter': 299,
+  'growth': 599,
+  'enterprise': 999
+};
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   'admin': 'Portal Admin',

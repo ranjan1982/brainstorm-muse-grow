@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/context/AppContext';
 import { Badge } from '@/components/ui/badge';
-import { ROLE_LABELS, UserRole } from '@/types';
+import { ROLE_LABELS, UserRole, SUBSCRIPTION_TIER_LABELS } from '@/types';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,14 +11,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ChevronDown, LogOut, User, LayoutDashboard, Zap } from 'lucide-react';
+import { ChevronDown, LogOut, User, LayoutDashboard, Zap, Building2, Check } from 'lucide-react';
 
 export function Header() {
-  const { currentUser, isAuthenticated, logout, login } = useApp();
+  const { 
+    currentUser, 
+    isAuthenticated, 
+    logout, 
+    login, 
+    clients, 
+    currentClient, 
+    setCurrentClient,
+    getClientSubscription 
+  } = useApp();
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
 
   const roles: UserRole[] = ['admin', 'us-strategy', 'india-head', 'india-junior', 'client'];
+  const canSwitchClients = currentUser?.role === 'us-strategy' || currentUser?.role === 'india-head' || currentUser?.role === 'india-junior';
+  const activeClients = clients.filter(c => c.isActive);
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -54,6 +65,48 @@ export function Header() {
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
+              {/* Client Switcher for Team Roles */}
+              {canSwitchClients && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Building2 className="w-4 h-4" />
+                      {currentClient?.company || 'Select Client'}
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-72">
+                    <DropdownMenuLabel>Switch Client</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {activeClients.map((client) => {
+                      const subscription = getClientSubscription(client.id);
+                      return (
+                        <DropdownMenuItem
+                          key={client.id}
+                          onClick={() => setCurrentClient(client)}
+                          className="cursor-pointer flex items-center justify-between"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-medium">{client.company}</span>
+                            <span className="text-xs text-muted-foreground">{client.name}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {subscription && (
+                              <Badge variant="outline" className="text-xs">
+                                {SUBSCRIPTION_TIER_LABELS[subscription.tier]}
+                              </Badge>
+                            )}
+                            {currentClient?.id === client.id && (
+                              <Check className="w-4 h-4 text-success" />
+                            )}
+                          </div>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+
               <Link to="/dashboard">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <LayoutDashboard className="w-4 h-4" />
