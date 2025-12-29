@@ -7,7 +7,9 @@ interface NewTaskData {
   description?: string;
   phase: Task['phase'];
   owner: Task['owner'];
+  approver?: Task['approver'];
   cadence?: Task['cadence'];
+  attachments?: Task['attachments'];
 }
 
 interface AppContextType {
@@ -80,10 +82,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       description: taskData.description,
       phase: taskData.phase,
       owner: taskData.owner,
+      approver: taskData.approver,
       status: 'pending',
       cadence: taskData.cadence,
       comments: [],
       documents: [],
+      attachments: taskData.attachments || [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };
