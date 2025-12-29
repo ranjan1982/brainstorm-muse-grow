@@ -1,13 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockKPIData, kpiHistory } from '@/data/mockData';
+import { kpiHistory } from '@/data/mockData';
 import { TrendingUp, Eye, Bot, CheckCircle2, ArrowUpRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useApp } from '@/context/AppContext';
 
 export function KPIDashboard() {
+  const { currentClient, getClientKPIData } = useApp();
+  const kpiData = getClientKPIData(currentClient?.id || 'client-1');
+
   const kpis = [
     {
       title: 'Local Pack Visibility',
-      value: `+${mockKPIData.localPackVisibility}%`,
+      value: `+${kpiData.localPackVisibility}%`,
       icon: TrendingUp,
       color: 'text-success',
       bgColor: 'bg-success/10',
@@ -15,7 +19,7 @@ export function KPIDashboard() {
     },
     {
       title: 'GBP Views',
-      value: `+${mockKPIData.gbpViews}%`,
+      value: `+${kpiData.gbpViews}%`,
       icon: Eye,
       color: 'text-info',
       bgColor: 'bg-info/10',
@@ -23,7 +27,7 @@ export function KPIDashboard() {
     },
     {
       title: 'AI Mention Score',
-      value: `${mockKPIData.aiMentionScore}/5`,
+      value: `${kpiData.aiMentionScore}/5`,
       icon: Bot,
       color: 'text-accent',
       bgColor: 'bg-accent/10',
@@ -31,11 +35,11 @@ export function KPIDashboard() {
     },
     {
       title: 'Tasks Completed',
-      value: `${mockKPIData.tasksCompleted}/${mockKPIData.totalTasks}`,
+      value: `${kpiData.tasksCompleted}/${kpiData.totalTasks}`,
       icon: CheckCircle2,
       color: 'text-warning',
       bgColor: 'bg-warning/10',
-      description: `${Math.round((mockKPIData.tasksCompleted / mockKPIData.totalTasks) * 100)}% complete`
+      description: kpiData.totalTasks > 0 ? `${Math.round((kpiData.tasksCompleted / kpiData.totalTasks) * 100)}% complete` : '0% complete'
     },
   ];
 
