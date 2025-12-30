@@ -56,36 +56,8 @@ export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
     const tierTasks = getClientTasksForTier(clientId);
     let filtered = tierTasks.filter(t => t.phase === p);
     
-    // Filter by role visibility
-    if (currentUser) {
-      switch (currentUser.role) {
-        case 'client':
-          // Client sees all tasks but can only act on their own
-          break;
-        case 'india-junior':
-          // Junior sees tasks assigned to them or India team tasks
-          filtered = filtered.filter(t => 
-            t.assignedTo === currentUser.id || 
-            t.owner === 'india-head' || 
-            t.owner === 'india-junior'
-          );
-          break;
-        case 'india-head':
-          // Head sees all India team tasks
-          filtered = filtered.filter(t => 
-            t.owner === 'india-head' || 
-            t.owner === 'india-junior' ||
-            t.status === 'approved'
-          );
-          break;
-        case 'us-strategy':
-          // US Strategy sees submitted tasks + their own
-          break;
-        case 'admin':
-          // Admin sees everything
-          break;
-      }
-    }
+    // All users can see ALL tasks in phases - no filtering by role
+    // Permissions for editing/actions are handled in TaskCard and TaskDetailModal
     
     return filtered;
   };

@@ -98,33 +98,69 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
-  // Permission checks
+  // Permission checks based on workflow document
+  // US Strategy is the GATEKEEPER - only they approve and send to client
+  
   const canEdit = () => {
     if (!currentUser) return false;
-    if ((currentUser.role === 'india-head' || currentUser.role === 'india-junior') && 
-        (task.owner === 'india-head' || task.owner === 'india-junior')) {
-      return true;
+    
+    // India SEO Head can work on ALL tasks (execute tasks)
+    if (currentUser.role === 'india-head') {
+      return task.status !== 'approved' && task.status !== 'submitted';
     }
-    if (currentUser.role === 'client' && task.owner === 'client') {
-      return true;
+    
+    // India SEO Junior can only work on tasks assigned to them
+    if (currentUser.role === 'india-junior') {
+      const isAssignedToJunior = task.owner === 'india-junior' || task.assignedTo === currentUser.id;
+      return isAssignedToJunior && task.status !== 'approved' && task.status !== 'submitted';
     }
-    if (currentUser.role === 'us-strategy' && task.status === 'submitted') {
-      return true;
+    
+    // Client can only work on client-assigned tasks
+    if (currentUser.role === 'client') {
+      return task.owner === 'client' && task.status !== 'approved' && task.status !== 'submitted';
     }
+    
     return false;
   };
 
+  // ONLY US Strategy can approve tasks
   const canApprove = () => {
     return currentUser?.role === 'us-strategy' && task.status === 'submitted';
   };
+  
+  // US Strategy can send approved task to client
+  const canSendToClient = () => {
+    return currentUser?.role === 'us-strategy' && task.status === 'approved' && task.owner !== 'client';
+  };
 
-  // US Strategy can comment on all tasks, others only on assigned tasks
+  // ONLY US Strategy can comment on ALL tasks
+  // Other roles can only comment on tasks assigned to their role
   const canComment = () => {
     if (!currentUser) return false;
-    if (currentUser.role === 'us-strategy' || currentUser.role === 'admin') return true;
-    // Other roles can comment only on tasks assigned to their role
-    return task.owner === currentUser.role;
+    
+    // US Strategy can add feedback/comment on ALL tasks (they review everything)
+    if (currentUser.role === 'us-strategy') return true;
+    
+    // India SEO Head can comment on all India team tasks
+    if (currentUser.role === 'india-head') {
+      return task.owner === 'india-head' || task.owner === 'india-junior';
+    }
+    
+    // India SEO Junior can comment only on their assigned tasks
+    if (currentUser.role === 'india-junior') {
+      return task.owner === 'india-junior' || task.assignedTo === currentUser?.id;
+    }
+    
+    // Client can comment on client tasks
+    if (currentUser.role === 'client') {
+      return task.owner === 'client';
+    }
+    
+    return false;
   };
+  
+  // Can upload documents - same as comment permissions
+  const canUploadDocuments = () => canComment();
 
   const statusIcon = {
     'pending': <Clock className="w-4 h-4" />,
@@ -548,6 +584,8 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
               Submit for Review
             </Button>
           )}
+          
+          {/* US Strategy Approval Actions - They are the gatekeeper */}
           {canApprove() && (
             <>
               <Button variant="success" onClick={() => handleStatusChange('approved')}>
@@ -560,12 +598,36 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
               </Button>
             </>
           )}
+          
+          {/* US Strategy can send approved tasks to client for their review */}
+          {canSendToClient() && (
+            <Button variant="accent" onClick={() => {
+              // Mark task as ready for client review
+              updateTask(task.id, { 
+                status: 'pending', 
+                owner: 'client',
+                approver: 'client' 
+              });
+            }}>
+              <Send className="w-4 h-4 mr-2" />
+              Send to Client
+            </Button>
+          )}
+          
           {task.status === 'resubmit' && canEdit() && (
             <Button variant="warning" onClick={() => handleStatusChange('in-progress')}>
               <AlertCircle className="w-4 h-4 mr-2" />
               Revise Task
             </Button>
           )}
+          
+          {/* Role-specific info */}
+          {currentUser?.role === 'us-strategy' && task.status !== 'submitted' && task.status !== 'approved' && (
+            <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground">
+              Awaiting submission for review
+            </div>
+          )}
+          
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="ml-auto">
             Close
           </Button>

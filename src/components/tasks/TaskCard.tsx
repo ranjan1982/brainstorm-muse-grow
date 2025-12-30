@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   AlertCircle,
   RotateCcw,
-  Eye
+  Eye,
+  Send
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,23 +24,26 @@ interface TaskCardProps {
 export function TaskCard({ task, onViewDetails }: TaskCardProps) {
   const { currentUser, updateTask, addComment } = useApp();
   
+  // Permission checks based on workflow document
+  // US Strategy is the GATEKEEPER - only they approve and send to client
+  
   const canEdit = () => {
     if (!currentUser) return false;
     
-    // India SEO roles can work on their tasks
-    if ((currentUser.role === 'india-head' || currentUser.role === 'india-junior') && 
-        (task.owner === 'india-head' || task.owner === 'india-junior')) {
-      return true;
+    // India SEO Head can work on ALL tasks
+    if (currentUser.role === 'india-head') {
+      return task.status !== 'approved' && task.status !== 'submitted';
     }
     
-    // Client can work on client tasks
-    if (currentUser.role === 'client' && task.owner === 'client') {
-      return true;
+    // India SEO Junior can only work on tasks assigned to them
+    if (currentUser.role === 'india-junior') {
+      const isAssignedToJunior = task.owner === 'india-junior' || task.assignedTo === currentUser.id;
+      return isAssignedToJunior && task.status !== 'approved' && task.status !== 'submitted';
     }
     
-    // US Strategy can review submitted tasks
-    if (currentUser.role === 'us-strategy' && task.status === 'submitted') {
-      return true;
+    // Client can only work on client-assigned tasks
+    if (currentUser.role === 'client') {
+      return task.owner === 'client' && task.status !== 'approved' && task.status !== 'submitted';
     }
     
     return false;
@@ -47,11 +51,32 @@ export function TaskCard({ task, onViewDetails }: TaskCardProps) {
 
   const canSubmit = () => {
     if (!currentUser) return false;
-    return task.status === 'completed' && canEdit();
+    if (task.status !== 'completed') return false;
+    
+    // India SEO Head can submit any task
+    if (currentUser.role === 'india-head') return true;
+    
+    // India SEO Junior can submit their assigned tasks
+    if (currentUser.role === 'india-junior') {
+      return task.owner === 'india-junior' || task.assignedTo === currentUser.id;
+    }
+    
+    // Client can submit client tasks
+    if (currentUser.role === 'client') {
+      return task.owner === 'client';
+    }
+    
+    return false;
   };
 
+  // ONLY US Strategy can approve tasks and send to client
   const canApprove = () => {
     return currentUser?.role === 'us-strategy' && task.status === 'submitted';
+  };
+  
+  // US Strategy can send approved tasks to client for review
+  const canSendToClient = () => {
+    return currentUser?.role === 'us-strategy' && task.status === 'approved' && task.owner !== 'client';
   };
 
   const handleStatusChange = (newStatus: Task['status']) => {
@@ -73,6 +98,16 @@ export function TaskCard({ task, onViewDetails }: TaskCardProps) {
   const handleResubmit = () => {
     if (canApprove()) {
       updateTask(task.id, { status: 'resubmit' });
+    }
+  };
+  
+  const handleSendToClient = () => {
+    if (canSendToClient()) {
+      updateTask(task.id, { 
+        status: 'pending', 
+        owner: 'client',
+        approver: 'client' 
+      });
     }
   };
 
@@ -117,6 +152,15 @@ export function TaskCard({ task, onViewDetails }: TaskCardProps) {
           <Badge variant={task.owner as any} className="text-[10px]">
             {task.owner === 'system' ? 'System' : ROLE_LABELS[task.owner as UserRole]}
           </Badge>
+          
+          {/* Show workflow status for team members */}
+          {currentUser?.role !== 'client' && task.status === 'submitted' && (
+            <span className="flex items-center gap-1 text-amber-500">
+              <Clock className="w-3 h-3" />
+              Awaiting US Strategy Review
+            </span>
+          )}
+          
           {task.comments.length > 0 && (
             <span className="flex items-center gap-1">
               <MessageSquare className="w-3 h-3" />
@@ -182,6 +226,18 @@ export function TaskCard({ task, onViewDetails }: TaskCardProps) {
                 Resubmit
               </Button>
             </>
+          )}
+          
+          {/* US Strategy can send approved tasks to client */}
+          {canSendToClient() && (
+            <Button 
+              size="sm" 
+              variant="accent"
+              onClick={(e) => { e.stopPropagation(); handleSendToClient(); }}
+            >
+              <Send className="w-4 h-4 mr-1" />
+              Send to Client
+            </Button>
           )}
           
           {task.status === 'resubmit' && canEdit() && (
