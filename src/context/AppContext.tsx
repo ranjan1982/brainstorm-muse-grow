@@ -35,6 +35,8 @@ interface AppContextType {
   currentClient: Client | null;
   setCurrentClient: (client: Client | null) => void;
   getClientTasks: (clientId?: string) => TaskWithClient[];
+  getClientTasksForTier: (clientId?: string) => TaskWithClient[];
+  getTaskTemplatesForTier: (tier: SubscriptionTier) => TaskTemplate[];
   getClientKPIData: (clientId: string) => KPIData;
   // Subscription management
   subscriptions: Subscription[];
@@ -176,6 +178,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return tasks.filter(t => t.clientId === targetClientId);
   };
 
+  // Get task templates available for a specific subscription tier
+  const getTaskTemplatesForTier = (tier: SubscriptionTier): TaskTemplate[] => {
+    return taskTemplates.filter(t => t.isActive && t.tiers.includes(tier));
+  };
+
+  // Get client tasks filtered by their subscription tier
+  const getClientTasksForTier = (clientId?: string): TaskWithClient[] => {
+    const targetClientId = clientId || currentClient?.id;
+    if (!targetClientId) return tasks;
+    
+    // Get the client's subscription tier
+    const subscription = subscriptions.find(s => s.clientId === targetClientId);
+    const tier = subscription?.tier || 'starter';
+    
+    // Get task template IDs available for this tier
+    const availableTemplates = getTaskTemplatesForTier(tier);
+    const availableTaskIds = new Set(availableTemplates.map(t => t.taskId));
+    
+    // Filter tasks by client AND by tier-available templates
+    return tasks.filter(t => 
+      t.clientId === targetClientId && 
+      availableTaskIds.has(t.taskId)
+    );
+  };
+
   const getClientKPIData = (clientId: string): KPIData => {
     return mockKPIData[clientId] || {
       localPackVisibility: 0,
@@ -243,6 +270,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       currentClient,
       setCurrentClient,
       getClientTasks,
+      getClientTasksForTier,
+      getTaskTemplatesForTier,
       getClientKPIData,
       // Subscriptions
       subscriptions,

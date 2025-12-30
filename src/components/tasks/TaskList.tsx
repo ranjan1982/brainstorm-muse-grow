@@ -1,4 +1,4 @@
-import { Task, Phase, PHASE_LABELS } from '@/types';
+import { Task, Phase, PHASE_LABELS, SUBSCRIPTION_TIER_LABELS } from '@/types';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
 import { CreateTaskDialog } from './CreateTaskDialog';
@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Crown, Star, Zap } from 'lucide-react';
 
 interface TaskListProps {
   phase?: Phase;
@@ -15,14 +15,31 @@ interface TaskListProps {
 }
 
 export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
-  const { tasks, currentUser } = useApp();
+  const { currentUser, currentClient, getClientTasksForTier, getClientSubscription, getTaskTemplatesForTier } = useApp();
   const [selectedPhase, setSelectedPhase] = useState<Phase>(phase || 'onboarding');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
   const phases: Phase[] = ['onboarding', 'foundation', 'execution', 'ai', 'reporting', 'monitoring'];
-  const starterUnlocked: Phase[] = ['onboarding', 'foundation', 'execution', 'reporting'];
+  
+  // Get current client's subscription tier
+  const clientId = currentUser?.role === 'client' ? currentUser.id : currentClient?.id;
+  const subscription = clientId ? getClientSubscription(clientId) : undefined;
+  const currentTier = subscription?.tier || 'starter';
+  
+  // Get available templates for this tier to determine which phases are unlocked
+  const availableTemplates = getTaskTemplatesForTier(currentTier);
+  const unlockedPhases = new Set(availableTemplates.map(t => t.phase));
+  
+  // Get tier icon
+  const getTierIcon = () => {
+    switch (currentTier) {
+      case 'enterprise': return <Crown className="w-4 h-4" />;
+      case 'growth': return <Zap className="w-4 h-4" />;
+      default: return <Star className="w-4 h-4" />;
+    }
+  };
   
   const canCreateTask = () => {
     if (!currentUser) return false;
@@ -35,7 +52,9 @@ export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
   };
 
   const getFilteredTasks = (p: Phase) => {
-    let filtered = tasks.filter(t => t.phase === p);
+    // Get tasks filtered by client and their subscription tier
+    const tierTasks = getClientTasksForTier(clientId);
+    let filtered = tierTasks.filter(t => t.phase === p);
     
     // Filter by role visibility
     if (currentUser) {
@@ -78,16 +97,36 @@ export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
     const approved = phaseTasks.filter(t => t.status === 'approved').length;
     return { total: phaseTasks.length, pending, inProgress, approved };
   };
+  
+  // Get template count for each phase based on tier
+  const getPhaseTemplateCount = (p: Phase) => {
+    return availableTemplates.filter(t => t.phase === p).length;
+  };
 
   if (showAllPhases) {
     return (
       <>
+        {/* Tier indicator */}
+        <div className="flex items-center gap-2 mb-4 p-3 bg-secondary/30 rounded-lg">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            {getTierIcon()}
+            <span className="text-muted-foreground">Subscription:</span>
+            <Badge variant={currentTier === 'enterprise' ? 'default' : currentTier === 'growth' ? 'secondary' : 'outline'}>
+              {SUBSCRIPTION_TIER_LABELS[currentTier]}
+            </Badge>
+          </div>
+          <span className="text-xs text-muted-foreground ml-2">
+            ({availableTemplates.length} task templates available)
+          </span>
+        </div>
+        
         <Tabs value={selectedPhase} onValueChange={(v) => setSelectedPhase(v as Phase)} className="w-full">
           <div className="flex items-center justify-between mb-6 gap-4">
             <TabsList className="flex-1 justify-start overflow-x-auto flex-nowrap bg-secondary/50 p-1 rounded-xl">
               {phases.map((p) => {
                 const counts = getPhaseTaskCounts(p);
-                const isLocked = !starterUnlocked.includes(p);
+                const templateCount = getPhaseTemplateCount(p);
+                const isLocked = !unlockedPhases.has(p);
                 return (
                   <TabsTrigger 
                     key={p} 
@@ -96,13 +135,13 @@ export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
                     className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg flex items-center gap-2 whitespace-nowrap"
                   >
                     {PHASE_LABELS[p].split('&')[0].trim()}
-                    {!isLocked && counts.total > 0 && (
+                    {!isLocked && (
                       <Badge variant="secondary" className="ml-1 text-[10px] px-1.5">
-                        {counts.approved}/{counts.total}
+                        {counts.total > 0 ? `${counts.approved}/${counts.total}` : `0/${templateCount}`}
                       </Badge>
                     )}
                     {isLocked && (
-                      <Badge variant="outline" className="ml-1 text-[10px] px-1.5">
+                      <Badge variant="outline" className="ml-1 text-[10px] px-1.5 opacity-50">
                         🔒
                       </Badge>
                     )}
@@ -169,7 +208,8 @@ export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
     );
   }
 
-  const filteredTasks = phase ? getFilteredTasks(phase) : tasks;
+  const allTierTasks = getClientTasksForTier(clientId);
+  const filteredTasks = phase ? getFilteredTasks(phase) : allTierTasks;
 
   return (
     <>

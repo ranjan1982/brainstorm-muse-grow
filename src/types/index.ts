@@ -109,9 +109,11 @@ export interface TaskTemplate {
   description?: string;
   phase: Phase;
   owner: UserRole | 'system';
-  cadence?: 'once' | 'monthly' | 'weekly' | 'ongoing';
+  cadence?: 'once' | 'monthly' | 'weekly' | 'ongoing' | 'bi-weekly' | 'bi-monthly' | 'quarterly';
   isActive: boolean;
   order: number;
+  tiers: SubscriptionTier[]; // Which subscription tiers include this task
+  notes?: string; // Additional notes about the task
 }
 
 export interface EmailTemplate {
