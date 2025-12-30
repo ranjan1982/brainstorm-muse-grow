@@ -138,27 +138,90 @@ export const mockPaymentHistory: PaymentHistory[] = [
   },
 ];
 
-// Task templates for phase configuration
+// Task templates for phase configuration - organized by tier
 export const mockTaskTemplates: TaskTemplate[] = [
-  // Onboarding templates
-  { id: 'tpl-1', taskId: 'TPL-ONB-001', title: 'Provide GBP access', description: 'Share Google Business Profile access credentials with the team.', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 1 },
-  { id: 'tpl-2', taskId: 'TPL-ONB-002', title: 'Upload 20+ photos', description: 'Upload high-quality photos of your business, team, and services.', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 2 },
-  { id: 'tpl-3', taskId: 'TPL-ONB-003', title: 'Submit service descriptions', description: 'Provide detailed descriptions of all services offered.', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 3 },
-  { id: 'tpl-4', taskId: 'TPL-ONB-004', title: 'Conduct onboarding call', description: 'Schedule and conduct initial strategy call with client.', phase: 'onboarding', owner: 'us-strategy', cadence: 'once', isActive: true, order: 4 },
-  { id: 'tpl-5', taskId: 'TPL-ONB-005', title: 'Verify access & completeness', description: 'Confirm all client-provided access and materials are complete.', phase: 'onboarding', owner: 'india-head', cadence: 'once', isActive: true, order: 5 },
-  
-  // Foundation templates
-  { id: 'tpl-6', taskId: 'TPL-FND-001', title: 'GBP audit & baseline snapshot', description: 'Complete comprehensive audit of current GBP status.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 1 },
-  { id: 'tpl-7', taskId: 'TPL-FND-002', title: 'Initial GBP optimization', description: 'Implement baseline optimization for GBP profile.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 2 },
-  { id: 'tpl-8', taskId: 'TPL-FND-003', title: 'Location page audit', description: 'Audit client website location pages for local SEO.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 3 },
-  
-  // Execution templates
-  { id: 'tpl-9', taskId: 'TPL-EXE-001', title: 'Publish 2 Google Posts', description: 'Create and publish monthly Google Business posts.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1 },
-  { id: 'tpl-10', taskId: 'TPL-EXE-002', title: 'Seed 3 GBP Q&As', description: 'Add relevant Q&A content to GBP.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2 },
-  
-  // Reporting templates
-  { id: 'tpl-11', taskId: 'TPL-RPT-001', title: 'Update dashboard', description: 'Refresh KPI dashboard with latest metrics.', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1 },
-  { id: 'tpl-12', taskId: 'TPL-RPT-002', title: 'Monthly email summary', description: 'Send monthly progress report to client.', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2 },
+  // ========== ONBOARDING & INTAKE - All Tiers ==========
+  { id: 'tpl-onb-1', taskId: 'ST-ONB-001', title: 'Provide GBP access', description: 'Required to proceed - share Google Business Profile access credentials.', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-onb-2', taskId: 'ST-ONB-002', title: 'Upload 20+ photos', description: 'Client-assisted upload of high-quality photos of business, team, and services.', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-onb-3', taskId: 'ST-ONB-003', title: 'Submit service descriptions', description: 'Structured intake of detailed descriptions for all services offered.', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-onb-4', taskId: 'ST-ONB-004', title: 'Conduct onboarding call (1 hr)', description: 'Set expectations and lock scope with initial strategy call.', phase: 'onboarding', owner: 'us-strategy', cadence: 'once', isActive: true, order: 4, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-onb-5', taskId: 'ST-ONB-005', title: 'Verify access & completeness', description: 'Confirm all client-provided access and materials are complete. Blocker if incomplete.', phase: 'onboarding', owner: 'india-head', cadence: 'once', isActive: true, order: 5, tiers: ['starter', 'growth', 'enterprise'] },
+
+  // ========== FOUNDATION SETUP - Starter Tier ==========
+  { id: 'tpl-fnd-st-1', taskId: 'ST-FND-001', title: 'GBP audit & baseline snapshot', description: 'Complete comprehensive audit of current GBP status.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-fnd-st-2', taskId: 'ST-FND-002', title: 'Initial GBP optimization', description: 'One-time baseline optimization for GBP profile.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-fnd-st-3', taskId: 'ST-FND-003', title: 'Location page audit (no fixes)', description: 'Audit client website location pages for local SEO without implementing fixes.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-fnd-st-4', taskId: 'ST-FND-004', title: 'Core citation submission (5–10)', description: 'Submit basic citations to core directories.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 4, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-fnd-st-5', taskId: 'ST-FND-005', title: 'Local Business schema', description: 'Implement basic Local Business schema markup.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 5, tiers: ['starter', 'growth', 'enterprise'] },
+
+  // ========== FOUNDATION SETUP - Growth Tier Enhancements ==========
+  { id: 'tpl-fnd-gr-1', taskId: 'GR-FND-001', title: 'Monthly GBP optimization', description: 'Ongoing monthly optimization of GBP profile.', phase: 'foundation', owner: 'india-head', cadence: 'monthly', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-fnd-gr-2', taskId: 'GR-FND-002', title: 'Full location page optimization', description: 'Complete optimization of location pages with fixes.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 7, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-fnd-gr-3', taskId: 'GR-FND-003', title: 'Organization schema', description: 'Implement comprehensive Organization schema markup.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 8, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-fnd-gr-4', taskId: 'GR-FND-004', title: 'Expanded citation set (15–20)', description: 'Extended citation submission to 15-20 directories.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 9, tiers: ['growth', 'enterprise'] },
+
+  // ========== FOUNDATION SETUP - Pro/Enterprise Tier ==========
+  { id: 'tpl-fnd-pr-1', taskId: 'PR-FND-001', title: 'Bi-weekly GBP optimization', description: 'Continuous bi-weekly optimization of GBP profile.', phase: 'foundation', owner: 'india-head', cadence: 'bi-weekly', isActive: true, order: 10, tiers: ['enterprise'] },
+  { id: 'tpl-fnd-pr-2', taskId: 'PR-FND-002', title: 'Advanced page rewrites', description: 'Complete rewrite and optimization of key pages.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 11, tiers: ['enterprise'] },
+  { id: 'tpl-fnd-pr-3', taskId: 'PR-FND-003', title: 'Speakable schema', description: 'Implement Speakable schema for voice search optimization.', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 12, tiers: ['enterprise'] },
+  { id: 'tpl-fnd-pr-4', taskId: 'PR-FND-004', title: 'Weekly site health monitoring', description: 'Continuous weekly monitoring of site health and performance.', phase: 'foundation', owner: 'india-head', cadence: 'weekly', isActive: true, order: 13, tiers: ['enterprise'] },
+
+  // ========== MONTHLY EXECUTION - Starter Tier ==========
+  { id: 'tpl-exe-st-1', taskId: 'ST-EXE-001', title: 'Publish 2 Google Posts', description: 'Create and publish monthly Google Business posts.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter'] },
+  { id: 'tpl-exe-st-2', taskId: 'ST-EXE-002', title: 'Seed 3 GBP Q&As', description: 'Add 3 relevant Q&A content to GBP monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter'] },
+  { id: 'tpl-exe-st-3', taskId: 'ST-EXE-003', title: 'Publish 1 AI-assisted blog', description: 'Create and publish one AI-assisted blog post monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 3, tiers: ['starter'] },
+  { id: 'tpl-exe-st-4', taskId: 'ST-EXE-004', title: 'Monitor reviews & alerts', description: 'Ongoing monitoring of reviews and alerts.', phase: 'execution', owner: 'india-head', cadence: 'ongoing', isActive: true, order: 4, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-exe-st-5', taskId: 'ST-EXE-005', title: 'Approve posts (quick)', description: 'Client quick approval of posts weekly.', phase: 'execution', owner: 'client', cadence: 'weekly', isActive: true, order: 5, tiers: ['starter', 'growth', 'enterprise'] },
+
+  // ========== MONTHLY EXECUTION - Growth Tier ==========
+  { id: 'tpl-exe-gr-1', taskId: 'GR-EXE-001', title: 'Publish 4 Google Posts', description: 'Create and publish 4 Google Business posts monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 6, tiers: ['growth'] },
+  { id: 'tpl-exe-gr-2', taskId: 'GR-EXE-002', title: 'Seed 5 GBP Q&As', description: 'Add 5 relevant Q&A content to GBP monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 7, tiers: ['growth'] },
+  { id: 'tpl-exe-gr-3', taskId: 'GR-EXE-003', title: 'Publish 2 blog posts', description: 'Create and publish 2 blog posts monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 8, tiers: ['growth'] },
+  { id: 'tpl-exe-gr-4', taskId: 'GR-EXE-004', title: 'FAQ expansion (8 Qs)', description: 'Expand FAQ section with 8 new questions monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 9, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-exe-gr-5', taskId: 'GR-EXE-005', title: 'Technical SEO audit', description: 'Monthly technical SEO audit and fixes.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 10, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-exe-gr-6', taskId: 'GR-EXE-006', title: 'Case study inputs', description: 'Gather client inputs for case study quarterly.', phase: 'execution', owner: 'client', cadence: 'quarterly', isActive: true, order: 11, tiers: ['growth', 'enterprise'] },
+
+  // ========== MONTHLY EXECUTION - Pro/Enterprise Tier ==========
+  { id: 'tpl-exe-pr-1', taskId: 'PR-EXE-001', title: 'Publish 8 Google Posts', description: 'Create and publish 8 Google Business posts monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 12, tiers: ['enterprise'] },
+  { id: 'tpl-exe-pr-2', taskId: 'PR-EXE-002', title: 'Seed 10 GBP Q&As', description: 'Add 10 relevant Q&A content to GBP monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 13, tiers: ['enterprise'] },
+  { id: 'tpl-exe-pr-3', taskId: 'PR-EXE-003', title: 'Publish 3–4 blog posts', description: 'Create and publish 3-4 blog posts monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 14, tiers: ['enterprise'] },
+  { id: 'tpl-exe-pr-4', taskId: 'PR-EXE-004', title: 'Case studies', description: 'Create detailed case studies bi-monthly.', phase: 'execution', owner: 'india-head', cadence: 'bi-monthly', isActive: true, order: 15, tiers: ['enterprise'] },
+  { id: 'tpl-exe-pr-5', taskId: 'PR-EXE-005', title: 'Industry directory placements', description: 'Monthly submission to industry-specific directories.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 16, tiers: ['enterprise'] },
+
+  // ========== AI / AEO OPTIMIZATION - Starter Tier ==========
+  { id: 'tpl-ai-st-1', taskId: 'ST-AEO-001', title: 'Run AI visibility test (10 prompts)', description: 'Test AI visibility with 10 prompts.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter'], notes: 'Starter does NOT include proactive AI content rewrites' },
+  { id: 'tpl-ai-st-2', taskId: 'ST-AEO-002', title: 'Log AI mention score (1–5)', description: 'Record AI mention score on a 1-5 scale.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter'] },
+  { id: 'tpl-ai-st-3', taskId: 'ST-AEO-003', title: 'Flag gaps (no remediation)', description: 'Identify and flag AI visibility gaps without remediation.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 3, tiers: ['starter'] },
+
+  // ========== AI / AEO OPTIMIZATION - Growth Tier ==========
+  { id: 'tpl-ai-gr-1', taskId: 'GR-AEO-001', title: 'Run AI tests (20 prompts)', description: 'Test AI visibility with 20 prompts.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 4, tiers: ['growth'] },
+  { id: 'tpl-ai-gr-2', taskId: 'GR-AEO-002', title: 'Rewrite FAQs for AI citation', description: 'Optimize FAQ content for better AI citation.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 5, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-ai-gr-3', taskId: 'GR-AEO-003', title: 'Competitor mention comparison', description: 'Analyze competitor AI mentions and compare.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-ai-gr-4', taskId: 'GR-AEO-004', title: 'AI visibility review', description: 'US Strategy review of AI visibility performance.', phase: 'ai', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 7, tiers: ['growth', 'enterprise'] },
+
+  // ========== AI / AEO OPTIMIZATION - Pro/Enterprise Tier ==========
+  { id: 'tpl-ai-pr-1', taskId: 'PR-AEO-001', title: 'Run AI tests (40–60 prompts)', description: 'Comprehensive AI visibility testing with 40-60 prompts.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 8, tiers: ['enterprise'] },
+  { id: 'tpl-ai-pr-2', taskId: 'PR-AEO-002', title: 'Controlled AI experiments', description: 'Run controlled experiments for AI optimization.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 9, tiers: ['enterprise'] },
+  { id: 'tpl-ai-pr-3', taskId: 'PR-AEO-003', title: 'AI content rewrites', description: 'Proactive content rewrites for AI optimization.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 10, tiers: ['enterprise'] },
+  { id: 'tpl-ai-pr-4', taskId: 'PR-AEO-004', title: 'AI strategy refinement', description: 'US Strategy refinement of AI approach.', phase: 'ai', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 11, tiers: ['enterprise'] },
+  { id: 'tpl-ai-pr-5', taskId: 'PR-AEO-005', title: 'Escalate flat AI visibility after 60 days', description: 'Escalate if AI visibility shows no improvement after 60 days.', phase: 'ai', owner: 'us-strategy', cadence: 'once', isActive: true, order: 12, tiers: ['enterprise'] },
+
+  // ========== REPORTING & STRATEGY - Starter Tier ==========
+  { id: 'tpl-rpt-st-1', taskId: 'ST-RPT-001', title: 'Update dashboard', description: 'System-generated dashboard update.', phase: 'reporting', owner: 'system', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-rpt-st-2', taskId: 'ST-RPT-002', title: 'Prepare monthly email summary', description: 'Create and send monthly progress email to client.', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter'] },
+  { id: 'tpl-rpt-st-3', taskId: 'ST-RPT-003', title: 'Quarterly strategy memo', description: 'US Strategy quarterly memo for client.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 3, tiers: ['starter'] },
+
+  // ========== REPORTING & STRATEGY - Growth Tier ==========
+  { id: 'tpl-rpt-gr-1', taskId: 'GR-RPT-002', title: 'Monthly PDF report', description: 'Create comprehensive monthly PDF report.', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 4, tiers: ['growth'] },
+  { id: 'tpl-rpt-gr-2', taskId: 'GR-RPT-003', title: 'Monthly strategy call', description: 'US Strategy monthly call with client.', phase: 'reporting', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 5, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-rpt-gr-3', taskId: 'GR-RPT-004', title: 'Quarterly Business Review (QBR)', description: 'Comprehensive quarterly business review presentation.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
+
+  // ========== REPORTING & STRATEGY - Pro/Enterprise Tier ==========
+  { id: 'tpl-rpt-pr-1', taskId: 'PR-RPT-001', title: 'Real-time dashboard updates', description: 'Continuous real-time dashboard monitoring and updates.', phase: 'reporting', owner: 'system', cadence: 'ongoing', isActive: true, order: 7, tiers: ['enterprise'] },
+  { id: 'tpl-rpt-pr-2', taskId: 'PR-RPT-002', title: 'Bi-weekly performance reports', description: 'Detailed bi-weekly performance reporting.', phase: 'reporting', owner: 'india-head', cadence: 'bi-weekly', isActive: true, order: 8, tiers: ['enterprise'] },
+  { id: 'tpl-rpt-pr-3', taskId: 'PR-RPT-003', title: 'Bi-weekly strategy calls', description: 'US Strategy bi-weekly calls with client.', phase: 'reporting', owner: 'us-strategy', cadence: 'bi-weekly', isActive: true, order: 9, tiers: ['enterprise'] },
+  { id: 'tpl-rpt-pr-4', taskId: 'PR-RPT-004', title: 'Quarterly QBR presentation', description: 'Executive quarterly business review presentation.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 10, tiers: ['enterprise'] },
+  { id: 'tpl-rpt-pr-5', taskId: 'PR-RPT-005', title: 'Scope review & upgrade advisory', description: 'Review scope and advise on potential tier upgrades.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 11, tiers: ['enterprise'] },
 ];
 
 // Email templates
