@@ -167,16 +167,16 @@ export const mockTaskTemplates: TaskTemplate[] = [
   { id: 'tpl-fnd-pr-4', taskId: 'PR-FND-004', title: 'Weekly site health monitoring', description: 'Continuous weekly monitoring of site health and performance.', phase: 'foundation', owner: 'india-head', cadence: 'weekly', isActive: true, order: 13, tiers: ['enterprise'] },
 
   // ========== MONTHLY EXECUTION - Starter Tier ==========
-  { id: 'tpl-exe-st-1', taskId: 'ST-EXE-001', title: 'Publish 2 Google Posts', description: 'Create and publish monthly Google Business posts.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter'] },
-  { id: 'tpl-exe-st-2', taskId: 'ST-EXE-002', title: 'Seed 3 GBP Q&As', description: 'Add 3 relevant Q&A content to GBP monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter'] },
-  { id: 'tpl-exe-st-3', taskId: 'ST-EXE-003', title: 'Publish 1 AI-assisted blog', description: 'Create and publish one AI-assisted blog post monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 3, tiers: ['starter'] },
+  { id: 'tpl-exe-st-1', taskId: 'ST-EXE-001', title: 'Publish 2 Google Posts', description: 'Create and publish monthly Google Business posts.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-exe-st-2', taskId: 'ST-EXE-002', title: 'Seed 3 GBP Q&As', description: 'Add 3 relevant Q&A content to GBP monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-exe-st-3', taskId: 'ST-EXE-003', title: 'Publish 1 AI-assisted blog', description: 'Create and publish one AI-assisted blog post monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-exe-st-4', taskId: 'ST-EXE-004', title: 'Monitor reviews & alerts', description: 'Ongoing monitoring of reviews and alerts.', phase: 'execution', owner: 'india-head', cadence: 'ongoing', isActive: true, order: 4, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-exe-st-5', taskId: 'ST-EXE-005', title: 'Approve posts (quick)', description: 'Client quick approval of posts weekly.', phase: 'execution', owner: 'client', cadence: 'weekly', isActive: true, order: 5, tiers: ['starter', 'growth', 'enterprise'] },
 
   // ========== MONTHLY EXECUTION - Growth Tier ==========
-  { id: 'tpl-exe-gr-1', taskId: 'GR-EXE-001', title: 'Publish 4 Google Posts', description: 'Create and publish 4 Google Business posts monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 6, tiers: ['growth'] },
-  { id: 'tpl-exe-gr-2', taskId: 'GR-EXE-002', title: 'Seed 5 GBP Q&As', description: 'Add 5 relevant Q&A content to GBP monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 7, tiers: ['growth'] },
-  { id: 'tpl-exe-gr-3', taskId: 'GR-EXE-003', title: 'Publish 2 blog posts', description: 'Create and publish 2 blog posts monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 8, tiers: ['growth'] },
+  { id: 'tpl-exe-gr-1', taskId: 'GR-EXE-001', title: 'Publish 4 Google Posts', description: 'Create and publish 4 Google Business posts monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-exe-gr-2', taskId: 'GR-EXE-002', title: 'Seed 5 GBP Q&As', description: 'Add 5 relevant Q&A content to GBP monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 7, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-exe-gr-3', taskId: 'GR-EXE-003', title: 'Publish 2 blog posts', description: 'Create and publish 2 blog posts monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 8, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-exe-gr-4', taskId: 'GR-EXE-004', title: 'FAQ expansion (8 Qs)', description: 'Expand FAQ section with 8 new questions monthly.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 9, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-exe-gr-5', taskId: 'GR-EXE-005', title: 'Technical SEO audit', description: 'Monthly technical SEO audit and fixes.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 10, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-exe-gr-6', taskId: 'GR-EXE-006', title: 'Case study inputs', description: 'Gather client inputs for case study quarterly.', phase: 'execution', owner: 'client', cadence: 'quarterly', isActive: true, order: 11, tiers: ['growth', 'enterprise'] },
@@ -189,12 +189,12 @@ export const mockTaskTemplates: TaskTemplate[] = [
   { id: 'tpl-exe-pr-5', taskId: 'PR-EXE-005', title: 'Industry directory placements', description: 'Monthly submission to industry-specific directories.', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 16, tiers: ['enterprise'] },
 
   // ========== AI / AEO OPTIMIZATION - Starter Tier ==========
-  { id: 'tpl-ai-st-1', taskId: 'ST-AEO-001', title: 'Run AI visibility test (10 prompts)', description: 'Test AI visibility with 10 prompts.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter'], notes: 'Starter does NOT include proactive AI content rewrites' },
-  { id: 'tpl-ai-st-2', taskId: 'ST-AEO-002', title: 'Log AI mention score (1–5)', description: 'Record AI mention score on a 1-5 scale.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter'] },
-  { id: 'tpl-ai-st-3', taskId: 'ST-AEO-003', title: 'Flag gaps (no remediation)', description: 'Identify and flag AI visibility gaps without remediation.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 3, tiers: ['starter'] },
+  { id: 'tpl-ai-st-1', taskId: 'ST-AEO-001', title: 'Run AI visibility test (10 prompts)', description: 'Test AI visibility with 10 prompts.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'], notes: 'Starter does NOT include proactive AI content rewrites' },
+  { id: 'tpl-ai-st-2', taskId: 'ST-AEO-002', title: 'Log AI mention score (1–5)', description: 'Record AI mention score on a 1-5 scale.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-ai-st-3', taskId: 'ST-AEO-003', title: 'Flag gaps (no remediation)', description: 'Identify and flag AI visibility gaps without remediation.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
 
   // ========== AI / AEO OPTIMIZATION - Growth Tier ==========
-  { id: 'tpl-ai-gr-1', taskId: 'GR-AEO-001', title: 'Run AI tests (20 prompts)', description: 'Test AI visibility with 20 prompts.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 4, tiers: ['growth'] },
+  { id: 'tpl-ai-gr-1', taskId: 'GR-AEO-001', title: 'Run AI tests (20 prompts)', description: 'Test AI visibility with 20 prompts.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 4, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-ai-gr-2', taskId: 'GR-AEO-002', title: 'Rewrite FAQs for AI citation', description: 'Optimize FAQ content for better AI citation.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 5, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-ai-gr-3', taskId: 'GR-AEO-003', title: 'Competitor mention comparison', description: 'Analyze competitor AI mentions and compare.', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-ai-gr-4', taskId: 'GR-AEO-004', title: 'AI visibility review', description: 'US Strategy review of AI visibility performance.', phase: 'ai', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 7, tiers: ['growth', 'enterprise'] },
@@ -208,11 +208,11 @@ export const mockTaskTemplates: TaskTemplate[] = [
 
   // ========== REPORTING & STRATEGY - Starter Tier ==========
   { id: 'tpl-rpt-st-1', taskId: 'ST-RPT-001', title: 'Update dashboard', description: 'System-generated dashboard update.', phase: 'reporting', owner: 'system', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
-  { id: 'tpl-rpt-st-2', taskId: 'ST-RPT-002', title: 'Prepare monthly email summary', description: 'Create and send monthly progress email to client.', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter'] },
-  { id: 'tpl-rpt-st-3', taskId: 'ST-RPT-003', title: 'Quarterly strategy memo', description: 'US Strategy quarterly memo for client.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 3, tiers: ['starter'] },
+  { id: 'tpl-rpt-st-2', taskId: 'ST-RPT-002', title: 'Prepare monthly email summary', description: 'Create and send monthly progress email to client.', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-rpt-st-3', taskId: 'ST-RPT-003', title: 'Quarterly strategy memo', description: 'US Strategy quarterly memo for client.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
 
   // ========== REPORTING & STRATEGY - Growth Tier ==========
-  { id: 'tpl-rpt-gr-1', taskId: 'GR-RPT-002', title: 'Monthly PDF report', description: 'Create comprehensive monthly PDF report.', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 4, tiers: ['growth'] },
+  { id: 'tpl-rpt-gr-1', taskId: 'GR-RPT-002', title: 'Monthly PDF report', description: 'Create comprehensive monthly PDF report.', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 4, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-rpt-gr-2', taskId: 'GR-RPT-003', title: 'Monthly strategy call', description: 'US Strategy monthly call with client.', phase: 'reporting', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 5, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-rpt-gr-3', taskId: 'GR-RPT-004', title: 'Quarterly Business Review (QBR)', description: 'Comprehensive quarterly business review presentation.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
 
@@ -222,6 +222,23 @@ export const mockTaskTemplates: TaskTemplate[] = [
   { id: 'tpl-rpt-pr-3', taskId: 'PR-RPT-003', title: 'Bi-weekly strategy calls', description: 'US Strategy bi-weekly calls with client.', phase: 'reporting', owner: 'us-strategy', cadence: 'bi-weekly', isActive: true, order: 9, tiers: ['enterprise'] },
   { id: 'tpl-rpt-pr-4', taskId: 'PR-RPT-004', title: 'Quarterly QBR presentation', description: 'Executive quarterly business review presentation.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 10, tiers: ['enterprise'] },
   { id: 'tpl-rpt-pr-5', taskId: 'PR-RPT-005', title: 'Scope review & upgrade advisory', description: 'Review scope and advise on potential tier upgrades.', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 11, tiers: ['enterprise'] },
+
+  // ========== FAILURE MONITORING - Starter Tier ==========
+  { id: 'tpl-mon-st-1', taskId: 'ST-MON-001', title: 'Weekly rank tracking', description: 'Monitor local pack rankings and positions weekly.', phase: 'monitoring', owner: 'india-head', cadence: 'weekly', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-mon-st-2', taskId: 'ST-MON-002', title: 'GBP suspension monitoring', description: 'Monitor for GBP suspension or listing issues.', phase: 'monitoring', owner: 'india-head', cadence: 'ongoing', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
+  { id: 'tpl-mon-st-3', taskId: 'ST-MON-003', title: 'Review alerts & response', description: 'Monitor and respond to new review alerts.', phase: 'monitoring', owner: 'india-head', cadence: 'ongoing', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
+
+  // ========== FAILURE MONITORING - Growth Tier ==========
+  { id: 'tpl-mon-gr-1', taskId: 'GR-MON-001', title: 'Competitor movement alerts', description: 'Track competitor ranking movements and changes.', phase: 'monitoring', owner: 'india-head', cadence: 'weekly', isActive: true, order: 4, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-mon-gr-2', taskId: 'GR-MON-002', title: 'Citation health check', description: 'Monitor citation accuracy and consistency.', phase: 'monitoring', owner: 'india-head', cadence: 'monthly', isActive: true, order: 5, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-mon-gr-3', taskId: 'GR-MON-003', title: 'Technical issue detection', description: 'Monitor for technical SEO issues and errors.', phase: 'monitoring', owner: 'india-head', cadence: 'weekly', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
+  { id: 'tpl-mon-gr-4', taskId: 'GR-MON-004', title: 'Recovery action plan', description: 'Create recovery plans for detected issues.', phase: 'monitoring', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 7, tiers: ['growth', 'enterprise'] },
+
+  // ========== FAILURE MONITORING - Enterprise Tier ==========
+  { id: 'tpl-mon-pr-1', taskId: 'PR-MON-001', title: 'Real-time rank monitoring', description: 'Continuous real-time monitoring of rankings.', phase: 'monitoring', owner: 'system', cadence: 'ongoing', isActive: true, order: 8, tiers: ['enterprise'] },
+  { id: 'tpl-mon-pr-2', taskId: 'PR-MON-002', title: 'Proactive issue prevention', description: 'Proactive identification and prevention of potential issues.', phase: 'monitoring', owner: 'india-head', cadence: 'weekly', isActive: true, order: 9, tiers: ['enterprise'] },
+  { id: 'tpl-mon-pr-3', taskId: 'PR-MON-003', title: 'Escalation management', description: 'Priority escalation and resolution of critical issues.', phase: 'monitoring', owner: 'us-strategy', cadence: 'ongoing', isActive: true, order: 10, tiers: ['enterprise'] },
+  { id: 'tpl-mon-pr-4', taskId: 'PR-MON-004', title: 'Recovery execution & reporting', description: 'Execute recovery actions and report on outcomes.', phase: 'monitoring', owner: 'india-head', cadence: 'weekly', isActive: true, order: 11, tiers: ['enterprise'] },
 ];
 
 // Email templates
