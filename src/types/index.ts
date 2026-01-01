@@ -22,7 +22,7 @@ export interface Task {
   assignedTo?: string;
   approver?: UserRole; // us-strategy or client
   status: TaskStatus;
-  cadence?: 'once' | 'monthly' | 'weekly' | 'ongoing';
+  cadence?: 'once' | 'monthly' | 'weekly' | 'ongoing' | 'bi-weekly' | 'bi-monthly' | 'quarterly';
   comments: Comment[];
   documents: Document[];
   attachments?: Attachment[];
