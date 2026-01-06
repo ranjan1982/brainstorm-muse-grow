@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
-import { PhaseTracker } from '@/components/workflow/PhaseTracker';
+import { AppSidebar } from '@/components/layout/AppSidebar';
 import { TaskList } from '@/components/tasks/TaskList';
 import { KPIDashboard } from '@/components/dashboard/KPIDashboard';
 import { useApp } from '@/context/AppContext';
@@ -10,11 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
 import { 
-  LayoutDashboard, 
-  CheckSquare, 
-  BarChart3, 
-  Settings,
   Clock,
   AlertCircle,
   CheckCircle2,
@@ -23,7 +20,6 @@ import {
   CreditCard,
   Mail,
   FileText,
-  TrendingUp,
   Building2
 } from 'lucide-react';
 
@@ -43,7 +39,9 @@ export default function Dashboard() {
     taskTemplates,
     emailTemplates
   } = useApp();
-  const [currentPhase, setCurrentPhase] = useState<Phase>('onboarding');
+  
+  const [selectedPhase, setSelectedPhase] = useState<Phase>('onboarding');
+  const [activeView, setActiveView] = useState<'tasks' | 'reports' | 'dashboard'>('dashboard');
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -52,12 +50,11 @@ export default function Dashboard() {
   // Get relevant tasks based on role
   const getRelevantTasks = () => {
     if (currentUser?.role === 'admin') {
-      return []; // Admin doesn't see tasks
+      return [];
     }
     if (currentUser?.role === 'client') {
       return tasks.filter(t => t.clientId === currentUser.id);
     }
-    // Team members see current client's tasks
     if (currentClient) {
       return getClientTasks(currentClient.id);
     }
@@ -103,7 +100,7 @@ export default function Dashboard() {
     }
   };
 
-  // Render Admin Dashboard
+  // Render Admin Dashboard (no sidebar)
   if (currentUser?.role === 'admin') {
     return (
       <div className="min-h-screen bg-background">
@@ -357,78 +354,62 @@ export default function Dashboard() {
     );
   }
 
-  // Render Client Dashboard with Subscription Management
-  if (currentUser?.role === 'client') {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
+  // Render Dashboard with Sidebar for all other users
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar 
+          selectedPhase={selectedPhase}
+          onPhaseSelect={setSelectedPhase}
+          activeView={activeView}
+          onViewChange={setActiveView}
+        />
         
-        <main className="pt-20 pb-16">
-          <div className="container mx-auto px-6">
-            {/* Welcome Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold">Welcome back, {currentUser?.name}</h1>
-                <Badge variant="client">
-                  {ROLE_LABELS['client']}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground">
-                Here's what's happening with your SEO campaign today.
-              </p>
+        <SidebarInset>
+          <Header />
+          
+          <main className="pt-20 pb-16 px-6">
+            <div className="flex items-center gap-2 mb-6">
+              <SidebarTrigger className="md:hidden" />
             </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {quickStats.map((stat) => (
-                <Card key={stat.label}>
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-secondary ${stat.color}`}>
-                      <stat.icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">{stat.value}</p>
-                      <p className="text-xs text-muted-foreground">{stat.label}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {/* Dashboard View */}
+            {activeView === 'dashboard' && (
+              <div>
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h1 className="text-2xl font-bold">Welcome back, {currentUser?.name}</h1>
+                    <Badge variant={currentUser?.role as any}>
+                      {ROLE_LABELS[currentUser?.role || 'client']}
+                    </Badge>
+                  </div>
+                  {currentClient && currentUser?.role !== 'client' && (
+                    <p className="text-muted-foreground">
+                      Managing: <span className="font-medium text-foreground">{currentClient.company}</span>
+                    </p>
+                  )}
+                </div>
 
-            {/* Phase Tracker */}
-            <div className="mb-8">
-              <PhaseTracker currentPhase={currentPhase} onPhaseClick={setCurrentPhase} />
-            </div>
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  {quickStats.map((stat) => (
+                    <Card key={stat.label}>
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <div className={`p-2 rounded-lg bg-secondary ${stat.color}`}>
+                          <stat.icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold">{stat.value}</p>
+                          <p className="text-xs text-muted-foreground">{stat.label}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
 
-            {/* Main Content Tabs */}
-            <Tabs defaultValue="tasks" className="space-y-6">
-              <TabsList className="bg-secondary/50 p-1">
-                <TabsTrigger value="tasks" className="gap-2">
-                  <CheckSquare className="w-4 h-4" />
-                  Tasks
-                </TabsTrigger>
-                <TabsTrigger value="reports" className="gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Reports
-                </TabsTrigger>
-                <TabsTrigger value="subscription" className="gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  Subscription
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="tasks" className="mt-6">
-                <TaskList showAllPhases />
-              </TabsContent>
-
-              <TabsContent value="reports" className="mt-6">
-                <KPIDashboard />
-              </TabsContent>
-
-              <TabsContent value="subscription" className="mt-6">
-                <div className="space-y-6">
-                  {/* Current Plan */}
-                  {clientSubscription && (
+                {/* Client Subscription Section */}
+                {currentUser?.role === 'client' && clientSubscription && (
+                  <div className="space-y-6">
                     <Card>
                       <CardHeader>
                         <CardTitle>Current Plan</CardTitle>
@@ -446,148 +427,86 @@ export default function Dashboard() {
                         </div>
                       </CardContent>
                     </Card>
-                  )}
 
-                  {/* Upgrade Options */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Upgrade Your Plan</CardTitle>
-                      <CardDescription>Choose a plan that fits your business needs</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {(['starter', 'growth', 'enterprise'] as SubscriptionTier[]).map(tier => (
-                          <Card key={tier} className={`relative ${clientSubscription?.tier === tier ? 'border-accent' : ''}`}>
-                            {clientSubscription?.tier === tier && (
-                              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                <Badge variant="default">Current</Badge>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Upgrade Your Plan</CardTitle>
+                        <CardDescription>Choose a plan that fits your business needs</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          {(['starter', 'growth', 'enterprise'] as SubscriptionTier[]).map(tier => (
+                            <Card key={tier} className={`relative ${clientSubscription?.tier === tier ? 'border-accent' : ''}`}>
+                              {clientSubscription?.tier === tier && (
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                                  <Badge variant="default">Current</Badge>
+                                </div>
+                              )}
+                              <CardContent className="p-6 text-center">
+                                <h3 className="text-xl font-bold mb-2">{SUBSCRIPTION_TIER_LABELS[tier]}</h3>
+                                <p className="text-3xl font-bold mb-4">
+                                  ${SUBSCRIPTION_TIER_PRICES[tier]}
+                                  <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                                </p>
+                                <Button 
+                                  variant={clientSubscription?.tier === tier ? 'outline' : 'default'}
+                                  className="w-full"
+                                  disabled={clientSubscription?.tier === tier}
+                                  onClick={() => handleUpgrade(tier)}
+                                >
+                                  {clientSubscription?.tier === tier ? 'Current Plan' : 'Upgrade'}
+                                </Button>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Payment History</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {clientPayments.length > 0 ? clientPayments.map(payment => (
+                            <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
+                              <div>
+                                <p className="font-medium">{payment.invoiceNumber}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(payment.paymentDate).toLocaleDateString()} • {payment.paymentMethod}
+                                </p>
                               </div>
-                            )}
-                            <CardContent className="p-6 text-center">
-                              <h3 className="text-xl font-bold mb-2">{SUBSCRIPTION_TIER_LABELS[tier]}</h3>
-                              <p className="text-3xl font-bold mb-4">
-                                ${SUBSCRIPTION_TIER_PRICES[tier]}
-                                <span className="text-sm font-normal text-muted-foreground">/mo</span>
-                              </p>
-                              <Button 
-                                variant={clientSubscription?.tier === tier ? 'outline' : 'default'}
-                                className="w-full"
-                                disabled={clientSubscription?.tier === tier}
-                                onClick={() => handleUpgrade(tier)}
-                              >
-                                {clientSubscription?.tier === tier ? 'Current Plan' : 'Upgrade'}
-                              </Button>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Payment History */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Payment History</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {clientPayments.length > 0 ? clientPayments.map(payment => (
-                          <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div>
-                              <p className="font-medium">{payment.invoiceNumber}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {new Date(payment.paymentDate).toLocaleDateString()} • {payment.paymentMethod}
-                              </p>
+                              <div className="flex items-center gap-3">
+                                <span className="font-medium">${payment.amount}</span>
+                                <Badge variant={payment.status === 'paid' ? 'default' : 'secondary'}>
+                                  {payment.status}
+                                </Badge>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <span className="font-medium">${payment.amount}</span>
-                              <Badge variant={payment.status === 'paid' ? 'default' : 'secondary'}>
-                                {payment.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        )) : (
-                          <p className="text-muted-foreground text-center py-4">No payment history available</p>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // Render Team Dashboard (US Strategy, India Head, India Junior)
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-6">
-          {/* Welcome Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold">Welcome back, {currentUser?.name}</h1>
-              <Badge variant={currentUser?.role as any}>
-                {ROLE_LABELS[currentUser?.role || 'client']}
-              </Badge>
-            </div>
-            {currentClient && (
-              <p className="text-muted-foreground">
-                Managing: <span className="font-medium text-foreground">{currentClient.company}</span>
-              </p>
+                          )) : (
+                            <p className="text-muted-foreground text-center py-4">No payment history available</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
             )}
-          </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {quickStats.map((stat) => (
-              <Card key={stat.label}>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className={`p-2 rounded-lg bg-secondary ${stat.color}`}>
-                    <stat.icon className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-xs text-muted-foreground">{stat.label}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+            {/* Tasks View */}
+            {activeView === 'tasks' && (
+              <TaskList phase={selectedPhase} />
+            )}
 
-          {/* Phase Tracker */}
-          <div className="mb-8">
-            <PhaseTracker currentPhase={currentPhase} onPhaseClick={setCurrentPhase} />
-          </div>
-
-          {/* Main Content Tabs */}
-          <Tabs defaultValue="tasks" className="space-y-6">
-            <TabsList className="bg-secondary/50 p-1">
-              <TabsTrigger value="tasks" className="gap-2">
-                <CheckSquare className="w-4 h-4" />
-                Tasks
-              </TabsTrigger>
-              <TabsTrigger value="reports" className="gap-2">
-                <BarChart3 className="w-4 h-4" />
-                Reports
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="tasks" className="mt-6">
-              <TaskList showAllPhases />
-            </TabsContent>
-
-            <TabsContent value="reports" className="mt-6">
+            {/* Reports View */}
+            {activeView === 'reports' && (
               <KPIDashboard />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-    </div>
+            )}
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }

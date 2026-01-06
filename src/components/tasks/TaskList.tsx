@@ -1,45 +1,22 @@
-import { Task, Phase, PHASE_LABELS, SUBSCRIPTION_TIER_LABELS } from '@/types';
+import { Task, Phase, PHASE_LABELS, ROLE_LABELS } from '@/types';
 import { TaskCard } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { useApp } from '@/context/AppContext';
 import { useState } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, Crown, Star, Zap } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 interface TaskListProps {
   phase?: Phase;
-  showAllPhases?: boolean;
 }
 
-export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
-  const { currentUser, currentClient, getClientTasksForTier, getClientSubscription, getTaskTemplatesForTier } = useApp();
-  const [selectedPhase, setSelectedPhase] = useState<Phase>(phase || 'onboarding');
+export function TaskList({ phase }: TaskListProps) {
+  const { currentUser, currentClient, getClientTasksForTier } = useApp();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  
-  const phases: Phase[] = ['onboarding', 'foundation', 'execution', 'ai', 'reporting', 'monitoring'];
-  
-  // Get current client's subscription tier
-  const clientId = currentUser?.role === 'client' ? currentUser.id : currentClient?.id;
-  const subscription = clientId ? getClientSubscription(clientId) : undefined;
-  const currentTier = subscription?.tier || 'starter';
-  
-  // Get available templates for this tier to determine which phases are unlocked
-  const availableTemplates = getTaskTemplatesForTier(currentTier);
-  const unlockedPhases = new Set(availableTemplates.map(t => t.phase));
-  
-  // Get tier icon
-  const getTierIcon = () => {
-    switch (currentTier) {
-      case 'enterprise': return <Crown className="w-4 h-4" />;
-      case 'growth': return <Zap className="w-4 h-4" />;
-      default: return <Star className="w-4 h-4" />;
-    }
-  };
   
   const canCreateTask = () => {
     if (!currentUser) return false;
@@ -51,146 +28,58 @@ export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
     setDetailModalOpen(true);
   };
 
-  const getFilteredTasks = (p: Phase) => {
-    // Get tasks filtered by client and their subscription tier
+  // Get client ID
+  const clientId = currentUser?.role === 'client' ? currentUser.id : currentClient?.id;
+
+  // Get tasks for the phase
+  const getFilteredTasks = (): Task[] => {
     const tierTasks = getClientTasksForTier(clientId);
-    let filtered = tierTasks.filter(t => t.phase === p);
+    let filtered = phase ? tierTasks.filter(t => t.phase === phase) : tierTasks;
     
-    // All users can see ALL tasks in phases - no filtering by role
-    // Permissions for editing/actions are handled in TaskCard and TaskDetailModal
+    // For clients, only show tasks owned by client
+    if (currentUser?.role === 'client') {
+      filtered = filtered.filter(t => t.owner === 'client');
+    }
+    
+    // Sort: Assigned to current user first, then by status
+    filtered.sort((a, b) => {
+      const aAssigned = a.owner === currentUser?.role ? 0 : 1;
+      const bAssigned = b.owner === currentUser?.role ? 0 : 1;
+      
+      if (aAssigned !== bAssigned) return aAssigned - bAssigned;
+      
+      // Then by status priority
+      const statusOrder: Record<string, number> = {
+        'pending': 0,
+        'resubmit': 1,
+        'in-progress': 2,
+        'submitted': 3,
+        'completed': 4,
+        'approved': 5
+      };
+      return (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99);
+    });
     
     return filtered;
   };
-  
-  const getPhaseTaskCounts = (p: Phase) => {
-    const phaseTasks = getFilteredTasks(p);
-    const pending = phaseTasks.filter(t => t.status === 'pending' || t.status === 'resubmit').length;
-    const inProgress = phaseTasks.filter(t => t.status === 'in-progress' || t.status === 'submitted').length;
-    const approved = phaseTasks.filter(t => t.status === 'approved').length;
-    return { total: phaseTasks.length, pending, inProgress, approved };
-  };
-  
-  // Get template count for each phase based on tier
-  const getPhaseTemplateCount = (p: Phase) => {
-    return availableTemplates.filter(t => t.phase === p).length;
-  };
 
-  if (showAllPhases) {
-    return (
-      <>
-        {/* Tier indicator */}
-        <div className="flex items-center gap-2 mb-4 p-3 bg-secondary/30 rounded-lg">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            {getTierIcon()}
-            <span className="text-muted-foreground">Subscription:</span>
-            <Badge variant={currentTier === 'enterprise' ? 'default' : currentTier === 'growth' ? 'secondary' : 'outline'}>
-              {SUBSCRIPTION_TIER_LABELS[currentTier]}
-            </Badge>
-          </div>
-          <span className="text-xs text-muted-foreground ml-2">
-            ({availableTemplates.length} task templates available)
-          </span>
-        </div>
-        
-        <Tabs value={selectedPhase} onValueChange={(v) => setSelectedPhase(v as Phase)} className="w-full">
-          <div className="flex items-center justify-between mb-6 gap-4">
-            <TabsList className="flex-1 justify-start overflow-x-auto flex-nowrap bg-secondary/50 p-1 rounded-xl">
-              {phases.map((p) => {
-                const counts = getPhaseTaskCounts(p);
-                const templateCount = getPhaseTemplateCount(p);
-                const isLocked = !unlockedPhases.has(p);
-                return (
-                  <TabsTrigger 
-                    key={p} 
-                    value={p}
-                    disabled={isLocked}
-                    className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg flex items-center gap-2 whitespace-nowrap"
-                  >
-                    {PHASE_LABELS[p].split('&')[0].trim()}
-                    {!isLocked && (
-                      <Badge variant="secondary" className="ml-1 text-[10px] px-1.5">
-                        {counts.total > 0 ? `${counts.approved}/${counts.total}` : `0/${templateCount}`}
-                      </Badge>
-                    )}
-                    {isLocked && (
-                      <Badge variant="outline" className="ml-1 text-[10px] px-1.5 opacity-50">
-                        🔒
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-            
-            {canCreateTask() && (
-              <Button 
-                variant="accent" 
-                onClick={() => setCreateDialogOpen(true)}
-                className="shrink-0"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Task
-              </Button>
-            )}
-          </div>
-          
-          {phases.map((p) => (
-            <TabsContent key={p} value={p} className="mt-0">
-              <div className="grid gap-4">
-                {getFilteredTasks(p).length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <p className="text-lg font-medium mb-2">No tasks in this phase</p>
-                    <p className="text-sm">Tasks will appear here as they are created.</p>
-                    {canCreateTask() && (
-                      <Button 
-                        variant="outline" 
-                        className="mt-4"
-                        onClick={() => setCreateDialogOpen(true)}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Create First Task
-                      </Button>
-                    )}
-                  </div>
-                ) : (
-                  getFilteredTasks(p).map((task) => (
-                    <TaskCard 
-                      key={task.id} 
-                      task={task} 
-                      onViewDetails={handleViewDetails}
-                    />
-                  ))
-                )}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-
-        <TaskDetailModal
-          task={selectedTask}
-          open={detailModalOpen}
-          onOpenChange={setDetailModalOpen}
-        />
-
-        <CreateTaskDialog
-          open={createDialogOpen}
-          onOpenChange={setCreateDialogOpen}
-        />
-      </>
-    );
-  }
-
-  const allTierTasks = getClientTasksForTier(clientId);
-  const filteredTasks = phase ? getFilteredTasks(phase) : allTierTasks;
+  const filteredTasks = getFilteredTasks();
 
   return (
     <>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold">Tasks</h3>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-semibold">
+            {phase ? PHASE_LABELS[phase] : 'All Tasks'}
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            {filteredTasks.length} task{filteredTasks.length !== 1 ? 's' : ''} 
+            {currentUser?.role && ` • Showing tasks for ${ROLE_LABELS[currentUser.role]}`}
+          </p>
+        </div>
         {canCreateTask() && (
           <Button 
-            variant="accent" 
-            size="sm"
+            variant="default" 
             onClick={() => setCreateDialogOpen(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
@@ -198,11 +87,22 @@ export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
           </Button>
         )}
       </div>
+
       <div className="grid gap-4">
         {filteredTasks.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <p className="text-lg font-medium mb-2">No tasks found</p>
+          <div className="text-center py-12 text-muted-foreground bg-muted/30 rounded-lg">
+            <p className="text-lg font-medium mb-2">No tasks in this phase</p>
             <p className="text-sm">Tasks will appear here as they are created.</p>
+            {canCreateTask() && (
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create First Task
+              </Button>
+            )}
           </div>
         ) : (
           filteredTasks.map((task) => (
@@ -210,6 +110,7 @@ export function TaskList({ phase, showAllPhases = false }: TaskListProps) {
               key={task.id} 
               task={task} 
               onViewDetails={handleViewDetails}
+              showBucket
             />
           ))
         )}

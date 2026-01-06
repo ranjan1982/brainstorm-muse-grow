@@ -19,9 +19,10 @@ import { cn } from '@/lib/utils';
 interface TaskCardProps {
   task: Task;
   onViewDetails?: (task: Task) => void;
+  showBucket?: boolean;
 }
 
-export function TaskCard({ task, onViewDetails }: TaskCardProps) {
+export function TaskCard({ task, onViewDetails, showBucket = false }: TaskCardProps) {
   const { currentUser, updateTask, addComment } = useApp();
   
   // Permission checks based on workflow document
