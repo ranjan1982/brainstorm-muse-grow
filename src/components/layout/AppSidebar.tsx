@@ -1,8 +1,5 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ChevronDown, 
-  ChevronRight,
+import {
   ClipboardList,
   BarChart3,
   LayoutDashboard,
@@ -13,7 +10,6 @@ import { useApp } from '@/context/AppContext';
 import { Phase, PHASE_LABELS, ROLE_LABELS } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Sidebar,
   SidebarContent,
@@ -38,14 +34,13 @@ interface AppSidebarProps {
 export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewChange }: AppSidebarProps) {
   const { currentUser, currentClient, tasks, logout, getClientSubscription } = useApp();
   const navigate = useNavigate();
-  const [phasesOpen, setPhasesOpen] = useState(true);
 
   // Define phases based on user role
   const allPhases: Phase[] = ['onboarding', 'foundation', 'execution', 'ai', 'reporting', 'monitoring'];
-  
+
   // Client only sees onboarding and reporting
-  const visiblePhases: Phase[] = currentUser?.role === 'client' 
-    ? ['onboarding', 'reporting'] 
+  const visiblePhases: Phase[] = currentUser?.role === 'client'
+    ? ['onboarding', 'reporting']
     : allPhases;
 
   // Get client's subscription tier
@@ -55,7 +50,7 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
   // Get action needed count per phase (tasks assigned to current user)
   const getPhaseActionCount = (phase: Phase): number => {
     if (!currentUser) return 0;
-    
+
     const clientTasks = tasks.filter(t => {
       // Filter by client if applicable
       if (currentUser.role === 'client') {
@@ -68,8 +63,8 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
     });
 
     // Count tasks assigned to current user's role in this phase
-    return clientTasks.filter(t => 
-      t.phase === phase && 
+    return clientTasks.filter(t =>
+      t.phase === phase &&
       t.owner === currentUser.role &&
       t.status !== 'approved' // Exclude completed tasks
     ).length;
@@ -128,7 +123,7 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
                   <span>Dashboard</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              
+
               <SidebarMenuItem>
                 <SidebarMenuButton
                   isActive={activeView === 'reports'}
@@ -145,66 +140,53 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
         <SidebarSeparator />
 
         <SidebarGroup>
-          <Collapsible open={phasesOpen} onOpenChange={setPhasesOpen}>
-            <CollapsibleTrigger asChild>
-              <div className="flex items-center justify-between px-2 py-1.5 cursor-pointer hover:bg-muted/50 rounded-md">
-                <div className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
-                  <ClipboardList className="w-4 h-4" />
-                  <span>Workflow Phases</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  {getTotalActionCount() > 0 && (
-                    <Badge variant="destructive" className="text-[10px] px-1.5 h-5">
-                      {getTotalActionCount()}
-                    </Badge>
-                  )}
-                  {phasesOpen ? (
-                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                  )}
-                </div>
-              </div>
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent>
-              <SidebarGroupContent className="mt-2">
-                <SidebarMenu>
-                  {visiblePhases.map((phase) => {
-                    const actionCount = getPhaseActionCount(phase);
-                    const isActive = selectedPhase === phase && activeView === 'tasks';
-                    
-                    return (
-                      <SidebarMenuItem key={phase}>
-                        <SidebarMenuButton
-                          isActive={isActive}
-                          onClick={() => {
-                            onPhaseSelect(phase);
-                            onViewChange('tasks');
-                          }}
-                          className="justify-between"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span>{phaseIcons[phase]}</span>
-                            <span className="text-sm">{PHASE_LABELS[phase].split('&')[0].trim()}</span>
-                          </div>
-                          <Badge 
-                            variant={actionCount > 0 ? "destructive" : "secondary"} 
-                            className={cn(
-                              "text-[10px] px-1.5 h-5 min-w-[20px] justify-center",
-                              actionCount === 0 && "opacity-50"
-                            )}
-                          >
-                            {actionCount}
-                          </Badge>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
+          <div className="flex items-center justify-between px-2 py-1.5">
+            <div className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
+              <ClipboardList className="w-4 h-4" />
+              <span>Workflow Phases</span>
+            </div>
+            {getTotalActionCount() > 0 && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 h-5">
+                {getTotalActionCount()}
+              </Badge>
+            )}
+          </div>
+
+          <SidebarGroupContent className="mt-2">
+            <SidebarMenu>
+              {visiblePhases.map((phase) => {
+                const actionCount = getPhaseActionCount(phase);
+                const isActive = selectedPhase === phase && activeView === 'tasks';
+
+                return (
+                  <SidebarMenuItem key={phase}>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      onClick={() => {
+                        onPhaseSelect(phase);
+                        onViewChange('tasks');
+                      }}
+                      className="justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span>{phaseIcons[phase]}</span>
+                        <span className="text-sm">{PHASE_LABELS[phase].split('&')[0].trim()}</span>
+                      </div>
+                      <Badge
+                        variant={actionCount > 0 ? "destructive" : "secondary"}
+                        className={cn(
+                          "text-[10px] px-1.5 h-5 min-w-[20px] justify-center",
+                          actionCount === 0 && "opacity-50"
+                        )}
+                      >
+                        {actionCount}
+                      </Badge>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
@@ -221,9 +203,9 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
             </p>
           </div>
         </div>
-        <Button 
-          variant="ghost" 
-          size="sm" 
+        <Button
+          variant="ghost"
+          size="sm"
           className="w-full justify-start text-muted-foreground hover:text-foreground"
           onClick={handleLogout}
         >
