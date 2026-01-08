@@ -1,19 +1,14 @@
-import { useNavigate } from 'react-router-dom';
 import {
   ClipboardList,
-  BarChart3,
-  LayoutDashboard,
-  LogOut
+  LayoutDashboard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import { Phase, PHASE_LABELS, ROLE_LABELS } from '@/types';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -33,7 +28,6 @@ interface AppSidebarProps {
 
 export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewChange }: AppSidebarProps) {
   const { currentUser, currentClient, tasks, logout, getClientSubscription } = useApp();
-  const navigate = useNavigate();
 
   // Define phases based on user role
   const allPhases: Phase[] = ['onboarding', 'foundation', 'execution', 'ai', 'reporting', 'monitoring'];
@@ -47,27 +41,27 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
   const clientId = currentUser?.role === 'client' ? currentUser.id : currentClient?.id;
   const subscription = clientId ? getClientSubscription(clientId) : undefined;
 
-  // Get action needed count per phase (tasks assigned to current user)
+  // Get action needed count per phase (tasks in this phase across all relevant clients)
   const getPhaseActionCount = (phase: Phase): number => {
     if (!currentUser) return 0;
 
-    const clientTasks = tasks.filter(t => {
-      // Filter by client if applicable
+    return tasks.filter(t => {
+      // 1. Match phase
+      if (t.phase !== phase) return false;
+
+      // 2. Count all tasks that are not yet 'approved'
+      if (t.status === 'approved') return false;
+
+      // 3. Scope filtering
       if (currentUser.role === 'client') {
+        // Clients only see their own tasks
         return t.clientId === currentUser.id;
       }
-      if (currentClient) {
-        return t.clientId === currentClient.id;
-      }
-      return true;
-    });
 
-    // Count tasks assigned to current user's role in this phase
-    return clientTasks.filter(t =>
-      t.phase === phase &&
-      t.owner === currentUser.role &&
-      t.status !== 'approved' // Exclude completed tasks
-    ).length;
+      // For team roles, show the count of all pending items across all clients
+      // as per request to see global workload for each phase.
+      return true;
+    }).length;
   };
 
   // Get total action count across all visible phases
@@ -75,10 +69,7 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
     return visiblePhases.reduce((sum, phase) => sum + getPhaseActionCount(phase), 0);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+
 
   const phaseIcons: Record<Phase, string> = {
     'onboarding': '🚀',
@@ -121,16 +112,6 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
                 >
                   <LayoutDashboard className="w-4 h-4" />
                   <span>Dashboard</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={activeView === 'reports'}
-                  onClick={() => onViewChange('reports')}
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  <span>Reports</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -190,29 +171,7 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <SidebarSeparator className="mb-4" />
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-xs font-medium">
-            {currentUser?.name?.charAt(0) || 'U'}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{currentUser?.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {currentUser?.role ? ROLE_LABELS[currentUser.role] : ''}
-            </p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start text-muted-foreground hover:text-foreground"
-          onClick={handleLogout}
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
-        </Button>
-      </SidebarFooter>
+
     </Sidebar>
   );
 }

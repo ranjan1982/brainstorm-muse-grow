@@ -14,15 +14,15 @@ import {
 import { ChevronDown, LogOut, User, LayoutDashboard, Zap, Building2, Check } from 'lucide-react';
 
 export function Header() {
-  const { 
-    currentUser, 
-    isAuthenticated, 
-    logout, 
-    login, 
-    clients, 
-    currentClient, 
+  const {
+    currentUser,
+    isAuthenticated,
+    logout,
+    login,
+    clients,
+    currentClient,
     setCurrentClient,
-    getClientSubscription 
+    getClientSubscription
   } = useApp();
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
@@ -32,9 +32,8 @@ export function Header() {
   const activeClients = clients.filter(c => c.isActive);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isLandingPage ? 'bg-transparent' : 'bg-background/80 backdrop-blur-xl border-b border-border/50'
-    }`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isLandingPage ? 'bg-transparent' : 'bg-background/80 backdrop-blur-xl border-b border-border/50'
+      }`}>
       <div className="container mx-auto px-6 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg gradient-accent flex items-center justify-center">
@@ -48,14 +47,12 @@ export function Header() {
         <nav className="hidden md:flex items-center gap-6">
           {!isAuthenticated && (
             <>
-              <Link to="/pricing" className={`text-sm font-medium transition-colors hover:text-accent ${
-                isLandingPage ? 'text-primary-foreground/80 hover:text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}>
+              <Link to="/pricing" className={`text-sm font-medium transition-colors hover:text-accent ${isLandingPage ? 'text-primary-foreground/80 hover:text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}>
                 Pricing
               </Link>
-              <Link to="/register" className={`text-sm font-medium transition-colors hover:text-accent ${
-                isLandingPage ? 'text-primary-foreground/80 hover:text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}>
+              <Link to="/register" className={`text-sm font-medium transition-colors hover:text-accent ${isLandingPage ? 'text-primary-foreground/80 hover:text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}>
                 Get Started
               </Link>
             </>
@@ -65,47 +62,6 @@ export function Header() {
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              {/* Client Switcher for Team Roles */}
-              {canSwitchClients && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Building2 className="w-4 h-4" />
-                      {currentClient?.company || 'Select Client'}
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-72">
-                    <DropdownMenuLabel>Switch Client</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    {activeClients.map((client) => {
-                      const subscription = getClientSubscription(client.id);
-                      return (
-                        <DropdownMenuItem
-                          key={client.id}
-                          onClick={() => setCurrentClient(client)}
-                          className="cursor-pointer flex items-center justify-between"
-                        >
-                          <div className="flex flex-col">
-                            <span className="font-medium">{client.company}</span>
-                            <span className="text-xs text-muted-foreground">{client.name}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {subscription && (
-                              <Badge variant="outline" className="text-xs">
-                                {SUBSCRIPTION_TIER_LABELS[subscription.tier]}
-                              </Badge>
-                            )}
-                            {currentClient?.id === client.id && (
-                              <Check className="w-4 h-4 text-success" />
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
 
               <Link to="/dashboard">
                 <Button variant="ghost" size="sm" className="gap-2">

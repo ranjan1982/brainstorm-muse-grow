@@ -2,40 +2,40 @@ import { Task, User, KPIData, Phase, Client, Subscription, PaymentHistory, TaskT
 
 // Multiple clients for team management
 export const mockClients: Client[] = [
-  { 
-    id: 'client-1', 
-    name: 'John Martinez', 
-    email: 'john@acmeplumbing.com', 
+  {
+    id: 'client-1',
+    name: 'John Martinez',
+    email: 'john@acmeplumbing.com',
     company: 'Acme Plumbing Co.',
     phone: '+1 (555) 123-4567',
     address: '123 Main St, Los Angeles, CA 90001',
     createdAt: new Date('2024-01-01'),
     isActive: true
   },
-  { 
-    id: 'client-2', 
-    name: 'Emily Chen', 
-    email: 'emily@greenscapelandscaping.com', 
+  {
+    id: 'client-2',
+    name: 'Emily Chen',
+    email: 'emily@greenscapelandscaping.com',
     company: 'GreenScape Landscaping',
     phone: '+1 (555) 234-5678',
     address: '456 Oak Ave, San Diego, CA 92101',
     createdAt: new Date('2024-01-15'),
     isActive: true
   },
-  { 
-    id: 'client-3', 
-    name: 'Michael Brown', 
-    email: 'michael@eliteautorepair.com', 
+  {
+    id: 'client-3',
+    name: 'Michael Brown',
+    email: 'michael@eliteautorepair.com',
     company: 'Elite Auto Repair',
     phone: '+1 (555) 345-6789',
     address: '789 Industrial Blvd, Phoenix, AZ 85001',
     createdAt: new Date('2024-02-01'),
     isActive: true
   },
-  { 
-    id: 'client-4', 
-    name: 'Sarah Williams', 
-    email: 'sarah@homecleanpro.com', 
+  {
+    id: 'client-4',
+    name: 'Sarah Williams',
+    email: 'sarah@homecleanpro.com',
     company: 'HomeClean Pro Services',
     phone: '+1 (555) 456-7890',
     address: '321 Service Rd, Denver, CO 80202',
@@ -149,15 +149,15 @@ export const mockTaskTemplates: TaskTemplate[] = [
   { id: 'tpl-onb-st-2', taskId: 'ST-ONB-02', title: 'Upload 20+ business photos', description: 'Client uploads photos → India checks → US approves', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-onb-st-3', taskId: 'ST-ONB-03', title: 'Submit service descriptions', description: 'Client submits → US reviews → India validates', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-onb-st-4', taskId: 'ST-ONB-04', title: 'Onboarding call (1 hour)', description: 'Schedule → Conduct → Lock scope', phase: 'onboarding', owner: 'us-strategy', cadence: 'once', isActive: true, order: 4, tiers: ['starter', 'growth', 'enterprise'] },
-  
+
   // Growth Tier Additions (available in growth, enterprise)
   { id: 'tpl-onb-gr-1', taskId: 'GR-ONB-01', title: 'GBP & GSC access collection', description: 'Client submits → India verifies → US approves', phase: 'onboarding', owner: 'client', cadence: 'once', isActive: true, order: 5, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-onb-gr-2', taskId: 'GR-ONB-02', title: 'Competitor & keyword intake', description: 'US Strategy analyzes → Approves → Locks', phase: 'onboarding', owner: 'us-strategy', cadence: 'once', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
-  
+
   // Pro Tier Additions (available in enterprise)
   { id: 'tpl-onb-pr-1', taskId: 'PR-ONB-01', title: 'Conversion funnel review', description: 'US Strategy reviews → Approves → Locks', phase: 'onboarding', owner: 'us-strategy', cadence: 'once', isActive: true, order: 7, tiers: ['enterprise'] },
   { id: 'tpl-onb-pr-2', taskId: 'PR-ONB-02', title: 'Brand positioning analysis', description: 'US Strategy analyzes → Approves → Shares', phase: 'onboarding', owner: 'us-strategy', cadence: 'once', isActive: true, order: 8, tiers: ['enterprise'] },
-  
+
   // Enterprise Tier Additions
   { id: 'tpl-onb-en-1', taskId: 'EN-ONB-01', title: 'Multi-location & brand intake', description: 'US Strategy analyzes → Approves → Locks', phase: 'onboarding', owner: 'us-strategy', cadence: 'once', isActive: true, order: 9, tiers: ['enterprise'] },
   { id: 'tpl-onb-en-2', taskId: 'EN-ONB-02', title: 'Executive kickoff workshop', description: 'US Strategy schedules → Conducts → Signs off', phase: 'onboarding', owner: 'us-strategy', cadence: 'once', isActive: true, order: 10, tiers: ['enterprise'] },
@@ -167,15 +167,15 @@ export const mockTaskTemplates: TaskTemplate[] = [
   { id: 'tpl-fnd-st-1', taskId: 'ST-FND-01', title: 'GBP audit & baseline snapshot', description: 'India SEO audits → US reviews → Approves', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-fnd-st-2', taskId: 'ST-FND-02', title: 'Initial GBP optimization', description: 'India SEO optimizes → US reviews → Publishes', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-fnd-st-3', taskId: 'ST-FND-03', title: 'LocalBusiness + FAQ schema', description: 'India SEO implements → Validates → US approves', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
-  
+
   // Growth Tier Additions (available in growth, enterprise)
   { id: 'tpl-fnd-gr-1', taskId: 'GR-FND-01', title: 'Deep GBP audit', description: 'India SEO audits → US reviews → Approves', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 4, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-fnd-gr-2', taskId: 'GR-FND-02', title: 'Tier 1-2 citations submission', description: 'India SEO submits → Verifies → Closes', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 5, tiers: ['growth', 'enterprise'] },
-  
+
   // Pro Tier Additions (available in enterprise)
   { id: 'tpl-fnd-pr-1', taskId: 'PR-FND-01', title: 'Service page optimization', description: 'India SEO optimizes → US approves → Publishes', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 6, tiers: ['enterprise'] },
   { id: 'tpl-fnd-pr-2', taskId: 'PR-FND-02', title: 'Internal linking strategy', description: 'India SEO designs → US approves → Implements', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 7, tiers: ['enterprise'] },
-  
+
   // Enterprise Tier Additions
   { id: 'tpl-fnd-en-1', taskId: 'EN-FND-01', title: 'Entity & brand schema', description: 'US Strategy designs → Approves → Implements', phase: 'foundation', owner: 'us-strategy', cadence: 'once', isActive: true, order: 8, tiers: ['enterprise'] },
   { id: 'tpl-fnd-en-2', taskId: 'EN-FND-02', title: 'Multi-location schema build', description: 'India SEO builds → US approves → Publishes', phase: 'foundation', owner: 'india-head', cadence: 'once', isActive: true, order: 9, tiers: ['enterprise'] },
@@ -186,17 +186,17 @@ export const mockTaskTemplates: TaskTemplate[] = [
   { id: 'tpl-exe-st-2', taskId: 'ST-EXE-02', title: 'Seed 3 GBP Q&As', description: 'India SEO drafts → US approves → Publishes', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-exe-st-3', taskId: 'ST-EXE-03', title: 'Publish 1 AI blog post', description: 'India SEO writes → US approves → Publishes', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 3, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-exe-st-4', taskId: 'ST-EXE-04', title: 'Monitor reviews & alerts', description: 'India SEO monitors → Responds → Logs', phase: 'execution', owner: 'india-head', cadence: 'ongoing', isActive: true, order: 4, tiers: ['starter', 'growth', 'enterprise'] },
-  
+
   // Growth Tier Additions (available in growth, enterprise)
   { id: 'tpl-exe-gr-1', taskId: 'GR-EXE-01', title: 'Publish 4 Google Posts', description: 'India SEO drafts → US approves → Publishes', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 5, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-exe-gr-2', taskId: 'GR-EXE-02', title: 'Publish 2 AI blog posts', description: 'India SEO writes → US approves → Publishes', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 6, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-exe-gr-3', taskId: 'GR-EXE-03', title: 'Technical SEO audit', description: 'India SEO audits → US reviews → Logs', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 7, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-exe-gr-4', taskId: 'GR-EXE-04', title: 'FAQ expansion (8 questions)', description: 'India SEO expands → US approves → Publishes', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 8, tiers: ['growth', 'enterprise'] },
-  
+
   // Pro Tier Additions (available in enterprise)
   { id: 'tpl-exe-pr-1', taskId: 'PR-EXE-01', title: 'Publish 6-8 Google Posts', description: 'India SEO drafts → US approves → Publishes', phase: 'execution', owner: 'india-head', cadence: 'monthly', isActive: true, order: 9, tiers: ['enterprise'] },
   { id: 'tpl-exe-pr-2', taskId: 'PR-EXE-02', title: 'CRO review & recommendations', description: 'US Strategy analyzes → Approves → Shares', phase: 'execution', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 10, tiers: ['enterprise'] },
-  
+
   // Enterprise Tier Additions
   { id: 'tpl-exe-en-1', taskId: 'EN-EXE-01', title: 'Weekly content & GBP cadence', description: 'India SEO drafts → US approves → Publishes', phase: 'execution', owner: 'india-head', cadence: 'weekly', isActive: true, order: 11, tiers: ['enterprise'] },
   { id: 'tpl-exe-en-2', taskId: 'EN-EXE-02', title: 'Reputation response playbooks', description: 'US Strategy defines → Approves → Deploys', phase: 'execution', owner: 'us-strategy', cadence: 'once', isActive: true, order: 12, tiers: ['enterprise'] },
@@ -205,15 +205,15 @@ export const mockTaskTemplates: TaskTemplate[] = [
   // Starter Tier (available in all tiers)
   { id: 'tpl-aeo-st-1', taskId: 'ST-AEO-01', title: 'AI visibility testing (10 prompts)', description: 'India SEO tests → US reviews → Logs', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-aeo-st-2', taskId: 'ST-AEO-02', title: 'AI mention score logging', description: 'India SEO logs → Stores → Reviews', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
-  
+
   // Growth Tier Additions (available in growth, enterprise)
   { id: 'tpl-aeo-gr-1', taskId: 'GR-AEO-01', title: 'AI visibility testing (20 prompts)', description: 'India SEO tests → US reviews → Logs', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 3, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-aeo-gr-2', taskId: 'GR-AEO-02', title: 'AI gap analysis', description: 'US Strategy analyzes → Documents → Shares', phase: 'ai', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 4, tiers: ['growth', 'enterprise'] },
-  
+
   // Pro Tier Additions (available in enterprise)
   { id: 'tpl-aeo-pr-1', taskId: 'PR-AEO-01', title: 'AI answer remediation', description: 'India SEO rewrites → US approves → Publishes', phase: 'ai', owner: 'india-head', cadence: 'monthly', isActive: true, order: 5, tiers: ['enterprise'] },
   { id: 'tpl-aeo-pr-2', taskId: 'PR-AEO-02', title: 'AI prompt tuning', description: 'US Strategy tunes → Validates → Deploys', phase: 'ai', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 6, tiers: ['enterprise'] },
-  
+
   // Enterprise Tier Additions
   { id: 'tpl-aeo-en-1', taskId: 'EN-AEO-01', title: 'AI brand-defense monitoring', description: 'US Strategy monitors → Detects → Acts', phase: 'ai', owner: 'us-strategy', cadence: 'ongoing', isActive: true, order: 7, tiers: ['enterprise'] },
   { id: 'tpl-aeo-en-2', taskId: 'EN-AEO-02', title: 'Generative search ownership testing', description: 'US Strategy tests → Analyzes → Adjusts', phase: 'ai', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 8, tiers: ['enterprise'] },
@@ -222,14 +222,14 @@ export const mockTaskTemplates: TaskTemplate[] = [
   // Starter Tier (available in all tiers)
   { id: 'tpl-rpt-st-1', taskId: 'ST-RPT-01', title: 'Dashboard update', description: 'System generates → Validates → Displays', phase: 'reporting', owner: 'system', cadence: 'monthly', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-rpt-st-2', taskId: 'ST-RPT-02', title: 'Monthly summary email', description: 'India SEO drafts → US approves → Sends', phase: 'reporting', owner: 'india-head', cadence: 'monthly', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
-  
+
   // Growth Tier Additions (available in growth, enterprise)
   { id: 'tpl-rpt-gr-1', taskId: 'GR-RPT-01', title: 'Bi-monthly strategy memo', description: 'US Strategy drafts → Approves → Shares', phase: 'reporting', owner: 'us-strategy', cadence: 'bi-monthly', isActive: true, order: 3, tiers: ['growth', 'enterprise'] },
-  
+
   // Pro Tier Additions (available in enterprise)
   { id: 'tpl-rpt-pr-1', taskId: 'PR-RPT-01', title: 'Monthly strategy call', description: 'US Strategy prepares → Conducts → Shares notes', phase: 'reporting', owner: 'us-strategy', cadence: 'monthly', isActive: true, order: 4, tiers: ['enterprise'] },
   { id: 'tpl-rpt-pr-2', taskId: 'PR-RPT-02', title: 'Conversion impact report', description: 'System generates → US reviews → Displays', phase: 'reporting', owner: 'system', cadence: 'monthly', isActive: true, order: 5, tiers: ['enterprise'] },
-  
+
   // Enterprise Tier Additions
   { id: 'tpl-rpt-en-1', taskId: 'EN-RPT-01', title: 'Executive KPI dashboard', description: 'System generates → Validates → Displays', phase: 'reporting', owner: 'system', cadence: 'monthly', isActive: true, order: 6, tiers: ['enterprise'] },
   { id: 'tpl-rpt-en-2', taskId: 'EN-RPT-02', title: 'Quarterly executive review', description: 'US Strategy drafts → Reviews → Presents', phase: 'reporting', owner: 'us-strategy', cadence: 'quarterly', isActive: true, order: 7, tiers: ['enterprise'] },
@@ -238,14 +238,14 @@ export const mockTaskTemplates: TaskTemplate[] = [
   // Starter Tier (available in all tiers)
   { id: 'tpl-fmr-st-1', taskId: 'ST-FMR-01', title: 'GBP suspension alert', description: 'System detects → Notifies → Escalates', phase: 'monitoring', owner: 'system', cadence: 'ongoing', isActive: true, order: 1, tiers: ['starter', 'growth', 'enterprise'] },
   { id: 'tpl-fmr-st-2', taskId: 'ST-FMR-02', title: 'Issue diagnosis & recovery', description: 'India SEO diagnoses → US approves → Closes', phase: 'monitoring', owner: 'india-head', cadence: 'ongoing', isActive: true, order: 2, tiers: ['starter', 'growth', 'enterprise'] },
-  
+
   // Growth Tier Additions (available in growth, enterprise)
   { id: 'tpl-fmr-gr-1', taskId: 'GR-FMR-01', title: 'Ranking anomaly detection', description: 'System detects → Alerts → Escalates', phase: 'monitoring', owner: 'system', cadence: 'ongoing', isActive: true, order: 3, tiers: ['growth', 'enterprise'] },
   { id: 'tpl-fmr-gr-2', taskId: 'GR-FMR-02', title: 'Controlled remediation', description: 'India SEO fixes → US approves → Closes', phase: 'monitoring', owner: 'india-head', cadence: 'ongoing', isActive: true, order: 4, tiers: ['growth', 'enterprise'] },
-  
+
   // Pro Tier Additions (available in enterprise)
   { id: 'tpl-fmr-pr-1', taskId: 'PR-FMR-01', title: 'Active GBP recovery', description: 'India SEO recovers → US approves → Closes', phase: 'monitoring', owner: 'india-head', cadence: 'ongoing', isActive: true, order: 5, tiers: ['enterprise'] },
-  
+
   // Enterprise Tier Additions
   { id: 'tpl-fmr-en-1', taskId: 'EN-FMR-01', title: 'SLA-based emergency recovery', description: 'US Strategy detects → Leads → Resolves', phase: 'monitoring', owner: 'us-strategy', cadence: 'ongoing', isActive: true, order: 6, tiers: ['enterprise'] },
 ];
@@ -444,21 +444,7 @@ export const mockTasks: TaskWithClient[] = [
     updatedAt: new Date('2024-01-22'),
     clientId: 'client-1'
   },
-  {
-    id: '10',
-    taskId: 'ST-EXE-01',
-    title: 'Publish 2 Google Posts',
-    description: 'Create and publish monthly Google Business posts.',
-    phase: 'execution',
-    owner: 'india-head',
-    status: 'pending',
-    cadence: 'monthly',
-    comments: [],
-    documents: [],
-    createdAt: new Date('2024-02-01'),
-    updatedAt: new Date('2024-02-01'),
-    clientId: 'client-1'
-  },
+
   {
     id: '11',
     taskId: 'GR-EXE-01',
@@ -1051,7 +1037,7 @@ export const kpiHistory = [
 
 export const getPhaseProgress = (tasks: Task[]): Record<Phase, { completed: number; total: number }> => {
   const phases: Phase[] = ['onboarding', 'foundation', 'execution', 'ai', 'reporting', 'monitoring'];
-  
+
   return phases.reduce((acc, phase) => {
     const phaseTasks = tasks.filter(t => t.phase === phase);
     const completed = phaseTasks.filter(t => t.status === 'approved').length;
