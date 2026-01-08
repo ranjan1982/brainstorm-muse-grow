@@ -168,7 +168,7 @@ export const STATUS_LABELS: Record<TaskStatus, string> = {
   'pending': 'Pending',
   'in-progress': 'In Progress',
   'completed': 'Completed',
-  'submitted': 'Submitted for Review',
+  'submitted': 'Awaiting for Review',
   'approved': 'Approved',
   'resubmit': 'Needs Revision'
 };

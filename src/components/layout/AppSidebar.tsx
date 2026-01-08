@@ -5,13 +5,11 @@ import {
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import { Phase, PHASE_LABELS, ROLE_LABELS } from '@/types';
-import { Badge } from '@/components/ui/badge';
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
@@ -37,37 +35,7 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
     ? ['onboarding', 'reporting']
     : allPhases;
 
-  // Get client's subscription tier
-  const clientId = currentUser?.role === 'client' ? currentUser.id : currentClient?.id;
-  const subscription = clientId ? getClientSubscription(clientId) : undefined;
 
-  // Get action needed count per phase (tasks in this phase across all relevant clients)
-  const getPhaseActionCount = (phase: Phase): number => {
-    if (!currentUser) return 0;
-
-    return tasks.filter(t => {
-      // 1. Match phase
-      if (t.phase !== phase) return false;
-
-      // 2. Count all tasks that are not yet 'approved'
-      if (t.status === 'approved') return false;
-
-      // 3. Scope filtering
-      if (currentUser.role === 'client') {
-        // Clients only see their own tasks
-        return t.clientId === currentUser.id;
-      }
-
-      // For team roles, show the count of all pending items across all clients
-      // as per request to see global workload for each phase.
-      return true;
-    }).length;
-  };
-
-  // Get total action count across all visible phases
-  const getTotalActionCount = (): number => {
-    return visiblePhases.reduce((sum, phase) => sum + getPhaseActionCount(phase), 0);
-  };
 
 
 
@@ -102,7 +70,6 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -121,22 +88,14 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
         <SidebarSeparator />
 
         <SidebarGroup>
-          <div className="flex items-center justify-between px-2 py-1.5">
-            <div className="flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
-              <ClipboardList className="w-4 h-4" />
-              <span>Workflow Phases</span>
-            </div>
-            {getTotalActionCount() > 0 && (
-              <Badge variant="destructive" className="text-[10px] px-1.5 h-5">
-                {getTotalActionCount()}
-              </Badge>
-            )}
+          <div className="px-2 py-1.5 flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
+            <ClipboardList className="w-4 h-4" />
+            <span>Workflow Phases</span>
           </div>
 
           <SidebarGroupContent className="mt-2">
             <SidebarMenu>
               {visiblePhases.map((phase) => {
-                const actionCount = getPhaseActionCount(phase);
                 const isActive = selectedPhase === phase && activeView === 'tasks';
 
                 return (
@@ -147,21 +106,11 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
                         onPhaseSelect(phase);
                         onViewChange('tasks');
                       }}
-                      className="justify-between"
                     >
                       <div className="flex items-center gap-2">
                         <span>{phaseIcons[phase]}</span>
                         <span className="text-sm">{PHASE_LABELS[phase].split('&')[0].trim()}</span>
                       </div>
-                      <Badge
-                        variant={actionCount > 0 ? "destructive" : "secondary"}
-                        className={cn(
-                          "text-[10px] px-1.5 h-5 min-w-[20px] justify-center",
-                          actionCount === 0 && "opacity-50"
-                        )}
-                      >
-                        {actionCount}
-                      </Badge>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );

@@ -297,8 +297,8 @@ export const mockEmailTemplates: EmailTemplate[] = [
 export const mockUsers: User[] = [
   { id: 'admin-1', name: 'Alex Thompson', email: 'alex@seosuite.com', role: 'admin' },
   { id: 'us-1', name: 'Sarah Mitchell', email: 'sarah@seosuite.com', role: 'us-strategy' },
-  { id: 'india-head-1', name: 'Raj Patel', email: 'raj@seosuite.com', role: 'india-head' },
-  { id: 'india-junior-1', name: 'Priya Sharma', email: 'priya@seosuite.com', role: 'india-junior' },
+  { id: 'india-head-1', name: 'Robert Harrison', email: 'robert@seosuite.com', role: 'india-head' },
+  { id: 'india-junior-1', name: 'Jennifer Davis', email: 'jennifer@seosuite.com', role: 'india-junior' },
   // Client users (linked to clients)
   { id: 'client-1', name: 'John Martinez', email: 'john@acmeplumbing.com', role: 'client' },
   { id: 'client-2', name: 'Emily Chen', email: 'emily@greenscapelandscaping.com', role: 'client' },
@@ -405,11 +405,11 @@ export const mockTasks: TaskWithClient[] = [
     title: 'GBP audit & baseline snapshot',
     description: 'Complete comprehensive audit of current GBP status.',
     phase: 'foundation',
-    owner: 'india-head',
+    owner: 'us-strategy',
     assignedTo: 'india-junior-1',
     status: 'submitted',
     comments: [
-      { id: 'c2', userId: 'india-junior-1', userName: 'Priya Sharma', userRole: 'india-junior', content: 'Audit complete, found 15 optimization opportunities.', createdAt: new Date('2024-01-22') }
+      { id: 'c2', userId: 'india-junior-1', userName: 'Jennifer Davis', userRole: 'india-junior', content: 'Comprehensive GBP audit completed. Found several keyword placement opportunities in the service descriptions.', createdAt: new Date('2024-01-22') }
     ],
     documents: [],
     createdAt: new Date('2024-01-20'),
@@ -424,7 +424,9 @@ export const mockTasks: TaskWithClient[] = [
     phase: 'foundation',
     owner: 'india-head',
     status: 'pending',
-    comments: [],
+    comments: [
+      { id: 'c3', userId: 'client-1', userName: 'John Doe', userRole: 'client', content: 'When can we expect this to be finished?', createdAt: new Date() }
+    ],
     documents: [],
     createdAt: new Date('2024-01-22'),
     updatedAt: new Date('2024-01-22'),
@@ -458,6 +460,21 @@ export const mockTasks: TaskWithClient[] = [
     documents: [],
     createdAt: new Date('2024-02-01'),
     updatedAt: new Date('2024-02-01'),
+    clientId: 'client-1'
+  },
+  {
+    id: '11-w',
+    taskId: 'ST-EXE-01-W',
+    title: 'Weekly Performance Audit',
+    description: 'Weekly review of Google Business Profile insights and ranking positions.',
+    phase: 'execution',
+    owner: 'india-head',
+    status: 'in-progress',
+    cadence: 'weekly',
+    comments: [],
+    documents: [],
+    createdAt: new Date('2026-01-08'),
+    updatedAt: new Date('2026-01-08'),
     clientId: 'client-1'
   },
   {

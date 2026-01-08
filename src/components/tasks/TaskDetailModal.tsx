@@ -11,10 +11,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { 
-  MessageSquare, 
-  FileText, 
-  Clock, 
+import {
+  MessageSquare,
+  FileText,
+  Clock,
   CheckCircle2,
   AlertCircle,
   RotateCcw,
@@ -58,7 +58,21 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
   if (!task) return null;
 
   const handleStatusChange = (newStatus: Task['status']) => {
-    updateTask(task.id, { status: newStatus });
+    if (newStatus === 'submitted') {
+      // Handoff to US Strategy for review
+      updateTask(task.id, {
+        status: 'submitted',
+        owner: 'us-strategy'
+      });
+    } else if (newStatus === 'resubmit') {
+      // Handoff back to India team for revision
+      updateTask(task.id, {
+        status: 'resubmit',
+        owner: 'india-head'
+      });
+    } else {
+      updateTask(task.id, { status: newStatus });
+    }
   };
 
   const handleSubmitComment = () => {
@@ -100,26 +114,26 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
 
   // Permission checks based on workflow document
   // US Strategy is the GATEKEEPER - only they approve and send to client
-  
+
   const canEdit = () => {
     if (!currentUser) return false;
-    
+
     // India SEO Head can work on ALL tasks (execute tasks)
     if (currentUser.role === 'india-head') {
       return task.status !== 'approved' && task.status !== 'submitted';
     }
-    
+
     // India SEO Junior can only work on tasks assigned to them
     if (currentUser.role === 'india-junior') {
       const isAssignedToJunior = task.owner === 'india-junior' || task.assignedTo === currentUser.id;
       return isAssignedToJunior && task.status !== 'approved' && task.status !== 'submitted';
     }
-    
+
     // Client can only work on client-assigned tasks
     if (currentUser.role === 'client') {
       return task.owner === 'client' && task.status !== 'approved' && task.status !== 'submitted';
     }
-    
+
     return false;
   };
 
@@ -127,7 +141,7 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
   const canApprove = () => {
     return currentUser?.role === 'us-strategy' && task.status === 'submitted';
   };
-  
+
   // US Strategy can send approved task to client
   const canSendToClient = () => {
     return currentUser?.role === 'us-strategy' && task.status === 'approved' && task.owner !== 'client';
@@ -137,28 +151,28 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
   // Other roles can only comment on tasks assigned to their role
   const canComment = () => {
     if (!currentUser) return false;
-    
+
     // US Strategy can add feedback/comment on ALL tasks (they review everything)
     if (currentUser.role === 'us-strategy') return true;
-    
+
     // India SEO Head can comment on all India team tasks
     if (currentUser.role === 'india-head') {
       return task.owner === 'india-head' || task.owner === 'india-junior';
     }
-    
+
     // India SEO Junior can comment only on their assigned tasks
     if (currentUser.role === 'india-junior') {
       return task.owner === 'india-junior' || task.assignedTo === currentUser?.id;
     }
-    
+
     // Client can comment on client tasks
     if (currentUser.role === 'client') {
       return task.owner === 'client';
     }
-    
+
     return false;
   };
-  
+
   // Can upload documents - same as comment permissions
   const canUploadDocuments = () => canComment();
 
@@ -259,22 +273,22 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
 
         <Tabs defaultValue="details" className="flex-1">
           <TabsList className="w-full justify-start border-b border-border/50 rounded-none h-auto p-0 bg-transparent">
-            <TabsTrigger 
-              value="details" 
+            <TabsTrigger
+              value="details"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent px-6 py-3"
             >
               <FileText className="w-4 h-4 mr-2" />
               Details
             </TabsTrigger>
-            <TabsTrigger 
-              value="communication" 
+            <TabsTrigger
+              value="communication"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent px-6 py-3"
             >
               <MessageSquare className="w-4 h-4 mr-2" />
               Communication ({task.comments.length})
             </TabsTrigger>
-            <TabsTrigger 
-              value="attachments" 
+            <TabsTrigger
+              value="attachments"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-accent data-[state=active]:bg-transparent px-6 py-3"
             >
               <Paperclip className="w-4 h-4 mr-2" />
@@ -369,7 +383,7 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
                     onChange={(e) => setNewComment(e.target.value)}
                     className="min-h-[100px] resize-none mb-3"
                   />
-                  
+
                   {/* Attachment Preview */}
                   {commentAttachments.length > 0 && (
                     <div className="flex flex-wrap gap-2 mb-3">
@@ -402,8 +416,8 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
                       <Upload className="w-4 h-4 mr-2" />
                       Attach Files
                     </Button>
-                    <Button 
-                      variant="accent" 
+                    <Button
+                      variant="accent"
                       size="sm"
                       onClick={handleSubmitComment}
                       disabled={!newComment.trim() && commentAttachments.length === 0}
@@ -466,7 +480,7 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
                                 </span>
                               </div>
                               <p className="text-sm text-foreground/90 pl-10 whitespace-pre-wrap">{comment.content}</p>
-                              
+
                               {/* Comment Attachments */}
                               {comment.attachments && comment.attachments.length > 0 && (
                                 <div className="pl-10 mt-3 flex flex-wrap gap-2">
@@ -584,7 +598,7 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
               Submit for Review
             </Button>
           )}
-          
+
           {/* US Strategy Approval Actions - They are the gatekeeper */}
           {canApprove() && (
             <>
@@ -598,36 +612,36 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
               </Button>
             </>
           )}
-          
+
           {/* US Strategy can send approved tasks to client for their review */}
           {canSendToClient() && (
             <Button variant="accent" onClick={() => {
               // Mark task as ready for client review
-              updateTask(task.id, { 
-                status: 'pending', 
+              updateTask(task.id, {
+                status: 'pending',
                 owner: 'client',
-                approver: 'client' 
+                approver: 'client'
               });
             }}>
               <Send className="w-4 h-4 mr-2" />
               Send to Client
             </Button>
           )}
-          
+
           {task.status === 'resubmit' && canEdit() && (
             <Button variant="warning" onClick={() => handleStatusChange('in-progress')}>
               <AlertCircle className="w-4 h-4 mr-2" />
               Revise Task
             </Button>
           )}
-          
+
           {/* Role-specific info */}
           {currentUser?.role === 'us-strategy' && task.status !== 'submitted' && task.status !== 'approved' && (
             <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground">
               Awaiting submission for review
             </div>
           )}
-          
+
           <Button variant="ghost" onClick={() => onOpenChange(false)} className="ml-auto">
             Close
           </Button>

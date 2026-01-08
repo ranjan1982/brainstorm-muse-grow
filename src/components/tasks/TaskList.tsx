@@ -2,10 +2,11 @@ import { Task, Phase, PHASE_LABELS, ROLE_LABELS, STATUS_LABELS } from '@/types';
 import { TaskDetailModal } from './TaskDetailModal';
 import { CreateTaskDialog } from './CreateTaskDialog';
 import { useApp } from '@/context/AppContext';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, Eye, Building2, Filter } from 'lucide-react';
+import { Plus, Eye, Building2, Filter, Calendar, MessageSquare } from 'lucide-react';
+import { cn, getWeeklyInfo } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -24,19 +25,25 @@ import {
 
 interface TaskListProps {
   phase?: Phase;
+  initialStatus?: string;
+  onViewTask?: (taskId: string) => void;
 }
 
 interface TaskWithClient extends Task {
   clientId: string;
 }
 
-export function TaskList({ phase }: TaskListProps) {
+export function TaskList({ phase, initialStatus = 'all', onViewTask }: TaskListProps) {
   const { currentUser, tasks, clients } = useApp();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<string>('all');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>(initialStatus);
+
+  // Sync state if initialStatus changes from Dashboad cards
+  useEffect(() => {
+    setSelectedStatus(initialStatus);
+  }, [initialStatus]);
 
   const canCreateTask = () => {
     if (!currentUser) return false;
@@ -44,8 +51,11 @@ export function TaskList({ phase }: TaskListProps) {
   };
 
   const handleViewDetails = (task: Task) => {
-    setSelectedTask(task);
-    setDetailModalOpen(true);
+    if (onViewTask) {
+      onViewTask(task.id);
+    } else {
+      setSelectedTask(task);
+    }
   };
 
   // Get client name by clientId
@@ -107,20 +117,8 @@ export function TaskList({ phase }: TaskListProps) {
   const filteredTasks = getFilteredTasks();
   const activeClients = clients.filter(c => c.isActive);
 
-  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-    switch (status) {
-      case 'approved':
-        return 'default';
-      case 'in-progress':
-        return 'secondary';
-      case 'pending':
-      case 'resubmit':
-        return 'destructive';
-      case 'submitted':
-        return 'outline';
-      default:
-        return 'secondary';
-    }
+  const getStatusVariant = (status: string): any => {
+    return status;
   };
 
   return (
@@ -211,9 +209,49 @@ export function TaskList({ phase }: TaskListProps) {
             </TableHeader>
             <TableBody>
               {filteredTasks.map((task) => (
-                <TableRow key={task.id}>
-                  <TableCell className="font-mono text-xs">{task.taskId}</TableCell>
-                  <TableCell className="font-medium">{task.title}</TableCell>
+                <TableRow
+                  key={task.id}
+                  className={cn(
+                    "transition-colors",
+                    task.status === 'submitted' ? "bg-[#fffbeb] hover:bg-[#fef3c7] border-l-4 border-l-warning shadow-sm relative z-10" : ""
+                  )}
+                >
+                  <TableCell className="font-mono text-xs">
+                    <div className="flex items-center gap-2">
+                      {task.status === 'submitted' && (
+                        <span className="flex h-2 w-2 rounded-full bg-warning animate-pulse" />
+                      )}
+                      {task.taskId}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    <div className="flex flex-col gap-1">
+                      <span>{task.title}</span>
+                      {task.comments.length > 0 && (
+                        <div className="flex items-center gap-1 mt-1.5 text-[11px] text-[#64748b] font-normal">
+                          <MessageSquare className="w-3.5 h-3.5 text-[#22d3ee]" />
+                          <span className="flex items-center">
+                            : {task.comments[task.comments.length - 1].userName}
+                            <span className="mx-1">•</span>
+                            {
+                              (() => {
+                                const d = new Date(task.comments[task.comments.length - 1].createdAt);
+                                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                                const dd = String(d.getDate()).padStart(2, '0');
+                                const yy = String(d.getFullYear()).slice(-2);
+                                let h = d.getHours();
+                                const m = String(d.getMinutes()).padStart(2, '0');
+                                const realAmpm = h >= 12 ? 'PM' : 'AM';
+                                h = h % 12;
+                                h = h ? h : 12;
+                                return `${mm}/${dd}/${yy} ${String(h).padStart(2, '0')}:${m} ${realAmpm}`;
+                              })()
+                            }
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Badge variant={getStatusVariant(task.status)}>
                       {STATUS_LABELS[task.status]}
@@ -226,11 +264,14 @@ export function TaskList({ phase }: TaskListProps) {
                   </TableCell>
                   <TableCell>{getClientName(task.clientId)}</TableCell>
                   <TableCell>
-                    <span className="text-sm">
-                      {task.cadence === 'monthly'
-                        ? new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date(task.createdAt))
-                        : task.cadence?.charAt(0).toUpperCase() + task.cadence?.slice(1) || 'Once'}
-                    </span>
+                    <Badge variant="secondary" className="flex w-fit items-center gap-1.5 font-medium py-1 px-2.5">
+                      <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                      {task.cadence === 'weekly'
+                        ? getWeeklyInfo(new Date(task.createdAt))
+                        : task.cadence === 'monthly'
+                          ? new Intl.DateTimeFormat('en-US', { month: 'short', year: 'numeric' }).format(new Date(task.createdAt))
+                          : task.cadence?.charAt(0).toUpperCase() + task.cadence?.slice(1) || 'Once'}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button
@@ -249,11 +290,13 @@ export function TaskList({ phase }: TaskListProps) {
         </div>
       )}
 
-      <TaskDetailModal
-        task={selectedTask}
-        open={detailModalOpen}
-        onOpenChange={setDetailModalOpen}
-      />
+      {!onViewTask && (
+        <TaskDetailModal
+          task={selectedTask}
+          open={!!selectedTask}
+          onOpenChange={(open) => !open && setSelectedTask(null)}
+        />
+      )}
 
       <CreateTaskDialog
         open={createDialogOpen}
