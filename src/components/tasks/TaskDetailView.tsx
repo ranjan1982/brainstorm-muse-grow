@@ -189,9 +189,9 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
     const [isAttachmentsOpen, setIsAttachmentsOpen] = useState(true);
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="max-w-6xl mx-auto px-4 pb-12 pt-0">
             {/* Header Area */}
-            <div className="flex flex-col gap-4 mb-8">
+            <div className="flex flex-col gap-4 mb-6">
                 <div className="flex items-center justify-between">
                     <button onClick={onBack} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                         Tasks <ChevronRight className="w-4 h-4" />
