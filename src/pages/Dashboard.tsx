@@ -12,6 +12,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 import {
   Clock,
   AlertCircle,
@@ -22,7 +24,8 @@ import {
   Mail,
   FileText,
   Building2,
-  MessageSquare
+  MessageSquare,
+  Download
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -45,13 +48,11 @@ export default function Dashboard() {
   const [selectedPhase, setSelectedPhase] = useState<Phase>('onboarding');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'tasks' | 'reports' | 'dashboard' | 'task-detail'>('dashboard');
+  const [activeView, setActiveView] = useState<'tasks' | 'reports' | 'dashboard' | 'task-detail' | 'subscription'>('dashboard');
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-
-
 
   // Calculate role-specific stats
   const getRoleStats = () => {
@@ -406,7 +407,7 @@ export default function Dashboard() {
             setSelectedTaskId(null);
             setActiveView('tasks');
           }}
-          activeView={activeView === 'task-detail' ? 'tasks' : activeView}
+          activeView={activeView}
           onViewChange={(view) => {
             setSelectedTaskId(null);
             setActiveView(view as any);
@@ -540,7 +541,7 @@ export default function Dashboard() {
                             return (t.owner === currentUser.role || t.assignedTo === currentUser.id) &&
                               (t.status === 'pending' || t.status === 'resubmit');
                           }
-                          if (currentUser?.role === 'client') return t.owner === 'client' && t.status === 'pending';
+                          if (currentUser?.role === 'client') return t.clientId === currentUser.id && t.owner === 'client' && t.status === 'pending';
                           return false;
                         }).slice(0, 5).map(task => (
                           <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg bg-card/50 hover:bg-card transition-colors">
@@ -604,92 +605,181 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
                 </div>
+              </div>
+            )}
 
-                {/* Client Subscription Section */}
-                {currentUser?.role === 'client' && clientSubscription && (
-                  <div className="space-y-6 mt-8">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Current Plan</CardTitle>
-                        <CardDescription>Your active subscription details</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg">
-                          <div>
-                            <p className="text-2xl font-bold">{SUBSCRIPTION_TIER_LABELS[clientSubscription.tier]}</p>
-                            <p className="text-muted-foreground">${clientSubscription.monthlyPrice}/month</p>
+            {/* Subscription Management View (Client Only) */}
+            {activeView === 'subscription' && currentUser?.role === 'client' && clientSubscription && (
+              <div className="space-y-6">
+                <div className="mb-6">
+                  <h1 className="text-2xl font-bold text-[#0f172a]">Subscription & Billing</h1>
+                  <p className="text-muted-foreground">Manage your plan, payment methods, and billing history.</p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Current Plan Highlight */}
+                  <Card className="border-[#bae6fd] bg-[#f0f9ff]/30 border-2">
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col md:flex-row items-center justify-between p-6 bg-white border border-[#bae6fd] rounded-xl shadow-sm gap-6">
+                        <div className="flex items-center gap-5">
+                          <div className="w-14 h-14 rounded-2xl bg-[#ccfbf1] text-[#0f766e] flex items-center justify-center shadow-inner">
+                            <CreditCard className="w-7 h-7" />
                           </div>
-                          <Badge variant={clientSubscription.status === 'active' ? 'default' : 'secondary'}>
-                            {clientSubscription.status}
-                          </Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Upgrade Your Plan</CardTitle>
-                        <CardDescription>Choose a plan that fits your business needs</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {(['starter', 'growth', 'enterprise'] as SubscriptionTier[]).map(tier => (
-                            <Card key={tier} className={`relative ${clientSubscription?.tier === tier ? 'border-accent' : ''}`}>
-                              {clientSubscription?.tier === tier && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                  <Badge variant="default">Current</Badge>
-                                </div>
-                              )}
-                              <CardContent className="p-6 text-center">
-                                <h3 className="text-xl font-bold mb-2">{SUBSCRIPTION_TIER_LABELS[tier]}</h3>
-                                <p className="text-3xl font-bold mb-4">
-                                  ${SUBSCRIPTION_TIER_PRICES[tier]}
-                                  <span className="text-sm font-normal text-muted-foreground">/mo</span>
-                                </p>
-                                <Button
-                                  variant={clientSubscription?.tier === tier ? 'outline' : 'default'}
-                                  className="w-full"
-                                  disabled={clientSubscription?.tier === tier}
-                                  onClick={() => handleUpgrade(tier)}
-                                >
-                                  {clientSubscription?.tier === tier ? 'Current Plan' : 'Upgrade'}
-                                </Button>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Payment History</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2">
-                          {clientPayments.length > 0 ? clientPayments.map(payment => (
-                            <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">{payment.invoiceNumber}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {new Date(payment.paymentDate).toLocaleDateString()} • {payment.paymentMethod}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <span className="font-medium">${payment.amount}</span>
-                                <Badge variant={payment.status === 'paid' ? 'default' : 'secondary'}>
-                                  {payment.status}
-                                </Badge>
-                              </div>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-2xl font-black text-[#0f172a] tracking-tight">{SUBSCRIPTION_TIER_LABELS[clientSubscription.tier]}</p>
+                              <Badge className="bg-[#14b8a6] text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest leading-none">
+                                {clientSubscription.status}
+                              </Badge>
                             </div>
-                          )) : (
-                            <p className="text-muted-foreground text-center py-4">No payment history available</p>
-                          )}
+                            <p className="text-sm font-bold text-[#64748b] whitespace-nowrap">
+                              ${clientSubscription.monthlyPrice} per month • Billed monthly
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-8 w-full md:w-auto border-t md:border-t-0 md:border-l border-[#f1f5f9] pt-4 md:pt-0 md:pl-8">
+                          <div className="flex-1">
+                            <div className="flex justify-between items-end mb-2">
+                              <span className="text-[10px] font-black text-[#64748b] uppercase tracking-wider">Next Payment</span>
+                              <span className="text-sm font-bold text-[#0f172a]">Feb 08, 2026</span>
+                            </div>
+                            <Progress value={65} className="h-2 bg-[#f1f5f9]" />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Upgrade Plans */}
+                    <Card className="border-[#e2e8f0] shadow-sm flex flex-col">
+                      <CardHeader className="pb-4 border-b border-[#f1f5f9]">
+                        <CardTitle className="text-base font-bold text-[#0f172a] flex items-center gap-2">
+                          Available Upgrades
+                        </CardTitle>
+                        <CardDescription>Scale your SEO growth with a premium tier</CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-6 flex-1">
+                        <div className="space-y-3">
+                          {(['starter', 'growth', 'enterprise'] as SubscriptionTier[]).map(tier => {
+                            const isCurrent = clientSubscription?.tier === tier;
+                            return (
+                              <div
+                                key={tier}
+                                className={cn(
+                                  "group flex items-center justify-between p-4 rounded-xl border-2 transition-all",
+                                  isCurrent
+                                    ? "border-[#14b8a6] bg-[#f0fdfa]"
+                                    : "border-[#f1f5f9] hover:border-[#e2e8f0] bg-white"
+                                )}
+                              >
+                                <div className="flex items-center gap-4">
+                                  <div className={cn(
+                                    "w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg",
+                                    isCurrent ? "bg-[#14b8a6] text-white" : "bg-secondary text-muted-foreground"
+                                  )}>
+                                    {tier === 'starter' ? 'S' : tier === 'growth' ? 'G' : 'E'}
+                                  </div>
+                                  <div className="flex flex-col">
+                                    <span className="font-extrabold text-[#0f172a] text-sm">{SUBSCRIPTION_TIER_LABELS[tier]}</span>
+                                    <span className="text-[11px] font-bold text-[#64748b] tracking-tight">${SUBSCRIPTION_TIER_PRICES[tier]}/mo</span>
+                                  </div>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant={isCurrent ? "secondary" : "default"}
+                                  className={cn(
+                                    "h-8 px-5 font-black text-[10px] uppercase tracking-widest",
+                                    isCurrent ? "bg-[#14b8a6]/10 text-[#0f766e] cursor-default" : "bg-[#0f172a] hover:bg-black text-white"
+                                  )}
+                                  onClick={() => !isCurrent && handleUpgrade(tier)}
+                                >
+                                  {isCurrent ? 'Current' : 'Select Plan'}
+                                </Button>
+                              </div>
+                            );
+                          })}
                         </div>
                       </CardContent>
                     </Card>
+
+                    {/* Payment History & Method */}
+                    <div className="flex flex-col gap-6">
+                      <Card className="border-[#e2e8f0] shadow-sm">
+                        <CardHeader className="pb-3 border-b border-[#f1f5f9]">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle className="text-base font-bold text-[#0f172a]">Payment Method</CardTitle>
+                              <CardDescription>Registered billing info</CardDescription>
+                            </div>
+                            <Button variant="outline" size="sm" className="h-8 text-[10px] font-black uppercase border-[#e2e8f0] hover:bg-[#f8fafc]">Update Card</Button>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="pt-5">
+                          <div className="flex items-center gap-4 p-4 border border-[#e2e8f0] rounded-xl bg-[#f8fafc]">
+                            <div className="w-12 h-8 bg-white border border-[#e2e8f0] rounded flex items-center justify-center shadow-sm">
+                              <span className="text-[10px] font-black italic text-[#2563eb]">VISA</span>
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-extrabold text-[#0f172a]">•••• •••• •••• 4242</p>
+                              <p className="text-[10px] text-[#64748b] font-bold">Expires 12/26 • Primary Card</p>
+                            </div>
+                            <CheckCircle2 className="w-5 h-5 text-[#14b8a6]" />
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card className="border-[#e2e8f0] shadow-sm flex-1">
+                        <CardHeader className="pb-3 border-b border-[#f1f5f9]">
+                          <CardTitle className="text-base font-bold text-[#0f172a]">Recent Invoices</CardTitle>
+                          <CardDescription>Your last 5 billing statements</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pt-0 px-0">
+                          <div className="divide-y divide-[#f1f5f9]">
+                            {clientPayments.length > 0 ? clientPayments.slice(0, 5).map(payment => (
+                              <div key={payment.id} className="flex items-center justify-between p-4 hover:bg-[#f8fafc] transition-colors cursor-pointer group">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 rounded bg-[#f1f5f9] flex items-center justify-center text-[#64748b] group-hover:bg-[#e2e8f0]">
+                                    <FileText className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-[#0f172a] text-xs">{payment.invoiceNumber}</p>
+                                    <p className="text-[10px] text-[#64748b] font-bold">
+                                      {new Date(payment.paymentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <div className="text-right">
+                                    <p className="font-black text-[#0f172a] text-sm">${payment.amount}</p>
+                                    <span className="text-[9px] font-extrabold text-[#14b8a6] uppercase tracking-tight">PAID</span>
+                                  </div>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      // Mock download action
+                                      console.log('Downloading invoice:', payment.invoiceNumber);
+                                    }}
+                                  >
+                                    <Download className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )) : (
+                              <div className="text-center py-10">
+                                <p className="text-[#64748b] text-sm font-medium italic">No payments recorded yet.</p>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             )}
 

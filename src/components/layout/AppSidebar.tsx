@@ -1,6 +1,7 @@
 import {
   ClipboardList,
-  LayoutDashboard
+  LayoutDashboard,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
@@ -19,9 +20,9 @@ import {
 
 interface AppSidebarProps {
   selectedPhase: Phase | null;
-  onPhaseSelect: (phase: Phase) => void;
-  activeView: 'tasks' | 'reports' | 'dashboard';
-  onViewChange: (view: 'tasks' | 'reports' | 'dashboard') => void;
+  onPhaseSelect: (phase) => void;
+  activeView: 'tasks' | 'reports' | 'dashboard' | 'subscription' | 'task-detail';
+  onViewChange: (view: 'tasks' | 'reports' | 'dashboard' | 'subscription' | 'task-detail') => void;
 }
 
 export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewChange }: AppSidebarProps) {
@@ -34,10 +35,6 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
   const visiblePhases: Phase[] = currentUser?.role === 'client'
     ? ['onboarding', 'reporting']
     : allPhases;
-
-
-
-
 
   const phaseIcons: Record<Phase, string> = {
     'onboarding': '🚀',
@@ -69,6 +66,7 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
       <SidebarSeparator />
 
       <SidebarContent>
+        {/* Main Navigation */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -87,6 +85,7 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
 
         <SidebarSeparator />
 
+        {/* Workflow Sections */}
         <SidebarGroup>
           <div className="px-2 py-1.5 flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
             <ClipboardList className="w-4 h-4" />
@@ -118,9 +117,28 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <SidebarSeparator />
+
+        {/* Account Management (Client Only) */}
+        {currentUser?.role === 'client' && (
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    isActive={activeView === 'subscription'}
+                    onClick={() => onViewChange('subscription')}
+                  >
+                    <CreditCard className="w-4 h-4" />
+                    <span>Subscription</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
-
-
     </Sidebar>
   );
 }
