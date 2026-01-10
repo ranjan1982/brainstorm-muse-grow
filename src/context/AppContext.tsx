@@ -49,6 +49,9 @@ interface AppContextType {
   updateTaskTemplate: (templateId: string, updates: Partial<TaskTemplate>) => void;
   emailTemplates: EmailTemplate[];
   updateEmailTemplate: (templateId: string, updates: Partial<EmailTemplate>) => void;
+  updateUserProfile: (userId: string, updates: Partial<User>) => void;
+  updateClientInfo: (clientId: string, updates: Partial<Client>) => void;
+  deleteUserAccount: (userId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -65,8 +68,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const users = mockUsers;
 
   const updateTask = (taskId: string, updates: Partial<Task>) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId 
+    setTasks(prev => prev.map(task =>
+      task.id === taskId
         ? { ...task, ...updates, updatedAt: new Date() }
         : task
     ));
@@ -74,7 +77,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addComment = (taskId: string, content: string, attachments?: { name: string; size: number; type: string; url: string }[]) => {
     if (!currentUser) return;
-    
+
     const comment = {
       id: `comment-${Date.now()}`,
       userId: currentUser.id,
@@ -97,7 +100,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addDocumentToTask = (taskId: string, document: { name: string; url: string }) => {
     if (!currentUser) return;
-    
+
     const newDoc = {
       id: `doc-${Date.now()}`,
       name: document.name,
@@ -187,18 +190,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getClientTasksForTier = (clientId?: string): TaskWithClient[] => {
     const targetClientId = clientId || currentClient?.id;
     if (!targetClientId) return tasks;
-    
+
     // Get the client's subscription tier
     const subscription = subscriptions.find(s => s.clientId === targetClientId);
     const tier = subscription?.tier || 'starter';
-    
+
     // Get task template IDs available for this tier
     const availableTemplates = getTaskTemplatesForTier(tier);
     const availableTaskIds = new Set(availableTemplates.map(t => t.taskId));
-    
+
     // Filter tasks by client AND by tier-available templates
-    return tasks.filter(t => 
-      t.clientId === targetClientId && 
+    return tasks.filter(t =>
+      t.clientId === targetClientId &&
       availableTaskIds.has(t.taskId)
     );
   };
@@ -251,6 +254,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ));
   };
 
+  const updateUserProfile = (userId: string, updates: Partial<User>) => {
+    if (currentUser && currentUser.id === userId) {
+      setCurrentUser({ ...currentUser, ...updates });
+    }
+  };
+
+  const updateClientInfo = (clientId: string, updates: Partial<Client>) => {
+    setClients(prev => prev.map(client =>
+      client.id === clientId
+        ? { ...client, ...updates }
+        : client
+    ));
+    if (currentClient && currentClient.id === clientId) {
+      setCurrentClient({ ...currentClient, ...updates });
+    }
+  };
+
+  const deleteUserAccount = (userId: string) => {
+    // In a real app, this would be an API call
+    setClients(prev => prev.filter(c => c.id !== userId));
+    // Log out if it's the current user
+    if (currentUser?.id === userId) {
+      logout();
+    }
+  };
+
   return (
     <AppContext.Provider value={{
       currentUser,
@@ -284,6 +313,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateTaskTemplate,
       emailTemplates,
       updateEmailTemplate,
+      updateUserProfile,
+      updateClientInfo,
+      deleteUserAccount,
     }}>
       {children}
     </AppContext.Provider>

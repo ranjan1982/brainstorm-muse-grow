@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { TaskList } from '@/components/tasks/TaskList';
+import { OrganizationProfile } from '@/components/profile/OrganizationProfile';
 import { TaskDetailView } from '@/components/tasks/TaskDetailView';
 import { KPIDashboard } from '@/components/dashboard/KPIDashboard';
 import { useApp } from '@/context/AppContext';
@@ -48,7 +49,7 @@ export default function Dashboard() {
   const [selectedPhase, setSelectedPhase] = useState<Phase>('onboarding');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'tasks' | 'reports' | 'dashboard' | 'task-detail' | 'subscription'>('dashboard');
+  const [activeView, setActiveView] = useState<'tasks' | 'reports' | 'dashboard' | 'task-detail' | 'subscription' | 'profile'>('dashboard');
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -806,6 +807,11 @@ export default function Dashboard() {
             {/* Reports View */}
             {activeView === 'reports' && (
               <KPIDashboard />
+            )}
+
+            {/* Profile View */}
+            {activeView === 'profile' && (
+              <OrganizationProfile />
             )}
           </main>
         </SidebarInset>
