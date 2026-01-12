@@ -1,8 +1,7 @@
 import {
   ClipboardList,
   LayoutDashboard,
-  CreditCard,
-  UserCog
+  CreditCard
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
@@ -22,8 +21,8 @@ import {
 interface AppSidebarProps {
   selectedPhase: Phase | null;
   onPhaseSelect: (phase) => void;
-  activeView: 'tasks' | 'reports' | 'dashboard' | 'subscription' | 'task-detail' | 'profile';
-  onViewChange: (view: 'tasks' | 'reports' | 'dashboard' | 'subscription' | 'task-detail' | 'profile') => void;
+  activeView: 'tasks' | 'reports' | 'dashboard' | 'subscription' | 'task-detail';
+  onViewChange: (view: 'tasks' | 'reports' | 'dashboard' | 'subscription' | 'task-detail') => void;
 }
 
 export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewChange }: AppSidebarProps) {
@@ -133,16 +132,6 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
                   >
                     <CreditCard className="w-4 h-4" />
                     <span>Subscription</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={activeView === 'profile'}
-                    onClick={() => onViewChange('profile')}
-                  >
-                    <UserCog className="w-4 h-4" />
-                    <span>Profile & Org</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
