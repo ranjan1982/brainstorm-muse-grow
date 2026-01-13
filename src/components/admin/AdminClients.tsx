@@ -28,9 +28,14 @@ import { toast } from 'sonner';
 import { Edit2, Building2, CreditCard, Clock, RotateCcw, PauseCircle, Phone, MapPin, Mail } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function AdminClients() {
+interface AdminClientsProps {
+    defaultFilter?: 'all' | 'active' | 'inactive' | 'incomplete';
+}
+
+export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
     const { clients, getClientSubscription, getClientPaymentHistory, updateClientInfo, updateSubscriptionStatus, refundPayment, upgradeSubscription } = useApp();
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterStatus, setFilterStatus] = useState(defaultFilter);
 
     // Profile Edit State
     const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -40,11 +45,23 @@ export function AdminClients() {
     const [isSubManageOpen, setIsSubManageOpen] = useState(false);
     const [selectedClientForSub, setSelectedClientForSub] = useState<string | null>(null);
 
-    const filteredClients = clients.filter(client =>
-        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.email.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredClients = clients.filter(client => {
+        const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+        if (!matchesSearch) return false;
+
+        if (filterStatus === 'active') return client.isActive;
+        if (filterStatus === 'inactive') return !client.isActive;
+        if (filterStatus === 'incomplete') {
+            const payments = getClientPaymentHistory(client.id);
+            // Incomplete: Active or Inactive user but NO payments made ever
+            return payments.length === 0;
+        }
+
+        return true;
+    });
 
     const openEditProfile = (client: Client) => {
         setEditingClient(client);
@@ -98,6 +115,17 @@ export function AdminClients() {
                     <p className="text-muted-foreground">Manage client profiles, subscriptions, and billing</p>
                 </div>
                 <div className="flex gap-2">
+                    <Select value={filterStatus} onValueChange={(v: any) => setFilterStatus(v)}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Clients</SelectItem>
+                            <SelectItem value="active">Active Members</SelectItem>
+                            <SelectItem value="inactive">Inactive Members</SelectItem>
+                            <SelectItem value="incomplete">Incomplete Reg.</SelectItem>
+                        </SelectContent>
+                    </Select>
                     <Input
                         placeholder="Search clients..."
                         value={searchTerm}

@@ -381,23 +381,44 @@ export function AdminUsers() {
 }
 
 export function AdminTemplates() {
-    const { emailTemplates, updateEmailTemplate } = useApp();
+    const { emailTemplates, updateEmailTemplate, addEmailTemplate, deleteEmailTemplate } = useApp();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [emailState, setEmailState] = useState<Partial<EmailTemplate>>({});
+    const [emailState, setEmailState] = useState<Partial<EmailTemplate>>({ isActive: true });
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const handleSave = () => {
+        if (!emailState.name || !emailState.subject || !emailState.body) {
+            toast.error('Please fill in all required fields');
+            return;
+        }
+
         if (editingId) {
             updateEmailTemplate(editingId, emailState);
+            toast.success('Template updated successfully');
+        } else {
+            addEmailTemplate({
+                name: emailState.name,
+                subject: emailState.subject,
+                body: emailState.body,
+                trigger: emailState.trigger || 'custom',
+                isActive: true
+            });
+            toast.success('Template created successfully');
         }
         setIsDialogOpen(false);
         setEditingId(null);
-        setEmailState({});
+        setEmailState({ isActive: true });
     };
 
     const openEdit = (template: EmailTemplate) => {
         setEmailState(template);
         setEditingId(template.id);
+        setIsDialogOpen(true);
+    };
+
+    const openCreate = () => {
+        setEditingId(null);
+        setEmailState({ isActive: true, trigger: 'custom' });
         setIsDialogOpen(true);
     };
 
@@ -408,7 +429,7 @@ export function AdminTemplates() {
                     <h2 className="text-3xl font-bold tracking-tight">Email Templates</h2>
                     <p className="text-muted-foreground">Configure system notification templates</p>
                 </div>
-                <Button onClick={() => toast.info('Create Template Dialog')}><Plus className="w-4 h-4 mr-2" /> New Template</Button>
+                <Button onClick={openCreate}><Plus className="w-4 h-4 mr-2" /> New Template</Button>
             </div>
 
             <Card>
@@ -420,10 +441,25 @@ export function AdminTemplates() {
                                     <div className="flex items-center gap-2">
                                         <h4 className="font-semibold">{template.name}</h4>
                                         <Badge variant="secondary" className="text-xs">{template.trigger}</Badge>
+                                        <Badge variant={template.isActive ? 'default' : 'outline'} className="text-[10px]">
+                                            {template.isActive ? 'Active' : 'Inactive'}
+                                        </Badge>
                                     </div>
                                     <p className="text-sm text-muted-foreground">Subject: {template.subject}</p>
                                 </div>
-                                <Button size="sm" variant="outline" onClick={() => openEdit(template)}><Edit2 className="w-4 h-4 mr-2" /> Edit</Button>
+                                <div className="flex gap-2">
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(template)}>
+                                        <Edit2 className="w-4 h-4" />
+                                    </Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => {
+                                        if (confirm('Are you sure you want to delete this template?')) {
+                                            deleteEmailTemplate(template.id);
+                                            toast.success('Template deleted');
+                                        }
+                                    }}>
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -433,12 +469,36 @@ export function AdminTemplates() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Email Template</DialogTitle>
+                        <DialogTitle>{editingId ? 'Edit Template' : 'Create Template'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
                             <Label>Template Name</Label>
-                            <Input value={emailState.name || ''} disabled />
+                            <Input
+                                value={emailState.name || ''}
+                                onChange={e => setEmailState({ ...emailState, name: e.target.value })}
+                                placeholder="e.g. Welcome Email"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Trigger Event</Label>
+                            <Select
+                                value={emailState.trigger}
+                                onValueChange={(v: any) => setEmailState({ ...emailState, trigger: v })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select trigger" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="welcome">Welcome Email</SelectItem>
+                                    <SelectItem value="task_assigned">Task Assigned</SelectItem>
+                                    <SelectItem value="task_completed">Task Completed</SelectItem>
+                                    <SelectItem value="subscription_reminder">Subscription Reminder</SelectItem>
+                                    <SelectItem value="new_user">New User Added</SelectItem>
+                                    <SelectItem value="backend_user_added">Backend User Added</SelectItem>
+                                    <SelectItem value="custom">Custom / Other</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2">
                             <Label>Subject Line</Label>
@@ -452,6 +512,10 @@ export function AdminTemplates() {
                                 onChange={e => setEmailState({ ...emailState, body: e.target.value })}
                             />
                         </div>
+                        <div className="flex items-center gap-2">
+                            <Switch checked={emailState.isActive} onCheckedChange={c => setEmailState({ ...emailState, isActive: c })} />
+                            <Label>Active</Label>
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button onClick={handleSave}>Save Changes</Button>
@@ -463,6 +527,23 @@ export function AdminTemplates() {
 }
 
 export function AdminBlast() {
+    const { sendEmailBlast } = useApp();
+    const [audience, setAudience] = useState<string>('');
+    const [subject, setSubject] = useState('');
+    const [message, setMessage] = useState('');
+
+    const handleSend = () => {
+        if (!audience || !subject || !message) {
+            toast.error('Please fill in all fields');
+            return;
+        }
+        sendEmailBlast(audience, subject, message);
+        toast.success(`Email blast sent to ${audience} audience!`);
+        setSubject('');
+        setMessage('');
+        setAudience('');
+    };
+
     return (
         <div className="space-y-6">
             <div>
@@ -475,7 +556,7 @@ export function AdminBlast() {
                     <div className="grid gap-4">
                         <div className="space-y-2">
                             <Label>Target Audience</Label>
-                            <Select>
+                            <Select value={audience} onValueChange={setAudience}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select audience" />
                                 </SelectTrigger>
@@ -489,16 +570,24 @@ export function AdminBlast() {
                         </div>
                         <div className="space-y-2">
                             <Label>Subject Line</Label>
-                            <Input placeholder="Enter email subject" />
+                            <Input
+                                placeholder="Enter email subject"
+                                value={subject}
+                                onChange={e => setSubject(e.target.value)}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label>Message Body</Label>
                             <textarea
                                 className="flex min-h-[150px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                 placeholder="Type your message here..."
+                                value={message}
+                                onChange={e => setMessage(e.target.value)}
                             />
                         </div>
-                        <Button className="w-full md:w-auto"><Send className="w-4 h-4 mr-2" /> Send Blast</Button>
+                        <Button className="w-full md:w-auto" onClick={handleSend}>
+                            <Send className="w-4 h-4 mr-2" /> Send Blast
+                        </Button>
                     </div>
                 </CardContent>
             </Card>

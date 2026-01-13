@@ -15,18 +15,26 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/s
 import { AdminClients } from '@/components/admin/AdminClients';
 import { AdminWorkflow } from '@/components/admin/AdminWorkflow';
 import { AdminPlans, AdminDiscounts, AdminUsers, AdminTemplates, AdminBlast } from '@/components/admin/AdminSetup';
+import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
+  LayoutDashboard,
+  CheckCircle2,
   Clock,
   AlertCircle,
-  CheckCircle2,
-  Eye,
+  TrendingUp,
   Users,
-  CreditCard,
-  Mail,
-  FileText,
   Building2,
+  Settings,
+  LogOut,
+  ChevronRight,
+  Menu,
+  CreditCard,
+  FileText,
+  Mail,
+  Eye,
+  Ban,
   MessageSquare,
   Download
 } from 'lucide-react';
@@ -57,11 +65,30 @@ export default function Dashboard() {
     return <Navigate to="/" replace />;
   }
 
+  // Admin stats
+  // Admin stats
+  const activeClients = clients.filter(c => c.isActive);
+  const inactiveClients = clients.filter(c => !c.isActive);
+  const adminTotalClients = clients.length;
+  // Incomplete: Client user exists but no payment history found (assuming empty history = no initial payment/setup)
+  const incompleteClients = clients.filter(c => getClientPaymentHistory(c.id).length === 0);
+
+  const activeSubscriptions = subscriptions.filter(s => s.status === 'active');
+  const totalMRR = activeSubscriptions.reduce((sum, s) => sum + s.monthlyPrice, 0);
+
   // Calculate role-specific stats
   const getRoleStats = () => {
     if (!currentUser) return [];
 
     switch (currentUser.role) {
+      case 'admin':
+        return [
+          { label: 'Total Clients', value: adminTotalClients, icon: Building2, color: 'text-primary', status: 'admin-clients' },
+          { label: 'Active Clients', value: activeClients.length, icon: Users, color: 'text-success', status: 'admin-clients-active' },
+          { label: 'Inactive Clients', value: inactiveClients.length, icon: Ban, color: 'text-destructive', status: 'admin-clients-inactive' },
+          { label: 'Incomplete Reg.', value: incompleteClients.length, icon: AlertCircle, color: 'text-warning', status: 'admin-clients-incomplete' },
+        ];
+
       case 'us-strategy':
         const strategyAwaiting = tasks.filter(t => t.status === 'submitted').length;
         const strategyPending = tasks.filter(t => t.owner === 'us-strategy' && (t.status === 'pending' || t.status === 'in-progress')).length;
@@ -130,10 +157,7 @@ export default function Dashboard() {
 
   const quickStats = getRoleStats();
 
-  // Admin stats
-  const activeClients = clients.filter(c => c.isActive);
-  const activeSubscriptions = subscriptions.filter(s => s.status === 'active');
-  const totalMRR = activeSubscriptions.reduce((sum, s) => sum + s.monthlyPrice, 0);
+
 
   // Client subscription upgrade
   const clientSubscription = currentUser?.role === 'client' ? getClientSubscription(currentUser.id) : null;
@@ -188,8 +212,9 @@ export default function Dashboard() {
                   )}
                 </div>
 
-                {/* Workflow Attention Breakdown - For Team Roles */}
-                {currentUser?.role !== 'client' && (
+
+                {/* Workflow Attention Breakdown - For Team Roles (Not Admin) */}
+                {currentUser?.role !== 'client' && currentUser?.role !== 'admin' && (
                   <div className="mb-8">
                     <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wider">Workflow Phase Summary</h3>
                     <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -250,10 +275,14 @@ export default function Dashboard() {
                       className="cursor-pointer transition-all hover:ring-2 hover:ring-accent hover:border-accent"
                       onClick={() => {
                         if (stat.status) {
-                          setSelectedStatus(stat.status);
-                          setActiveView('tasks');
-                          // If it's a global view click, clear phase to show all
-                          setSelectedPhase(undefined as any);
+                          if (stat.status.startsWith('admin-')) {
+                            setActiveView(stat.status);
+                          } else {
+                            setSelectedStatus(stat.status);
+                            setActiveView('tasks');
+                            // If it's a global view click, clear phase to show all
+                            setSelectedPhase(undefined as any);
+                          }
                         }
                       }}
                     >
@@ -270,90 +299,92 @@ export default function Dashboard() {
                   ))}
                 </div>
 
-                {/* Action Items Based on Role */}
-                <div className="mt-8">
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                        <AlertCircle className="w-5 h-5 text-accent" />
-                        Immediate Actions
-                      </CardTitle>
-                      <CardDescription>
-                        Critical tasks requiring your attention
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {tasks.filter(t => {
-                          if (currentUser?.role === 'us-strategy') return t.status === 'submitted';
-                          if (currentUser?.role === 'india-head' || currentUser?.role === 'india-junior') {
-                            return (t.owner === currentUser.role || t.assignedTo === currentUser.id) &&
-                              (t.status === 'pending' || t.status === 'resubmit');
-                          }
-                          if (currentUser?.role === 'client') return t.clientId === currentUser.id && t.owner === 'client' && t.status === 'pending';
-                          return false;
-                        }).slice(0, 5).map(task => (
-                          <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg bg-card/50 hover:bg-card transition-colors">
-                            <div className="flex items-center gap-4 flex-1 min-w-0">
-                              <div className="font-mono text-[10px] text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded">
-                                {task.taskId}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{task.title}</p>
-                                <div className="flex items-center gap-2">
-                                  <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <Building2 className="w-3 h-3" />
-                                    {clients.find(c => c.id === task.clientId)?.company}
-                                  </p>
-                                  <span className="text-[10px] bg-[#f1f5f9] text-[#475569] px-2 py-0.5 rounded-full font-medium uppercase tracking-tight">
-                                    {PHASE_LABELS[task.phase]}
-                                  </span>
-                                  {task.comments.length > 0 && (
-                                    <Badge variant="secondary" className="text-[9px] h-3.5 px-1 font-normal gap-1 bg-accent/10 border-accent/20 text-accent">
-                                      <MessageSquare className="w-2 h-2" />
-                                      {task.comments.length}
-                                    </Badge>
-                                  )}
+                {/* Action Items Based on Role (Not for Admin) */}
+                {currentUser?.role !== 'admin' && (
+                  <div className="mt-8">
+                    <Card>
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                          <AlertCircle className="w-5 h-5 text-accent" />
+                          Immediate Actions
+                        </CardTitle>
+                        <CardDescription>
+                          Critical tasks requiring your attention
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {tasks.filter(t => {
+                            if (currentUser?.role === 'us-strategy') return t.status === 'submitted';
+                            if (currentUser?.role === 'india-head' || currentUser?.role === 'india-junior') {
+                              return (t.owner === currentUser.role || t.assignedTo === currentUser.id) &&
+                                (t.status === 'pending' || t.status === 'resubmit');
+                            }
+                            if (currentUser?.role === 'client') return t.clientId === currentUser.id && t.owner === 'client' && t.status === 'pending';
+                            return false;
+                          }).slice(0, 5).map(task => (
+                            <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg bg-card/50 hover:bg-card transition-colors">
+                              <div className="flex items-center gap-4 flex-1 min-w-0">
+                                <div className="font-mono text-[10px] text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded">
+                                  {task.taskId}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">{task.title}</p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                      <Building2 className="w-3 h-3" />
+                                      {clients.find(c => c.id === task.clientId)?.company}
+                                    </p>
+                                    <span className="text-[10px] bg-[#f1f5f9] text-[#475569] px-2 py-0.5 rounded-full font-medium uppercase tracking-tight">
+                                      {PHASE_LABELS[task.phase]}
+                                    </span>
+                                    {task.comments.length > 0 && (
+                                      <Badge variant="secondary" className="text-[9px] h-3.5 px-1 font-normal gap-1 bg-accent/10 border-accent/20 text-accent">
+                                        <MessageSquare className="w-2 h-2" />
+                                        {task.comments.length}
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
+                              <div className="flex items-center gap-3">
+                                <Badge variant={task.status as any} className="text-[10px]">
+                                  {STATUS_LABELS[task.status]}
+                                </Badge>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 text-xs gap-1"
+                                  onClick={() => {
+                                    setSelectedTaskId(task.id);
+                                    setActiveView('task-detail');
+                                  }}
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                  View
+                                </Button>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <Badge variant={task.status as any} className="text-[10px]">
-                                {STATUS_LABELS[task.status]}
-                              </Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 text-xs gap-1"
-                                onClick={() => {
-                                  setSelectedTaskId(task.id);
-                                  setActiveView('task-detail');
-                                }}
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                                View
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                        {tasks.filter(t => {
-                          if (currentUser?.role === 'us-strategy') return t.status === 'submitted';
-                          if (currentUser?.role === 'india-head' || currentUser?.role === 'india-junior') {
-                            return (t.owner === currentUser.role || t.assignedTo === currentUser.id) &&
-                              (t.status === 'pending' || t.status === 'resubmit');
-                          }
-                          if (currentUser?.role === 'client') return t.owner === 'client' && t.status === 'pending';
-                          return false;
-                        }).length === 0 && (
-                            <div className="text-center py-8">
-                              <CheckCircle2 className="w-10 h-10 text-success/30 mx-auto mb-3" />
-                              <p className="text-sm text-muted-foreground">All caught up! No immediate actions required.</p>
-                            </div>
-                          )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                          ))}
+                          {tasks.filter(t => {
+                            if (currentUser?.role === 'us-strategy') return t.status === 'submitted';
+                            if (currentUser?.role === 'india-head' || currentUser?.role === 'india-junior') {
+                              return (t.owner === currentUser.role || t.assignedTo === currentUser.id) &&
+                                (t.status === 'pending' || t.status === 'resubmit');
+                            }
+                            if (currentUser?.role === 'client') return t.owner === 'client' && t.status === 'pending';
+                            return false;
+                          }).length === 0 && (
+                              <div className="text-center py-8">
+                                <CheckCircle2 className="w-10 h-10 text-success/30 mx-auto mb-3" />
+                                <p className="text-sm text-muted-foreground">All caught up! No immediate actions required.</p>
+                              </div>
+                            )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
               </div>
             )}
 
@@ -558,7 +589,11 @@ export default function Dashboard() {
             )}
 
             {/* Admin Views */}
-            {activeView === 'admin-clients' && <AdminClients />}
+            {activeView === 'admin-clients' && <AdminClients defaultFilter="all" />}
+            {activeView === 'admin-clients-active' && <AdminClients defaultFilter="active" />}
+            {activeView === 'admin-clients-inactive' && <AdminClients defaultFilter="inactive" />}
+            {activeView === 'admin-clients-incomplete' && <AdminClients defaultFilter="incomplete" />}
+
             {activeView === 'admin-workflow' && <AdminWorkflow />}
             {activeView === 'admin-setup-plans' && <AdminPlans />}
             {activeView === 'admin-setup-discounts' && <AdminDiscounts />}
@@ -566,6 +601,13 @@ export default function Dashboard() {
             {activeView === 'admin-setup-templates' && <AdminTemplates />}
             {activeView === 'admin-setup-blast' && <AdminBlast />}
             {activeView === 'admin-profile' && <OrganizationProfile />}
+
+            {/* Revenue Chart specific for Admin Dashboard Main View */}
+            {activeView === 'dashboard' && currentUser?.role === 'admin' && (
+              <div className="mt-8">
+                <RevenueChart />
+              </div>
+            )}
 
             {/* Profile View (Client) */}
             {activeView === 'profile' && <OrganizationProfile />}
