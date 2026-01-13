@@ -114,6 +114,8 @@ export interface Client {
   avatar?: string;
   createdAt: Date;
   isActive: boolean;
+  website?: string;
+  industry?: string;
 }
 
 export interface Subscription {

@@ -255,28 +255,52 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                                 <Label>Company Name</Label>
                                                 <Input
                                                     value={detailClientData.company}
+                                                    onChange={e => setSelectedClient({ ...detailClientData, company: e.target.value })}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Industry</Label>
+                                                <Input
+                                                    value={detailClientData.industry || ''}
+                                                    placeholder="e.g. Legal, Medical"
+                                                    onChange={e => setSelectedClient({ ...detailClientData, industry: e.target.value })}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>First Name</Label>
+                                                <Input
+                                                    value={detailClientData.name.split(' ')[0]}
                                                     onChange={e => {
-                                                        // Local state update simulated for simplicity, ideally needs local state for form
-                                                        setSelectedClient({ ...detailClientData, company: e.target.value });
+                                                        const names = detailClientData.name.split(' ');
+                                                        const newName = [e.target.value, ...names.slice(1)].join(' ');
+                                                        setSelectedClient({ ...detailClientData, name: newName });
                                                     }}
                                                 />
                                             </div>
                                             <div className="space-y-2">
-                                                <Label>Contact Name</Label>
+                                                <Label>Last Name</Label>
                                                 <Input
-                                                    value={detailClientData.name}
-                                                    onChange={e => setSelectedClient({ ...detailClientData, name: e.target.value })}
+                                                    value={detailClientData.name.split(' ').slice(1).join(' ')}
+                                                    onChange={e => {
+                                                        const names = detailClientData.name.split(' ');
+                                                        const newName = [names[0], e.target.value].join(' ');
+                                                        setSelectedClient({ ...detailClientData, name: newName });
+                                                    }}
                                                 />
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label>Email</Label>
-                                            <Input
-                                                value={detailClientData.email}
-                                                onChange={e => setSelectedClient({ ...detailClientData, email: e.target.value })}
-                                            />
-                                        </div>
+
                                         <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label>Email</Label>
+                                                <Input
+                                                    value={detailClientData.email}
+                                                    onChange={e => setSelectedClient({ ...detailClientData, email: e.target.value })}
+                                                />
+                                            </div>
                                             <div className="space-y-2">
                                                 <Label>Phone</Label>
                                                 <Input
@@ -284,14 +308,25 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                                     onChange={e => setSelectedClient({ ...detailClientData, phone: e.target.value })}
                                                 />
                                             </div>
-                                            <div className="space-y-2">
-                                                <Label>Address</Label>
-                                                <Input
-                                                    value={detailClientData.address || ''}
-                                                    onChange={e => setSelectedClient({ ...detailClientData, address: e.target.value })}
-                                                />
-                                            </div>
                                         </div>
+
+                                        <div className="space-y-2">
+                                            <Label>Website</Label>
+                                            <Input
+                                                value={detailClientData.website || ''}
+                                                placeholder="https://example.com"
+                                                onChange={e => setSelectedClient({ ...detailClientData, website: e.target.value })}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label>Address</Label>
+                                            <Input
+                                                value={detailClientData.address || ''}
+                                                onChange={e => setSelectedClient({ ...detailClientData, address: e.target.value })}
+                                            />
+                                        </div>
+
                                         <Button onClick={() => onSaveProfile(detailClientData)} className="w-full">Save Changes</Button>
                                     </div>
                                 </div>
@@ -460,7 +495,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                         </Tabs>
                     )}
                 </SheetContent>
-            </Sheet>
-        </div>
+            </Sheet >
+        </div >
     );
 }
