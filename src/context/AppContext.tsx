@@ -45,6 +45,7 @@ interface AppContextType {
   getClientSubscription: (clientId: string) => Subscription | undefined;
   upgradeSubscription: (clientId: string, newTier: SubscriptionTier) => void;
   updateSubscriptionStatus: (subscriptionId: string, status: Subscription['status']) => void;
+  extendSubscriptionTrial: (subscriptionId: string, days: number) => void;
   // Admin features
   paymentHistory: PaymentHistory[];
   getClientPaymentHistory: (clientId: string) => PaymentHistory[];
@@ -274,6 +275,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSubscriptions(prev => prev.map(s => s.id === subscriptionId ? { ...s, status } : s));
   };
 
+  const extendSubscriptionTrial = (subscriptionId: string, days: number) => {
+    setSubscriptions(prev => prev.map(sub => {
+      if (sub.id === subscriptionId) {
+        const currentEndDate = sub.trialEndDate || new Date();
+        const newEndDate = new Date(currentEndDate);
+        newEndDate.setDate(newEndDate.getDate() + days);
+        return {
+          ...sub,
+          trialEndDate: newEndDate,
+          status: 'trial' // Ensure status is trial if extending
+        };
+      }
+      return sub;
+    }));
+  };
+
   const updateTaskTemplate = (templateId: string, updates: Partial<TaskTemplate>) => {
     setTaskTemplates(prev => prev.map(tpl =>
       tpl.id === templateId
@@ -422,6 +439,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getClientSubscription,
       upgradeSubscription,
       updateSubscriptionStatus,
+      extendSubscriptionTrial,
       // Admin
       paymentHistory,
       getClientPaymentHistory,
