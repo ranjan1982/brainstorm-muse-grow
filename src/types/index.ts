@@ -1,8 +1,8 @@
-export type UserRole = 'admin' | 'us-strategy' | 'india-head' | 'india-junior' | 'client';
+export type UserRole = 'admin' | 'us-strategy' | 'india-head' | 'india-junior' | 'client' | 'team-member';
 
 export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'submitted' | 'approved' | 'resubmit';
 
-export type Phase = 'onboarding' | 'foundation' | 'execution' | 'ai' | 'reporting' | 'monitoring';
+export type Phase = 'onboarding' | 'foundation' | 'execution' | 'ai' | 'reporting' | 'monitoring' | string;
 
 export interface User {
   id: string;
@@ -10,6 +10,18 @@ export interface User {
   email: string;
   role: UserRole;
   avatar?: string;
+  isActive?: boolean;
+  phone?: string;
+  lastLogin?: Date;
+}
+
+export interface LoginHistory {
+  id: string;
+  userId: string;
+  userName: string;
+  ipAddress: string;
+  sessionTime: string; // e.g. "1h 20m"
+  loginTime: Date;
 }
 
 export interface Task {
@@ -29,6 +41,7 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   dueDate?: Date;
+  order?: number; // For task ordering within phase
 }
 
 export interface Attachment {
@@ -68,6 +81,29 @@ export interface Document {
 
 export type SubscriptionTier = 'starter' | 'growth' | 'enterprise';
 
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  tier: SubscriptionTier; // Mapping to code tier
+  price: number;
+  billingCycle: 'monthly' | 'yearly' | 'one-time';
+  isActive: boolean;
+  isArchived: boolean;
+  features?: string[];
+}
+
+export interface Discount {
+  id: string;
+  code: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  appliesTo: 'one-time' | 'recurring';
+  maxUses?: number;
+  usedCount: number;
+  isActive: boolean;
+  recurringDuration?: number; // Number of billing cycles
+}
+
 export interface Client {
   id: string;
   name: string;
@@ -84,11 +120,12 @@ export interface Subscription {
   id: string;
   clientId: string;
   tier: SubscriptionTier;
-  status: 'active' | 'cancelled' | 'pending' | 'expired';
+  status: 'active' | 'cancelled' | 'pending' | 'expired' | 'paused' | 'trial';
   startDate: Date;
   endDate?: Date;
   nextBillingDate?: Date;
   monthlyPrice: number;
+  trialEndDate?: Date;
 }
 
 export interface PaymentHistory {
@@ -96,10 +133,22 @@ export interface PaymentHistory {
   clientId: string;
   subscriptionId: string;
   amount: number;
-  status: 'paid' | 'pending' | 'failed' | 'refunded';
+  status: 'paid' | 'pending' | 'failed' | 'refunded' | 'partially-refunded';
   paymentDate: Date;
   paymentMethod: string;
   invoiceNumber: string;
+  refundAmount?: number;
+}
+
+export interface PhaseConfig {
+  id: string;
+  name: string; // readable name
+  slug: Phase; // matching the Phase type
+  description?: string;
+  order: number;
+  predecessor?: Phase;
+  successor?: Phase;
+  isActive: boolean;
 }
 
 export interface TaskTemplate {
@@ -121,7 +170,7 @@ export interface EmailTemplate {
   name: string;
   subject: string;
   body: string;
-  trigger: 'task_assigned' | 'task_completed' | 'subscription_reminder' | 'welcome' | 'custom';
+  trigger: 'task_assigned' | 'task_completed' | 'subscription_reminder' | 'welcome' | 'custom' | 'new_user' | 'backend_user_added';
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -152,10 +201,11 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   'us-strategy': 'US Strategy Team',
   'india-head': 'India SEO Head',
   'india-junior': 'India SEO Junior',
-  'client': 'Client'
+  'client': 'Client',
+  'team-member': 'Team Member'
 };
 
-export const PHASE_LABELS: Record<Phase, string> = {
+export const PHASE_LABELS: Record<string, string> = {
   'onboarding': 'Onboarding & Intake',
   'foundation': 'Foundation Setup',
   'execution': 'Monthly Execution',

@@ -3,15 +3,18 @@ import { Navigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { TaskList } from '@/components/tasks/TaskList';
+import { OrganizationProfile } from '@/components/profile/OrganizationProfile';
 import { TaskDetailView } from '@/components/tasks/TaskDetailView';
 import { KPIDashboard } from '@/components/dashboard/KPIDashboard';
 import { useApp } from '@/context/AppContext';
 import { Phase, ROLE_LABELS, STATUS_LABELS, PHASE_LABELS, SUBSCRIPTION_TIER_LABELS, SUBSCRIPTION_TIER_PRICES, SubscriptionTier } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { AdminClients } from '@/components/admin/AdminClients';
+import { AdminWorkflow } from '@/components/admin/AdminWorkflow';
+import { AdminPlans, AdminDiscounts, AdminUsers, AdminTemplates, AdminBlast } from '@/components/admin/AdminSetup';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
@@ -48,7 +51,7 @@ export default function Dashboard() {
   const [selectedPhase, setSelectedPhase] = useState<Phase>('onboarding');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'tasks' | 'reports' | 'dashboard' | 'task-detail' | 'subscription'>('dashboard');
+  const [activeView, setActiveView] = useState<string>('dashboard');
 
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -142,261 +145,7 @@ export default function Dashboard() {
     }
   };
 
-  // Render Admin Dashboard (no sidebar)
-  if (currentUser?.role === 'admin') {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-
-        <main className="pt-20 pb-16">
-          <div className="container mx-auto px-6">
-            {/* Welcome Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold">Admin Portal</h1>
-                <Badge variant="admin">
-                  {ROLE_LABELS['admin']}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground">
-                Manage subscriptions, clients, task templates, and email configurations.
-              </p>
-            </div>
-
-            {/* Admin Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <Card>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-success/10 text-success">
-                    <Users className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{activeClients.length}</p>
-                    <p className="text-xs text-muted-foreground">Active Clients</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-info/10 text-info">
-                    <CreditCard className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">${totalMRR.toLocaleString()}</p>
-                    <p className="text-xs text-muted-foreground">Monthly Revenue</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-warning/10 text-warning">
-                    <FileText className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{taskTemplates.length}</p>
-                    <p className="text-xs text-muted-foreground">Task Templates</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-accent/10 text-accent">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{emailTemplates.length}</p>
-                    <p className="text-xs text-muted-foreground">Email Templates</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Admin Tabs */}
-            <Tabs defaultValue="clients" className="space-y-6">
-              <TabsList className="bg-secondary/50 p-1">
-                <TabsTrigger value="clients" className="gap-2">
-                  <Users className="w-4 h-4" />
-                  Clients
-                </TabsTrigger>
-                <TabsTrigger value="subscriptions" className="gap-2">
-                  <CreditCard className="w-4 h-4" />
-                  Subscriptions
-                </TabsTrigger>
-                <TabsTrigger value="tasks" className="gap-2">
-                  <FileText className="w-4 h-4" />
-                  Task Templates
-                </TabsTrigger>
-                <TabsTrigger value="emails" className="gap-2">
-                  <Mail className="w-4 h-4" />
-                  Email Templates
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="clients" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Registered Clients</CardTitle>
-                    <CardDescription>Manage all registered clients and their details</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {clients.map(client => {
-                        const subscription = getClientSubscription(client.id);
-                        const payments = getClientPaymentHistory(client.id);
-                        const lastPayment = payments[0];
-                        return (
-                          <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
-                                <Building2 className="w-5 h-5 text-muted-foreground" />
-                              </div>
-                              <div>
-                                <p className="font-medium">{client.company}</p>
-                                <p className="text-sm text-muted-foreground">{client.name} • {client.email}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-4">
-                              {subscription && (
-                                <Badge variant={subscription.status === 'active' ? 'default' : 'secondary'}>
-                                  {SUBSCRIPTION_TIER_LABELS[subscription.tier]}
-                                </Badge>
-                              )}
-                              <Badge variant={client.isActive ? 'outline' : 'destructive'}>
-                                {client.isActive ? 'Active' : 'Inactive'}
-                              </Badge>
-                              {lastPayment && (
-                                <span className="text-sm text-muted-foreground">
-                                  Last: ${lastPayment.amount} ({lastPayment.status})
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="subscriptions" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Subscription Plans</CardTitle>
-                    <CardDescription>Overview of all subscription tiers and active subscribers</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {(['starter', 'growth', 'enterprise'] as SubscriptionTier[]).map(tier => {
-                        const tierSubs = subscriptions.filter(s => s.tier === tier && s.status === 'active');
-                        return (
-                          <Card key={tier} className="bg-secondary/30">
-                            <CardContent className="p-4">
-                              <h4 className="font-semibold mb-2">{SUBSCRIPTION_TIER_LABELS[tier]}</h4>
-                              <p className="text-3xl font-bold">{tierSubs.length}</p>
-                              <p className="text-xs text-muted-foreground">
-                                ${SUBSCRIPTION_TIER_PRICES[tier]}/mo per client
-                              </p>
-                              <p className="text-sm text-success mt-2">
-                                ${tierSubs.length * SUBSCRIPTION_TIER_PRICES[tier]}/mo
-                              </p>
-                            </CardContent>
-                          </Card>
-                        );
-                      })}
-                    </div>
-                    <div className="space-y-2">
-                      <h4 className="font-medium mb-3">Recent Payments</h4>
-                      {paymentHistory.slice(0, 5).map(payment => {
-                        const client = clients.find(c => c.id === payment.clientId);
-                        return (
-                          <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
-                            <div>
-                              <p className="font-medium">{client?.company}</p>
-                              <p className="text-xs text-muted-foreground">{payment.invoiceNumber}</p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className="font-medium">${payment.amount}</span>
-                              <Badge variant={payment.status === 'paid' ? 'default' : payment.status === 'pending' ? 'secondary' : 'destructive'}>
-                                {payment.status}
-                              </Badge>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="tasks" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Task Templates by Phase</CardTitle>
-                    <CardDescription>Configure default tasks for each workflow phase</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {taskTemplates.map(template => (
-                        <div key={template.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-muted-foreground">{template.taskId}</span>
-                              <p className="font-medium">{template.title}</p>
-                            </div>
-                            <p className="text-sm text-muted-foreground">{template.description}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline">{template.phase}</Badge>
-                            <Badge variant={template.isActive ? 'default' : 'secondary'}>
-                              {template.isActive ? 'Active' : 'Inactive'}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="emails" className="mt-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Email Templates</CardTitle>
-                    <CardDescription>Manage automated email notifications</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {emailTemplates.map(template => (
-                        <div key={template.id} className="p-4 border rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="font-medium">{template.name}</h4>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="outline">{template.trigger}</Badge>
-                              <Badge variant={template.isActive ? 'default' : 'secondary'}>
-                                {template.isActive ? 'Active' : 'Inactive'}
-                              </Badge>
-                            </div>
-                          </div>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Subject: {template.subject}
-                          </p>
-                          <pre className="text-xs bg-secondary/50 p-2 rounded overflow-x-auto">
-                            {template.body.slice(0, 150)}...
-                          </pre>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  // Render Dashboard with Sidebar for all other users
+  // Render Dashboard with Sidebar for all users including admin
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
@@ -807,6 +556,19 @@ export default function Dashboard() {
             {activeView === 'reports' && (
               <KPIDashboard />
             )}
+
+            {/* Admin Views */}
+            {activeView === 'admin-clients' && <AdminClients />}
+            {activeView === 'admin-workflow' && <AdminWorkflow />}
+            {activeView === 'admin-setup-plans' && <AdminPlans />}
+            {activeView === 'admin-setup-discounts' && <AdminDiscounts />}
+            {activeView === 'admin-setup-users' && <AdminUsers />}
+            {activeView === 'admin-setup-templates' && <AdminTemplates />}
+            {activeView === 'admin-setup-blast' && <AdminBlast />}
+            {activeView === 'admin-profile' && <OrganizationProfile />}
+
+            {/* Profile View (Client) */}
+            {activeView === 'profile' && <OrganizationProfile />}
           </main>
         </SidebarInset>
       </div>

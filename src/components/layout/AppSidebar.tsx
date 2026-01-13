@@ -1,8 +1,18 @@
 import {
   ClipboardList,
   LayoutDashboard,
-  CreditCard
+  CreditCard,
+  UserCog,
+  Users,
+  Settings,
+  GitMerge,
+  ChevronRight,
 } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
 import { Phase, PHASE_LABELS, ROLE_LABELS } from '@/types';
@@ -16,13 +26,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from '@/components/ui/sidebar';
+
 
 interface AppSidebarProps {
   selectedPhase: Phase | null;
-  onPhaseSelect: (phase) => void;
-  activeView: 'tasks' | 'reports' | 'dashboard' | 'subscription' | 'task-detail';
-  onViewChange: (view: 'tasks' | 'reports' | 'dashboard' | 'subscription' | 'task-detail') => void;
+  onPhaseSelect: (phase: Phase) => void;
+  activeView: string;
+  onViewChange: (view: string) => void;
 }
 
 export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewChange }: AppSidebarProps) {
@@ -45,6 +59,8 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
     'monitoring': '🔔'
   };
 
+  const isAdmin = currentUser?.role === 'admin';
+
   return (
     <Sidebar className="border-r">
       <SidebarHeader className="p-4">
@@ -59,6 +75,7 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
                 {currentClient.company}
               </span>
             )}
+            {isAdmin && <span className="text-xs text-muted-foreground">Administrator</span>}
           </div>
         </div>
       </SidebarHeader>
@@ -85,58 +102,162 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
 
         <SidebarSeparator />
 
-        {/* Workflow Sections */}
-        <SidebarGroup>
-          <div className="px-2 py-1.5 flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
-            <ClipboardList className="w-4 h-4" />
-            <span>Workflow Phases</span>
-          </div>
-
-          <SidebarGroupContent className="mt-2">
-            <SidebarMenu>
-              {visiblePhases.map((phase) => {
-                const isActive = selectedPhase === phase && activeView === 'tasks';
-
-                return (
-                  <SidebarMenuItem key={phase}>
+        {/* Admin Navigation */}
+        {isAdmin ? (
+          <>
+            <SidebarGroup>
+              <div className="px-2 py-1.5 flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
+                <Settings className="w-4 h-4" />
+                <span>Administration</span>
+              </div>
+              <SidebarGroupContent className="mt-2">
+                <SidebarMenu>
+                  <SidebarMenuItem>
                     <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => {
-                        onPhaseSelect(phase);
-                        onViewChange('tasks');
-                      }}
+                      isActive={activeView === 'admin-clients'}
+                      onClick={() => onViewChange('admin-clients')}
                     >
-                      <div className="flex items-center gap-2">
-                        <span>{phaseIcons[phase]}</span>
-                        <span className="text-sm">{PHASE_LABELS[phase].split('&')[0].trim()}</span>
-                      </div>
+                      <Users className="w-4 h-4" />
+                      <span>Clients Management</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={activeView === 'admin-workflow'}
+                      onClick={() => onViewChange('admin-workflow')}
+                    >
+                      <GitMerge className="w-4 h-4" />
+                      <span>Work Phases</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <Collapsible className="group/collapsible" asChild>
+                    <SidebarMenuItem>
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton tooltip="System Setup">
+                          <Settings className="w-4 h-4" />
+                          <span>System Setup</span>
+                          <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <SidebarMenuSub>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton isActive={activeView === 'admin-setup-plans'} onClick={() => onViewChange('admin-setup-plans')}>
+                              <span>Plans</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton isActive={activeView === 'admin-setup-discounts'} onClick={() => onViewChange('admin-setup-discounts')}>
+                              <span>Coupons</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton isActive={activeView === 'admin-setup-users'} onClick={() => onViewChange('admin-setup-users')}>
+                              <span>Users</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton isActive={activeView === 'admin-setup-templates'} onClick={() => onViewChange('admin-setup-templates')}>
+                              <span>Templates</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                          <SidebarMenuSubItem>
+                            <SidebarMenuSubButton isActive={activeView === 'admin-setup-blast'} onClick={() => onViewChange('admin-setup-blast')}>
+                              <span>Email Blast</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                      </CollapsibleContent>
+                    </SidebarMenuItem>
+                  </Collapsible>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-        <SidebarSeparator />
+            <SidebarSeparator />
 
-        {/* Account Management (Client Only) */}
-        {currentUser?.role === 'client' && (
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={activeView === 'subscription'}
-                    onClick={() => onViewChange('subscription')}
-                  >
-                    <CreditCard className="w-4 h-4" />
-                    <span>Subscription</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={activeView === 'admin-profile'}
+                      onClick={() => onViewChange('admin-profile')}
+                    >
+                      <UserCog className="w-4 h-4" />
+                      <span>My Profile</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        ) : (
+          /* Standard Workflow Sections for Non-Admin */
+          <>
+            <SidebarGroup>
+              <div className="px-2 py-1.5 flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
+                <ClipboardList className="w-4 h-4" />
+                <span>Workflow Phases</span>
+              </div>
+
+              <SidebarGroupContent className="mt-2">
+                <SidebarMenu>
+                  {visiblePhases.map((phase) => {
+                    const isActive = selectedPhase === phase && activeView === 'tasks';
+
+                    return (
+                      <SidebarMenuItem key={phase}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          onClick={() => {
+                            onPhaseSelect(phase);
+                            onViewChange('tasks');
+                          }}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span>{phaseIcons[phase]}</span>
+                            <span className="text-sm">{PHASE_LABELS[phase].split('&')[0].trim()}</span>
+                          </div>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarSeparator />
+
+            {/* Account Management (Client Only) */}
+            {currentUser?.role === 'client' && (
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={activeView === 'subscription'}
+                        onClick={() => onViewChange('subscription')}
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        <span>Subscription</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={activeView === 'profile'}
+                        onClick={() => onViewChange('profile')}
+                      >
+                        <UserCog className="w-4 h-4" />
+                        <span>Profile & Org</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+          </>
         )}
       </SidebarContent>
     </Sidebar>

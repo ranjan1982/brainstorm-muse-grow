@@ -1,4 +1,4 @@
-import { Task, User, KPIData, Phase, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate } from '@/types';
+import { Task, User, KPIData, Phase, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, LoginHistory, SubscriptionPlan, Discount, PhaseConfig } from '@/types';
 
 // Multiple clients for team management
 export const mockClients: Client[] = [
@@ -1043,6 +1043,86 @@ export const mockKPIData: Record<string, KPIData> = {
     totalTasks: 2,
   },
 };
+
+export const mockLoginHistory: LoginHistory[] = [
+  { id: 'log-1', userId: 'client-1', userName: 'John Martinez', ipAddress: '192.168.1.1', sessionTime: '45m', loginTime: new Date('2024-03-10T10:00:00') },
+  { id: 'log-2', userId: 'client-1', userName: 'John Martinez', ipAddress: '192.168.1.1', sessionTime: '1h 20m', loginTime: new Date('2024-03-09T14:30:00') },
+  { id: 'log-3', userId: 'client-2', userName: 'Emily Chen', ipAddress: '10.0.0.5', sessionTime: '25m', loginTime: new Date('2024-03-10T09:15:00') },
+];
+
+export const mockPlans: SubscriptionPlan[] = [
+  {
+    id: 'plan-starter-monthly',
+    name: 'Starter Monthly',
+    tier: 'starter',
+    price: 299,
+    billingCycle: 'monthly',
+    isActive: true,
+    isArchived: false,
+    features: ['Basic GBP Audit', '2 Google Posts/mo', 'Monthly Reporting']
+  },
+  {
+    id: 'plan-growth-monthly',
+    name: 'Growth Monthly',
+    tier: 'growth',
+    price: 599,
+    billingCycle: 'monthly',
+    isActive: true,
+    isArchived: false,
+    features: ['Deep GBP Audit', '4 Google Posts/mo', 'Bi-monthly Strategy']
+  },
+  {
+    id: 'plan-enterprise-monthly',
+    name: 'Enterprise Monthly',
+    tier: 'enterprise',
+    price: 999,
+    billingCycle: 'monthly',
+    isActive: true,
+    isArchived: false,
+    features: ['Multi-location schema', 'Weekly Posts', 'Executive Review']
+  },
+  {
+    id: 'plan-starter-yearly',
+    name: 'Starter Yearly',
+    tier: 'starter',
+    price: 2990, // 2 months free
+    billingCycle: 'yearly',
+    isActive: true,
+    isArchived: false,
+    features: ['Basic GBP Audit', '2 Google Posts/mo', 'Monthly Reporting']
+  }
+];
+
+export const mockDiscounts: Discount[] = [
+  {
+    id: 'disc-1',
+    code: 'WELCOME20',
+    type: 'percentage',
+    value: 20,
+    appliesTo: 'one-time',
+    usedCount: 5,
+    isActive: true
+  },
+  {
+    id: 'disc-2',
+    code: 'STARTUP50',
+    type: 'fixed',
+    value: 50,
+    appliesTo: 'recurring',
+    recurringDuration: 3,
+    usedCount: 12,
+    isActive: true
+  }
+];
+
+export const mockPhaseConfigs: PhaseConfig[] = [
+  { id: 'ph-1', name: 'Onboarding & Intake', slug: 'onboarding', order: 1, successor: 'foundation', isActive: true },
+  { id: 'ph-2', name: 'Foundation Setup', slug: 'foundation', order: 2, predecessor: 'onboarding', successor: 'execution', isActive: true },
+  { id: 'ph-3', name: 'Monthly Execution', slug: 'execution', order: 3, predecessor: 'foundation', successor: 'ai', isActive: true },
+  { id: 'ph-4', name: 'AI / AEO Optimization', slug: 'ai', order: 4, predecessor: 'execution', successor: 'reporting', isActive: true },
+  { id: 'ph-5', name: 'Reporting & Strategy', slug: 'reporting', order: 5, predecessor: 'ai', successor: 'monitoring', isActive: true },
+  { id: 'ph-6', name: 'Failure Monitoring', slug: 'monitoring', order: 6, predecessor: 'reporting', isActive: true }
+];
 
 export const kpiHistory = [
   { month: 'Jan', visibility: 45, views: 1200, aiScore: 2.1 },

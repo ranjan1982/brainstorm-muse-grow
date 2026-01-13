@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, Task, UserRole, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, KPIData, SubscriptionTier } from '@/types';
-import { mockUsers, mockTasks, mockClients, mockSubscriptions, mockPaymentHistory, mockTaskTemplates, mockEmailTemplates, mockKPIData } from '@/data/mockData';
+import { User, Task, UserRole, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, KPIData, SubscriptionTier, LoginHistory, SubscriptionPlan, Discount, PhaseConfig } from '@/types';
+import { mockUsers, mockTasks, mockClients, mockSubscriptions, mockPaymentHistory, mockTaskTemplates, mockEmailTemplates, mockKPIData, mockLoginHistory, mockPlans, mockDiscounts, mockPhaseConfigs } from '@/data/mockData';
 
 interface NewTaskData {
   title: string;
@@ -30,6 +30,8 @@ interface AppContextType {
   login: (role: UserRole) => void;
   logout: () => void;
   users: User[];
+  setUsers: React.Dispatch<React.SetStateAction<User[]>>;
+  addUser: (user: Omit<User, 'id' | 'createdAt'>) => void;
   // Multi-client management
   clients: Client[];
   currentClient: Client | null;
@@ -42,13 +44,34 @@ interface AppContextType {
   subscriptions: Subscription[];
   getClientSubscription: (clientId: string) => Subscription | undefined;
   upgradeSubscription: (clientId: string, newTier: SubscriptionTier) => void;
+  updateSubscriptionStatus: (subscriptionId: string, status: Subscription['status']) => void;
   // Admin features
   paymentHistory: PaymentHistory[];
   getClientPaymentHistory: (clientId: string) => PaymentHistory[];
+  refundPayment: (paymentId: string) => void;
   taskTemplates: TaskTemplate[];
   updateTaskTemplate: (templateId: string, updates: Partial<TaskTemplate>) => void;
+  addTaskTemplate: (template: Omit<TaskTemplate, 'id'>) => void;
+  deleteTaskTemplate: (templateId: string) => void;
   emailTemplates: EmailTemplate[];
   updateEmailTemplate: (templateId: string, updates: Partial<EmailTemplate>) => void;
+  addEmailTemplate: (template: Omit<EmailTemplate, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  deleteEmailTemplate: (templateId: string) => void;
+  sendEmailBlast: (audience: string, subject: string, message: string) => void;
+  updateUserProfile: (userId: string, updates: Partial<User>) => void;
+  updateClientInfo: (clientId: string, updates: Partial<Client>) => void;
+  deleteUserAccount: (userId: string) => void;
+  loginHistory: LoginHistory[];
+  plans: SubscriptionPlan[];
+  discounts: Discount[];
+  phaseConfigs: PhaseConfig[];
+  updatePhaseConfig: (id: string, updates: Partial<PhaseConfig>) => void;
+  updatePlan: (id: string, updates: Partial<SubscriptionPlan>) => void;
+  addPlan: (plan: Omit<SubscriptionPlan, 'id'>) => void;
+  deletePlan: (id: string) => void;
+  updateDiscount: (id: string, updates: Partial<Discount>) => void;
+  addDiscount: (discount: Omit<Discount, 'id'>) => void;
+  deleteDiscount: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -59,14 +82,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [clients, setClients] = useState<Client[]>(mockClients);
   const [currentClient, setCurrentClient] = useState<Client | null>(null);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(mockSubscriptions);
-  const [paymentHistory] = useState<PaymentHistory[]>(mockPaymentHistory);
+  const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>(mockPaymentHistory);
   const [taskTemplates, setTaskTemplates] = useState<TaskTemplate[]>(mockTaskTemplates);
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>(mockEmailTemplates);
-  const users = mockUsers;
+  const [loginHistory] = useState<LoginHistory[]>(mockLoginHistory);
+  const [plans, setPlans] = useState<SubscriptionPlan[]>(mockPlans);
+  const [discounts, setDiscounts] = useState<Discount[]>(mockDiscounts);
+  const [phaseConfigs, setPhaseConfigs] = useState<PhaseConfig[]>(mockPhaseConfigs);
+  const [users, setUsers] = useState<User[]>(mockUsers);
 
   const updateTask = (taskId: string, updates: Partial<Task>) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId 
+    setTasks(prev => prev.map(task =>
+      task.id === taskId
         ? { ...task, ...updates, updatedAt: new Date() }
         : task
     ));
@@ -74,7 +101,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addComment = (taskId: string, content: string, attachments?: { name: string; size: number; type: string; url: string }[]) => {
     if (!currentUser) return;
-    
+
     const comment = {
       id: `comment-${Date.now()}`,
       userId: currentUser.id,
@@ -97,7 +124,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addDocumentToTask = (taskId: string, document: { name: string; url: string }) => {
     if (!currentUser) return;
-    
+
     const newDoc = {
       id: `doc-${Date.now()}`,
       name: document.name,
@@ -187,18 +214,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getClientTasksForTier = (clientId?: string): TaskWithClient[] => {
     const targetClientId = clientId || currentClient?.id;
     if (!targetClientId) return tasks;
-    
+
     // Get the client's subscription tier
     const subscription = subscriptions.find(s => s.clientId === targetClientId);
     const tier = subscription?.tier || 'starter';
-    
+
     // Get task template IDs available for this tier
     const availableTemplates = getTaskTemplatesForTier(tier);
     const availableTaskIds = new Set(availableTemplates.map(t => t.taskId));
-    
+
     // Filter tasks by client AND by tier-available templates
-    return tasks.filter(t => 
-      t.clientId === targetClientId && 
+    return tasks.filter(t =>
+      t.clientId === targetClientId &&
       availableTaskIds.has(t.taskId)
     );
   };
@@ -235,6 +262,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return paymentHistory.filter(p => p.clientId === clientId);
   };
 
+  const refundPayment = (paymentId: string) => {
+    setPaymentHistory(prev => prev.map(p =>
+      p.id === paymentId
+        ? { ...p, status: 'refunded', refundAmount: p.amount }
+        : p
+    ));
+  };
+
+  const updateSubscriptionStatus = (subscriptionId: string, status: Subscription['status']) => {
+    setSubscriptions(prev => prev.map(s => s.id === subscriptionId ? { ...s, status } : s));
+  };
+
   const updateTaskTemplate = (templateId: string, updates: Partial<TaskTemplate>) => {
     setTaskTemplates(prev => prev.map(tpl =>
       tpl.id === templateId
@@ -243,12 +282,115 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ));
   };
 
+  const addTaskTemplate = (templateData: Omit<TaskTemplate, 'id'>) => {
+    const newTemplate: TaskTemplate = {
+      ...templateData,
+      id: `tpl-${Date.now()}`
+    };
+    setTaskTemplates(prev => [...prev, newTemplate]);
+  };
+
+  const deleteTaskTemplate = (templateId: string) => {
+    setTaskTemplates(prev => prev.filter(t => t.id !== templateId));
+  };
+
   const updateEmailTemplate = (templateId: string, updates: Partial<EmailTemplate>) => {
     setEmailTemplates(prev => prev.map(tpl =>
       tpl.id === templateId
         ? { ...tpl, ...updates, updatedAt: new Date() }
         : tpl
     ));
+  };
+
+  const addEmailTemplate = (templateData: Omit<EmailTemplate, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newTemplate: EmailTemplate = {
+      ...templateData,
+      id: `email-${Date.now()}`,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    setEmailTemplates(prev => [...prev, newTemplate]);
+  };
+
+  const deleteEmailTemplate = (templateId: string) => {
+    setEmailTemplates(prev => prev.filter(t => t.id !== templateId));
+  };
+
+  const sendEmailBlast = (audience: string, subject: string, message: string) => {
+    // In a real app, this would make an API call to a mailing service
+    console.log(`Sending blast to ${audience}: ${subject}`);
+    // We could add a log to a system event log here if we had one
+  };
+
+  const updateUserProfile = (userId: string, updates: Partial<User>) => {
+    if (currentUser && currentUser.id === userId) {
+      setCurrentUser({ ...currentUser, ...updates });
+    }
+  };
+
+  const updateClientInfo = (clientId: string, updates: Partial<Client>) => {
+    setClients(prev => prev.map(client =>
+      client.id === clientId
+        ? { ...client, ...updates }
+        : client
+    ));
+    if (currentClient && currentClient.id === clientId) {
+      setCurrentClient({ ...currentClient, ...updates });
+    }
+  };
+
+  const deleteUserAccount = (userId: string) => {
+    setClients(prev => prev.filter(c => c.id !== userId));
+    setUsers(prev => prev.filter(u => u.id !== userId));
+    if (currentUser?.id === userId) {
+      logout();
+    }
+  };
+
+  const updatePhaseConfig = (id: string, updates: Partial<PhaseConfig>) => {
+    setPhaseConfigs(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const updatePlan = (id: string, updates: Partial<SubscriptionPlan>) => {
+    setPlans(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const addPlan = (planData: Omit<SubscriptionPlan, 'id'>) => {
+    const newPlan: SubscriptionPlan = {
+      ...planData,
+      id: `plan-${Date.now()}`
+    };
+    setPlans(prev => [...prev, newPlan]);
+  };
+
+  const deletePlan = (id: string) => {
+    setPlans(prev => prev.filter(p => p.id !== id));
+  };
+
+  const updateDiscount = (id: string, updates: Partial<Discount>) => {
+    setDiscounts(prev => prev.map(d => d.id === id ? { ...d, ...updates } : d));
+  };
+
+  const addDiscount = (discountData: Omit<Discount, 'id'>) => {
+    const newDiscount: Discount = {
+      ...discountData,
+      id: `disc-${Date.now()}`
+    };
+    setDiscounts(prev => [...prev, newDiscount]);
+  };
+
+  const deleteDiscount = (id: string) => {
+    setDiscounts(prev => prev.filter(d => d.id !== id));
+  };
+
+  const addUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
+    const newUser: User = {
+      ...userData,
+      id: `user-${Date.now()}`,
+      isActive: true,
+      role: userData.role
+    };
+    setUsers(prev => [...prev, newUser]);
   };
 
   return (
@@ -265,6 +407,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       users,
+      setUsers,
+      addUser,
       // Multi-client
       clients,
       currentClient,
@@ -277,13 +421,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
       subscriptions,
       getClientSubscription,
       upgradeSubscription,
+      updateSubscriptionStatus,
       // Admin
       paymentHistory,
       getClientPaymentHistory,
+      refundPayment,
       taskTemplates,
       updateTaskTemplate,
+      addTaskTemplate,
+      deleteTaskTemplate,
       emailTemplates,
       updateEmailTemplate,
+      addEmailTemplate,
+      deleteEmailTemplate,
+      sendEmailBlast,
+      updateUserProfile,
+      updateClientInfo,
+      deleteUserAccount,
+      loginHistory,
+      plans,
+      discounts,
+      phaseConfigs,
+      updatePhaseConfig,
+      updatePlan,
+      addPlan,
+      deletePlan,
+      updateDiscount,
+      addDiscount,
+      deleteDiscount,
     }}>
       {children}
     </AppContext.Provider>
