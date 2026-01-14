@@ -140,6 +140,7 @@ export interface PaymentHistory {
   paymentMethod: string;
   invoiceNumber: string;
   refundAmount?: number;
+  transactionId?: string;
 }
 
 export interface PhaseConfig {

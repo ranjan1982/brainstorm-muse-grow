@@ -37,7 +37,7 @@ import { CalendarIcon, Download, AlertTriangle, UserCheck, UserX, Monitor, Activ
 import { cn } from '@/lib/utils';
 
 interface AdminClientsProps {
-    defaultFilter?: 'all' | 'active' | 'inactive' | 'incomplete';
+    defaultFilter?: 'all' | 'active' | 'inactive' | 'incomplete' | 'trial';
 }
 
 export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
@@ -63,6 +63,10 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
             const payments = getClientPaymentHistory(client.id);
             // Incomplete: Active or Inactive user but NO payments made ever
             return payments.length === 0;
+        }
+        if (filterStatus === 'trial') {
+            const sub = getClientSubscription(client.id);
+            return sub?.status === 'trial';
         }
 
         return true;
@@ -124,6 +128,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                             <SelectItem value="all">All Clients</SelectItem>
                             <SelectItem value="active">Active Members</SelectItem>
                             <SelectItem value="inactive">Inactive Members</SelectItem>
+                            <SelectItem value="trial">Trial Subscribers</SelectItem>
                             <SelectItem value="incomplete">Incomplete Reg.</SelectItem>
                         </SelectContent>
                     </Select>
@@ -349,6 +354,14 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                                                 <Badge variant="secondary">Trial ends {format(detailClientSub.trialEndDate || new Date(), 'MMM dd')}</Badge>
                                                             )}
                                                         </div>
+                                                        <div className="mt-3 space-y-1">
+                                                            <div className="text-xs text-muted-foreground">
+                                                                <span className="font-medium text-foreground">Profile ID:</span> {detailClientSub.id}
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground">
+                                                                <span className="font-medium text-foreground">Created:</span> {format(new Date(detailClientSub.startDate), 'MMM dd, yyyy')}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <div className="text-right">
                                                         <div className="text-2xl font-bold">${detailClientSub.monthlyPrice}</div>
@@ -406,6 +419,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                                     <TableHeader>
                                                         <TableRow>
                                                             <TableHead>Date</TableHead>
+                                                            <TableHead>Transaction ID</TableHead>
                                                             <TableHead>Amount</TableHead>
                                                             <TableHead>Status</TableHead>
                                                             <TableHead className="text-right">Action</TableHead>
@@ -415,6 +429,9 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                                         {detailClientPayments.map(payment => (
                                                             <TableRow key={payment.id}>
                                                                 <TableCell>{format(payment.paymentDate, 'MMM dd, yyyy')}</TableCell>
+                                                                <TableCell className="font-mono text-xs text-muted-foreground">
+                                                                    {payment.transactionId || `TXN-${payment.id.substring(0, 8)}`}
+                                                                </TableCell>
                                                                 <TableCell>${payment.amount}</TableCell>
                                                                 <TableCell>
                                                                     <span className={cn(
@@ -446,7 +463,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                                             </TableRow>
                                                         ))}
                                                         {detailClientPayments.length === 0 && (
-                                                            <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-4">No payment history found</TableCell></TableRow>
+                                                            <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-4">No payment history found</TableCell></TableRow>
                                                         )}
                                                     </TableBody>
                                                 </Table>

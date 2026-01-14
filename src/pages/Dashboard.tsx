@@ -72,6 +72,7 @@ export default function Dashboard() {
   const adminTotalClients = clients.length;
   // Incomplete: Client user exists but no payment history found (assuming empty history = no initial payment/setup)
   const incompleteClients = clients.filter(c => getClientPaymentHistory(c.id).length === 0);
+  const trialClients = clients.filter(c => getClientSubscription(c.id)?.status === 'trial');
 
   const activeSubscriptions = subscriptions.filter(s => s.status === 'active');
   const totalMRR = activeSubscriptions.reduce((sum, s) => sum + s.monthlyPrice, 0);
@@ -85,6 +86,7 @@ export default function Dashboard() {
         return [
           { label: 'Total Clients', value: adminTotalClients, icon: Building2, color: 'text-primary', status: 'admin-clients' },
           { label: 'Active Clients', value: activeClients.length, icon: Users, color: 'text-success', status: 'admin-clients-active' },
+          { label: 'Trial Subscribers', value: trialClients.length, icon: Clock, color: 'text-purple-500', status: 'admin-clients-trial' },
           { label: 'Inactive Clients', value: inactiveClients.length, icon: Ban, color: 'text-destructive', status: 'admin-clients-inactive' },
           { label: 'Incomplete Reg.', value: incompleteClients.length, icon: AlertCircle, color: 'text-warning', status: 'admin-clients-incomplete' },
         ];
@@ -591,6 +593,7 @@ export default function Dashboard() {
             {/* Admin Views */}
             {activeView === 'admin-clients' && <AdminClients defaultFilter="all" />}
             {activeView === 'admin-clients-active' && <AdminClients defaultFilter="active" />}
+            {activeView === 'admin-clients-trial' && <AdminClients defaultFilter="trial" />}
             {activeView === 'admin-clients-inactive' && <AdminClients defaultFilter="inactive" />}
             {activeView === 'admin-clients-incomplete' && <AdminClients defaultFilter="incomplete" />}
 
