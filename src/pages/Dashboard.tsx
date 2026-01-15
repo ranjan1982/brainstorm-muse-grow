@@ -104,22 +104,22 @@ export default function Dashboard() {
           { label: 'Active Clients', value: totalClients, icon: Building2, color: 'text-muted-foreground', status: 'all' },
         ];
 
-      case 'india-head':
-      case 'india-junior':
+      case 'seo-head':
+      case 'seo-junior':
         const indiaToExecute = tasks.filter(t =>
-          (t.owner === 'india-head' || t.owner === 'india-junior' || t.assignedTo === currentUser.id) &&
+          (t.owner === 'seo-head' || t.owner === 'seo-junior' || t.assignedTo === currentUser.id) &&
           (t.status === 'pending' || t.status === 'in-progress')
         ).length;
         const indiaRevision = tasks.filter(t =>
-          (t.owner === 'india-head' || t.owner === 'india-junior' || t.assignedTo === currentUser.id) &&
+          (t.owner === 'seo-head' || t.owner === 'seo-junior' || t.assignedTo === currentUser.id) &&
           t.status === 'resubmit'
         ).length;
         const indiaSubmitted = tasks.filter(t =>
-          (t.owner === 'india-head' || t.owner === 'india-junior' || t.assignedTo === currentUser.id) &&
+          (t.owner === 'seo-head' || t.owner === 'seo-junior' || t.assignedTo === currentUser.id) &&
           t.status === 'submitted'
         ).length;
         const indiaApproved = tasks.filter(t =>
-          (t.owner === 'india-head' || t.owner === 'india-junior' || t.assignedTo === currentUser.id) &&
+          (t.owner === 'seo-head' || t.owner === 'seo-junior' || t.assignedTo === currentUser.id) &&
           t.status === 'approved'
         ).length;
 
@@ -318,7 +318,7 @@ export default function Dashboard() {
                         <div className="space-y-4">
                           {tasks.filter(t => {
                             if (currentUser?.role === 'us-strategy') return t.status === 'submitted';
-                            if (currentUser?.role === 'india-head' || currentUser?.role === 'india-junior') {
+                            if (currentUser?.role === 'seo-head' || currentUser?.role === 'seo-junior') {
                               return (t.owner === currentUser.role || t.assignedTo === currentUser.id) &&
                                 (t.status === 'pending' || t.status === 'resubmit');
                             }
@@ -370,7 +370,7 @@ export default function Dashboard() {
                           ))}
                           {tasks.filter(t => {
                             if (currentUser?.role === 'us-strategy') return t.status === 'submitted';
-                            if (currentUser?.role === 'india-head' || currentUser?.role === 'india-junior') {
+                            if (currentUser?.role === 'seo-head' || currentUser?.role === 'seo-junior') {
                               return (t.owner === currentUser.role || t.assignedTo === currentUser.id) &&
                                 (t.status === 'pending' || t.status === 'resubmit');
                             }

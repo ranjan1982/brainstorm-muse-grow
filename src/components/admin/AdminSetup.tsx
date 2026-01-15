@@ -287,7 +287,7 @@ export function AdminDiscounts() {
 export function AdminUsers() {
     const { users, addUser, updateUserProfile, deleteUserAccount } = useApp();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [userState, setUserState] = useState<Partial<User>>({ role: 'team-member', isActive: true });
+    const [userState, setUserState] = useState<Partial<User>>({ role: 'seo-junior', isActive: true });
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const handleSave = () => {
@@ -298,7 +298,7 @@ export function AdminUsers() {
         }
         setIsDialogOpen(false);
         setEditingId(null);
-        setUserState({ role: 'team-member', isActive: true });
+        setUserState({ role: 'seo-junior', isActive: true });
     };
 
     const openEdit = (user: User) => {
@@ -318,7 +318,7 @@ export function AdminUsers() {
                     <Button variant="outline" onClick={() => { setIsDialogOpen(true); setEditingId(null); setUserState({ role: 'admin', isActive: true }); }}>
                         <Plus className="w-4 h-4 mr-2" /> Add Admin
                     </Button>
-                    <Button onClick={() => { setIsDialogOpen(true); setEditingId(null); setUserState({ role: 'india-junior', isActive: true }); }}>
+                    <Button onClick={() => { setIsDialogOpen(true); setEditingId(null); setUserState({ role: 'seo-junior', isActive: true }); }}>
                         <Plus className="w-4 h-4 mr-2" /> Add SEO User
                     </Button>
                 </div>
@@ -375,10 +375,11 @@ export function AdminUsers() {
                             <Select value={userState.role} onValueChange={(v: any) => setUserState({ ...userState, role: v })}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="admin">System Admin</SelectItem>
+                                    <SelectItem value="admin">Portal Admin</SelectItem>
                                     <SelectItem value="us-strategy">US Strategy</SelectItem>
-                                    <SelectItem value="india-head">India Head</SelectItem>
-                                    <SelectItem value="india-junior">India Junior</SelectItem>
+                                    <SelectItem value="seo-head">SEO Head</SelectItem>
+                                    <SelectItem value="seo-junior">SEO Junior</SelectItem>
+                                    <SelectItem value="client">Client</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

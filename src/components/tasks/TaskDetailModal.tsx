@@ -68,7 +68,7 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
       // Handoff back to India team for revision
       updateTask(task.id, {
         status: 'resubmit',
-        owner: 'india-head'
+        owner: 'seo-head'
       });
     } else {
       updateTask(task.id, { status: newStatus });
@@ -119,13 +119,13 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
     if (!currentUser) return false;
 
     // India SEO Head can work on ALL tasks (execute tasks)
-    if (currentUser.role === 'india-head') {
+    if (currentUser.role === 'seo-head') {
       return task.status !== 'approved' && task.status !== 'submitted';
     }
 
     // India SEO Junior can only work on tasks assigned to them
-    if (currentUser.role === 'india-junior') {
-      const isAssignedToJunior = task.owner === 'india-junior' || task.assignedTo === currentUser.id;
+    if (currentUser.role === 'seo-junior') {
+      const isAssignedToJunior = task.owner === 'seo-junior' || task.assignedTo === currentUser.id;
       return isAssignedToJunior && task.status !== 'approved' && task.status !== 'submitted';
     }
 
@@ -156,13 +156,13 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
     if (currentUser.role === 'us-strategy') return true;
 
     // India SEO Head can comment on all India team tasks
-    if (currentUser.role === 'india-head') {
-      return task.owner === 'india-head' || task.owner === 'india-junior';
+    if (currentUser.role === 'seo-head') {
+      return task.owner === 'seo-head' || task.owner === 'seo-junior';
     }
 
     // India SEO Junior can comment only on their assigned tasks
-    if (currentUser.role === 'india-junior') {
-      return task.owner === 'india-junior' || task.assignedTo === currentUser?.id;
+    if (currentUser.role === 'seo-junior') {
+      return task.owner === 'seo-junior' || task.assignedTo === currentUser?.id;
     }
 
     // Client can comment on client tasks

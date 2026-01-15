@@ -87,7 +87,7 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
         } else if (newStatus === 'resubmit') {
             updateTask(task.id, {
                 status: 'resubmit',
-                owner: 'india-head'
+                owner: 'seo-head'
             });
         } else {
             updateTask(task.id, { status: newStatus });
@@ -134,9 +134,9 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
     const canEdit = () => {
         if (!currentUser) return false;
         if (currentUser.role === 'admin') return true;
-        if (currentUser.role === 'india-head') return task.status !== 'approved' && task.status !== 'submitted';
-        if (currentUser.role === 'india-junior') {
-            const isAssignedToJunior = task.owner === 'india-junior' || task.assignedTo === currentUser.id;
+        if (currentUser.role === 'seo-head') return task.status !== 'approved' && task.status !== 'submitted';
+        if (currentUser.role === 'seo-junior') {
+            const isAssignedToJunior = task.owner === 'seo-junior' || task.assignedTo === currentUser.id;
             return isAssignedToJunior && task.status !== 'approved' && task.status !== 'submitted';
         }
         if (currentUser.role === 'client') return task.owner === 'client' && task.status !== 'approved' && task.status !== 'submitted';
@@ -160,8 +160,8 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
     const canComment = () => {
         if (!currentUser) return false;
         if (currentUser.role === 'us-strategy') return true;
-        if (currentUser.role === 'india-head') return task.owner === 'india-head' || task.owner === 'india-junior' || task.owner === 'us-strategy' || task.owner === 'system';
-        if (currentUser.role === 'india-junior') return task.owner === 'india-junior' || task.assignedTo === currentUser?.id;
+        if (currentUser.role === 'seo-head') return task.owner === 'seo-head' || task.owner === 'seo-junior' || task.owner === 'us-strategy' || task.owner === 'system';
+        if (currentUser.role === 'seo-junior') return task.owner === 'seo-junior' || task.assignedTo === currentUser?.id;
         if (currentUser.role === 'client') return task.owner === 'client';
         return false;
     };
@@ -429,7 +429,7 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
 
                 <div className="max-w-6xl mx-auto w-full flex justify-between items-center">
                     <div className="flex gap-3">
-                        {canEdit() && (currentUser?.role === 'india-head' || currentUser?.role === 'india-junior') && !isAssigning && (
+                        {canEdit() && (currentUser?.role === 'seo-head' || currentUser?.role === 'seo-junior') && !isAssigning && (
                             <Button className="bg-[#14b8a6] hover:bg-[#0d9488] shadow-sm font-semibold" onClick={() => setIsAssigning(true)}>
                                 <Send className="w-4 h-4 mr-2" /> Assign to US Strategy
                             </Button>

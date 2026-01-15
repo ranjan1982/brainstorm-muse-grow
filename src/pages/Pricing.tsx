@@ -70,7 +70,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
           {/* Header */}
@@ -83,7 +83,7 @@ export default function Pricing() {
               Choose Your Growth Path
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              All plans include our core SEO workflow platform. 
+              All plans include our core SEO workflow platform.
               Start with Starter and upgrade as you grow.
             </p>
           </div>
@@ -91,15 +91,14 @@ export default function Pricing() {
           {/* Pricing Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {plans.map((plan) => (
-              <Card 
+              <Card
                 key={plan.name}
-                className={`relative transition-all duration-300 hover:shadow-xl ${
-                  plan.highlighted 
-                    ? 'border-accent shadow-lg scale-105 z-10' 
-                    : plan.available 
-                      ? 'hover:border-accent/50' 
+                className={`relative transition-all duration-300 hover:shadow-xl ${plan.highlighted
+                    ? 'border-accent shadow-lg scale-105 z-10'
+                    : plan.available
+                      ? 'hover:border-accent/50'
                       : 'opacity-75'
-                }`}
+                  }`}
               >
                 {plan.highlighted && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
@@ -109,7 +108,7 @@ export default function Pricing() {
                     </Badge>
                   </div>
                 )}
-                
+
                 {!plan.available && (
                   <div className="absolute top-4 right-4">
                     <Badge variant="outline">
@@ -145,15 +144,22 @@ export default function Pricing() {
                   </ul>
 
                   {plan.available ? (
-                    <Link to="/register" className="block">
-                      <Button 
-                        variant={plan.highlighted ? 'accent' : 'outline'} 
-                        className="w-full"
-                        size="lg"
-                      >
-                        Get Started
-                      </Button>
-                    </Link>
+                    <div className="space-y-3">
+                      <Link to="/purchase" className="block">
+                        <Button
+                          variant={plan.highlighted ? 'accent' : 'outline'}
+                          className="w-full h-12 font-bold"
+                          size="lg"
+                        >
+                          Purchase Subscription
+                        </Button>
+                      </Link>
+                      <Link to="/free-trial" className="block text-center">
+                        <button className="text-sm font-bold text-muted-foreground hover:text-accent transition-colors">
+                          Start 14-Day Free Trial
+                        </button>
+                      </Link>
+                    </div>
                   ) : (
                     <Button variant="outline" className="w-full" size="lg" disabled>
                       <Lock className="w-4 h-4 mr-2" />

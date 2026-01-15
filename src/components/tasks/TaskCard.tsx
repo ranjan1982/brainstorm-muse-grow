@@ -32,13 +32,13 @@ export function TaskCard({ task, onViewDetails, showBucket = false }: TaskCardPr
     if (!currentUser) return false;
     
     // India SEO Head can work on ALL tasks
-    if (currentUser.role === 'india-head') {
+    if (currentUser.role === 'seo-head') {
       return task.status !== 'approved' && task.status !== 'submitted';
     }
     
     // India SEO Junior can only work on tasks assigned to them
-    if (currentUser.role === 'india-junior') {
-      const isAssignedToJunior = task.owner === 'india-junior' || task.assignedTo === currentUser.id;
+    if (currentUser.role === 'seo-junior') {
+      const isAssignedToJunior = task.owner === 'seo-junior' || task.assignedTo === currentUser.id;
       return isAssignedToJunior && task.status !== 'approved' && task.status !== 'submitted';
     }
     
@@ -55,11 +55,11 @@ export function TaskCard({ task, onViewDetails, showBucket = false }: TaskCardPr
     if (task.status !== 'completed') return false;
     
     // India SEO Head can submit any task
-    if (currentUser.role === 'india-head') return true;
+    if (currentUser.role === 'seo-head') return true;
     
     // India SEO Junior can submit their assigned tasks
-    if (currentUser.role === 'india-junior') {
-      return task.owner === 'india-junior' || task.assignedTo === currentUser.id;
+    if (currentUser.role === 'seo-junior') {
+      return task.owner === 'seo-junior' || task.assignedTo === currentUser.id;
     }
     
     // Client can submit client tasks

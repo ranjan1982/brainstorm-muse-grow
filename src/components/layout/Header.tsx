@@ -27,8 +27,8 @@ export function Header() {
   const location = useLocation();
   const isLandingPage = location.pathname === '/';
 
-  const roles: UserRole[] = ['admin', 'us-strategy', 'india-head', 'india-junior', 'client'];
-  const canSwitchClients = currentUser?.role === 'us-strategy' || currentUser?.role === 'india-head' || currentUser?.role === 'india-junior';
+  const roles: UserRole[] = ['admin', 'us-strategy', 'seo-head', 'seo-junior', 'client'];
+  const canSwitchClients = currentUser?.role === 'us-strategy' || currentUser?.role === 'seo-head' || currentUser?.role === 'seo-junior';
   const activeClients = clients.filter(c => c.isActive);
 
   return (
@@ -51,9 +51,9 @@ export function Header() {
                 }`}>
                 Pricing
               </Link>
-              <Link to="/register" className={`text-sm font-medium transition-colors hover:text-accent ${isLandingPage ? 'text-primary-foreground/80 hover:text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+              <Link to="/login" className={`text-sm font-medium transition-colors hover:text-accent ${isLandingPage ? 'text-primary-foreground/80 hover:text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}>
-                Get Started
+                Login
               </Link>
             </>
           )}
@@ -62,13 +62,13 @@ export function Header() {
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-
               <Link to="/dashboard">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <LayoutDashboard className="w-4 h-4" />
                   Dashboard
                 </Button>
               </Link>
+              {/* Account Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="glass" size="sm" className="gap-2">
@@ -81,20 +81,6 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Switch Role (Demo)</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {roles.map((role) => (
-                    <DropdownMenuItem
-                      key={role}
-                      onClick={() => login(role)}
-                      className="cursor-pointer"
-                    >
-                      <Badge variant={role as any} className="mr-2">
-                        {ROLE_LABELS[role]}
-                      </Badge>
-                    </DropdownMenuItem>
-                  ))}
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive">
                     <LogOut className="w-4 h-4 mr-2" />
                     Logout
@@ -104,32 +90,12 @@ export function Header() {
             </div>
           ) : (
             <>
-              {/* Role Switcher for Demo */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant={isLandingPage ? "hero-outline" : "outline"} size="sm" className="gap-2">
-                    <User className="w-4 h-4" />
-                    Demo Login
-                    <ChevronDown className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Select a Role</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {roles.map((role) => (
-                    <DropdownMenuItem
-                      key={role}
-                      onClick={() => login(role)}
-                      className="cursor-pointer"
-                    >
-                      <Badge variant={role as any} className="mr-2">
-                        {ROLE_LABELS[role]}
-                      </Badge>
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Link to="/register">
+              <Link to="/login" className="hidden sm:block">
+                <Button variant={isLandingPage ? "hero-outline" : "outline"} size="sm">
+                  Login
+                </Button>
+              </Link>
+              <Link to="/free-trial">
                 <Button variant={isLandingPage ? "hero" : "accent"} size="sm">
                   Start Free Trial
                 </Button>

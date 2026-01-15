@@ -27,7 +27,7 @@ interface AppContextType {
   addDocumentToTask: (taskId: string, document: { name: string; url: string }) => void;
   addTask: (taskData: NewTaskData) => void;
   isAuthenticated: boolean;
-  login: (role: UserRole) => void;
+  login: (email: string, password?: string) => boolean;
   logout: () => void;
   users: User[];
   setUsers: React.Dispatch<React.SetStateAction<User[]>>;
@@ -178,20 +178,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTasks(prev => [...prev, newTask]);
   };
 
-  const login = (role: UserRole) => {
-    const user = users.find(u => u.role === role);
+  const login = (identifier: string, password?: string): boolean => {
+    let user: User | undefined;
+
+    if (password) {
+      // Email/Password login
+      user = users.find(u => u.email.toLowerCase() === identifier.toLowerCase() && u.password === password);
+    } else {
+      // Role-based login (used for registration shortcuts)
+      user = users.find(u => u.role === identifier);
+    }
+
     if (user) {
       setCurrentUser(user);
       // Set default client for non-admin roles
-      if (role === 'client') {
+      if (user.role === 'client') {
         const clientData = clients.find(c => c.id === user.id);
         setCurrentClient(clientData || null);
-      } else if (role !== 'admin') {
+      } else if (user.role !== 'admin') {
         // For team members, set first active client as default
         const firstActiveClient = clients.find(c => c.isActive);
         setCurrentClient(firstActiveClient || null);
       }
+      return true;
     }
+    return false;
   };
 
   const logout = () => {

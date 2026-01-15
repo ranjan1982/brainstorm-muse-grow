@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'us-strategy' | 'india-head' | 'india-junior' | 'client' | 'team-member';
+export type UserRole = 'admin' | 'us-strategy' | 'seo-head' | 'seo-junior' | 'client';
 
 export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'submitted' | 'approved' | 'resubmit';
 
@@ -8,6 +8,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: UserRole;
   avatar?: string;
   isActive?: boolean;
@@ -202,11 +203,10 @@ export const SUBSCRIPTION_TIER_PRICES: Record<SubscriptionTier, number> = {
 
 export const ROLE_LABELS: Record<UserRole, string> = {
   'admin': 'Portal Admin',
-  'us-strategy': 'US Strategy Team',
-  'india-head': 'India SEO Head',
-  'india-junior': 'India SEO Junior',
-  'client': 'Client',
-  'team-member': 'Team Member'
+  'us-strategy': 'US Strategy',
+  'seo-head': 'SEO Head',
+  'seo-junior': 'SEO Junior',
+  'client': 'Client'
 };
 
 export const PHASE_LABELS: Record<string, string> = {

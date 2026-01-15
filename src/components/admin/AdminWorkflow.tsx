@@ -244,8 +244,8 @@ export function AdminWorkflow() {
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="us-strategy">US Strategy</SelectItem>
-                                        <SelectItem value="india-head">India Head</SelectItem>
-                                        <SelectItem value="india-junior">India Junior</SelectItem>
+                                        <SelectItem value="seo-head">India Head</SelectItem>
+                                        <SelectItem value="seo-junior">India Junior</SelectItem>
                                         <SelectItem value="system">System (Auto)</SelectItem>
                                     </SelectContent>
                                 </Select>

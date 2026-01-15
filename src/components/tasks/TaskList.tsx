@@ -47,7 +47,7 @@ export function TaskList({ phase, initialStatus = 'all', onViewTask }: TaskListP
 
   const canCreateTask = () => {
     if (!currentUser) return false;
-    return currentUser.role === 'us-strategy' || currentUser.role === 'india-head' || currentUser.role === 'admin';
+    return currentUser.role === 'us-strategy' || currentUser.role === 'seo-head' || currentUser.role === 'admin';
   };
 
   const handleViewDetails = (task: Task) => {

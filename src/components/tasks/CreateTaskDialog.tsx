@@ -36,7 +36,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
     title: '',
     description: '',
     phase: 'onboarding' as Phase,
-    assignTo: 'india-head' as UserRole,
+    assignTo: 'seo-head' as UserRole,
     approver: 'us-strategy' as UserRole,
     cadence: '' as '' | 'once' | 'monthly' | 'weekly' | 'ongoing',
   });
@@ -45,7 +45,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
 
   const canCreateTask = () => {
     if (!currentUser) return false;
-    return currentUser.role === 'us-strategy' || currentUser.role === 'india-head' || currentUser.role === 'admin';
+    return currentUser.role === 'us-strategy' || currentUser.role === 'seo-head' || currentUser.role === 'admin';
   };
 
   const getAvailablePhases = (): Phase[] => {
@@ -54,10 +54,10 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
 
   const getAssignableUsers = (): UserRole[] => {
     if (currentUser?.role === 'us-strategy' || currentUser?.role === 'admin') {
-      return ['us-strategy', 'india-head', 'india-junior', 'client'];
+      return ['us-strategy', 'seo-head', 'seo-junior', 'client'];
     }
-    if (currentUser?.role === 'india-head') {
-      return ['india-head', 'india-junior'];
+    if (currentUser?.role === 'seo-head') {
+      return ['seo-head', 'seo-junior'];
     }
     return [];
   };
@@ -125,7 +125,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
       title: '',
       description: '',
       phase: 'onboarding',
-      assignTo: 'india-head',
+      assignTo: 'seo-head',
       approver: 'us-strategy',
       cadence: '',
     });
