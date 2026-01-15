@@ -201,7 +201,11 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                             <div className="flex flex-col text-sm">
                                                 <span className="font-medium">{sub ? `$${sub.monthlyPrice}` : '-'}</span>
                                                 <span className="text-[10px] text-muted-foreground">
-                                                    {sub?.nextBillingDate ? format(new Date(sub.nextBillingDate), 'MMM dd') : ''}
+                                                    {sub?.status === 'trial' && sub.trialEndDate ? (
+                                                        <span className="text-orange-600 font-medium">Trial Ends {format(new Date(sub.trialEndDate), 'MMM dd')}</span>
+                                                    ) : (
+                                                        sub?.nextBillingDate ? format(new Date(sub.nextBillingDate), 'MMM dd') : ''
+                                                    )}
                                                 </span>
                                             </div>
                                         </TableCell>

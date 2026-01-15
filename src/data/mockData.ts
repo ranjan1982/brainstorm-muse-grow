@@ -42,6 +42,16 @@ export const mockClients: Client[] = [
     createdAt: new Date('2024-02-15'),
     isActive: false
   },
+  {
+    id: 'client-5',
+    name: 'David Kim',
+    email: 'david@techstart.io',
+    company: 'TechStart Inc.',
+    phone: '+1 (555) 567-8901',
+    address: '101 Tech Blvd, Austin, TX 78701',
+    createdAt: new Date('2026-01-10'),
+    isActive: true
+  },
 ];
 
 // Subscriptions for each client
@@ -81,6 +91,16 @@ export const mockSubscriptions: Subscription[] = [
     startDate: new Date('2024-02-15'),
     endDate: new Date('2024-06-15'),
     monthlyPrice: 299
+  },
+  {
+    id: 'sub-5',
+    clientId: 'client-5',
+    tier: 'growth',
+    status: 'trial',
+    startDate: new Date('2026-01-10'),
+    nextBillingDate: new Date('2026-01-24'),
+    trialEndDate: new Date('2026-01-24'),
+    monthlyPrice: 599
   },
 ];
 
@@ -304,6 +324,7 @@ export const mockUsers: User[] = [
   { id: 'client-2', name: 'Emily Chen', email: 'emily@greenscapelandscaping.com', role: 'client' },
   { id: 'client-3', name: 'Michael Brown', email: 'michael@eliteautorepair.com', role: 'client' },
   { id: 'client-4', name: 'Sarah Williams', email: 'sarah@homecleanpro.com', role: 'client' },
+  { id: 'client-5', name: 'David Kim', email: 'david@techstart.io', role: 'client' },
 ];
 
 // Tasks now include clientId for multi-client support
@@ -1042,12 +1063,20 @@ export const mockKPIData: Record<string, KPIData> = {
     tasksCompleted: 0,
     totalTasks: 2,
   },
+  'client-5': {
+    localPackVisibility: 15,
+    gbpViews: 340,
+    aiMentionScore: 1.2,
+    tasksCompleted: 1,
+    totalTasks: 5,
+  },
 };
 
 export const mockLoginHistory: LoginHistory[] = [
   { id: 'log-1', userId: 'client-1', userName: 'John Martinez', ipAddress: '192.168.1.1', sessionTime: '45m', loginTime: new Date('2024-03-10T10:00:00') },
   { id: 'log-2', userId: 'client-1', userName: 'John Martinez', ipAddress: '192.168.1.1', sessionTime: '1h 20m', loginTime: new Date('2024-03-09T14:30:00') },
   { id: 'log-3', userId: 'client-2', userName: 'Emily Chen', ipAddress: '10.0.0.5', sessionTime: '25m', loginTime: new Date('2024-03-10T09:15:00') },
+  { id: 'log-4', userId: 'client-5', userName: 'David Kim', ipAddress: '172.16.0.22', sessionTime: '5m', loginTime: new Date('2026-01-11T16:20:00') },
 ];
 
 export const mockPlans: SubscriptionPlan[] = [
@@ -1101,7 +1130,8 @@ export const mockDiscounts: Discount[] = [
     value: 20,
     appliesTo: 'one-time',
     usedCount: 5,
-    isActive: true
+    isActive: true,
+    validUpto: new Date('2026-12-31')
   },
   {
     id: 'disc-2',
@@ -1111,7 +1141,8 @@ export const mockDiscounts: Discount[] = [
     appliesTo: 'recurring',
     recurringDuration: 3,
     usedCount: 12,
-    isActive: true
+    isActive: true,
+    validUpto: new Date('2026-06-30')
   }
 ];
 

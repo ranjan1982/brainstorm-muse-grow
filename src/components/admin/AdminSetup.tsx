@@ -208,6 +208,7 @@ export function AdminDiscounts() {
                                 <TableHead>Value</TableHead>
                                 <TableHead>Type</TableHead>
                                 <TableHead>Usage</TableHead>
+                                <TableHead>Valid Upto</TableHead>
                                 <TableHead className="w-[100px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -223,6 +224,9 @@ export function AdminDiscounts() {
                                         {discount.appliesTo === 'recurring' && ` (${discount.recurringDuration}x)`}
                                     </TableCell>
                                     <TableCell>{discount.usedCount} times</TableCell>
+                                    <TableCell>
+                                        {discount.validUpto ? new Date(discount.validUpto).toLocaleDateString('en-US') : 'N/A'}
+                                    </TableCell>
                                     <TableCell>
                                         <div className="flex gap-2">
                                             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(discount)}><Edit2 className="w-4 h-4" /></Button>
@@ -261,6 +265,14 @@ export function AdminDiscounts() {
                                 <Label>Value</Label>
                                 <Input type="number" value={discountState.value || ''} onChange={e => setDiscountState({ ...discountState, value: Number(e.target.value) })} />
                             </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Valid Upto</Label>
+                            <Input
+                                type="date"
+                                value={discountState.validUpto ? new Date(discountState.validUpto).toISOString().split('T')[0] : ''}
+                                onChange={e => setDiscountState({ ...discountState, validUpto: e.target.value ? new Date(e.target.value) : undefined })}
+                            />
                         </div>
                     </div>
                     <DialogFooter>

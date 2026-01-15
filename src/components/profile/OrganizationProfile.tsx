@@ -20,13 +20,23 @@ export function OrganizationProfile() {
     const [company, setCompany] = useState(currentClient?.company || '');
     const [address, setAddress] = useState(currentClient?.address || '');
 
+    // Password state
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+
     const handleSave = () => {
         if (!currentUser) return;
+
+        // Security check: require password if email is changed
+        if (email !== currentUser.email && !password) {
+            toast.error('Please enter and confirm your password in the Security Settings tile to change your email address.');
+            return;
+        }
 
         // Update User
         updateUserProfile(currentUser.id, {
             name,
-            email, // In real app, changing email might require verification
+            email,
             phone
         });
 
@@ -37,6 +47,22 @@ export function OrganizationProfile() {
                 address,
                 phone // Client phone might be same as user phone or diff
             });
+        }
+
+        // Update Password if provided
+        if (password) {
+            if (password !== confirmPassword) {
+                toast.error('Passwords do not match');
+                return;
+            }
+            if (password.length < 6) {
+                toast.error('Password must be at least 6 characters');
+                return;
+            }
+            // In a real app, this would call changePassword(currentUser.id, password)
+            toast.success('Password updated successfully');
+            setPassword('');
+            setConfirmPassword('');
         }
 
         toast.success('Profile updated successfully');
@@ -92,6 +118,43 @@ export function OrganizationProfile() {
                         </CardContent>
                     </Card>
                 )}
+
+                <Card className="border-accent/20">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <span className="p-1 px-1.5 rounded bg-accent/10 border border-accent/20 text-accent">🔒</span>
+                            Security Settings
+                        </CardTitle>
+                        <CardDescription>Update your credentials. Required to change email address.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>New Password</Label>
+                            <Input
+                                type="password"
+                                disabled={!isEditing}
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                placeholder="Enter new password"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Confirm New Password</Label>
+                            <Input
+                                type="password"
+                                disabled={!isEditing}
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
+                                placeholder="Confirm new password"
+                            />
+                        </div>
+                        {!isEditing && (
+                            <p className="text-xs text-muted-foreground italic">
+                                Password fields are hidden for security. Click Edit to change.
+                            </p>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
 
             <div className="flex justify-end gap-2">

@@ -341,7 +341,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateUserProfile = (userId: string, updates: Partial<User>) => {
     if (currentUser && currentUser.id === userId) {
-      setCurrentUser({ ...currentUser, ...updates });
+      const updatedUser = { ...currentUser, ...updates };
+      setCurrentUser(updatedUser);
+      setUsers(prev => prev.map(u => u.id === userId ? updatedUser : u));
     }
   };
 

@@ -102,6 +102,7 @@ export interface Discount {
   usedCount: number;
   isActive: boolean;
   recurringDuration?: number; // Number of billing cycles
+  validUpto?: Date;
 }
 
 export interface Client {
