@@ -33,7 +33,7 @@ import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon, Download, AlertTriangle, UserCheck, UserX, Monitor, Activity, Eye } from 'lucide-react';
+import { CalendarIcon, Download, AlertTriangle, UserCheck, UserX, Monitor, Activity, Eye, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AdminClientsProps {
@@ -111,6 +111,368 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
         extendSubscriptionTrial(subId, days);
         toast.success(`Trial extended by ${days} days`);
     };
+
+    if (isDetailOpen && detailClientData) {
+        return (
+            <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                    <Button variant="outline" size="sm" onClick={() => setIsDetailOpen(false)}>
+                        <ArrowLeft className="w-4 h-4 mr-2" /> Back to Clients
+                    </Button>
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">Client Details: {detailClientData.company}</h2>
+                        <p className="text-muted-foreground">Manage profile, subscription, and view history</p>
+                    </div>
+                </div>
+
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 md:w-[600px] mb-6">
+                        <TabsTrigger value="profile">Profile</TabsTrigger>
+                        <TabsTrigger value="subscription">Subscription & Billing</TabsTrigger>
+                        <TabsTrigger value="history">Login History</TabsTrigger>
+                    </TabsList>
+
+                    {/* Profile Tab */}
+                    <TabsContent value="profile" className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Profile Information</CardTitle>
+                                <CardDescription>Update client's personal and company details.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <div className="flex justify-between items-center bg-secondary/20 p-4 rounded-lg">
+                                    <div className="flex items-center gap-2">
+                                        {detailClientData.isActive ? <UserCheck className="text-green-500 w-5 h-5" /> : <UserX className="text-destructive w-5 h-5" />}
+                                        <span className="font-medium">Account Status</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Label htmlFor="active-mode">Active?</Label>
+                                        <Switch
+                                            id="active-mode"
+                                            checked={detailClientData.isActive}
+                                            onCheckedChange={(c) => {
+                                                onSaveProfile({ ...detailClientData, isActive: c });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label>Company Name</Label>
+                                        <Input
+                                            value={detailClientData.company}
+                                            onChange={e => setSelectedClient({ ...detailClientData, company: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Industry</Label>
+                                        <Input
+                                            value={detailClientData.industry || ''}
+                                            placeholder="e.g. Legal, Medical"
+                                            onChange={e => setSelectedClient({ ...detailClientData, industry: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label>First Name</Label>
+                                        <Input
+                                            value={detailClientData.name.split(' ')[0]}
+                                            onChange={e => {
+                                                const names = detailClientData.name.split(' ');
+                                                const newName = [e.target.value, ...names.slice(1)].join(' ');
+                                                setSelectedClient({ ...detailClientData, name: newName });
+                                            }}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Last Name</Label>
+                                        <Input
+                                            value={detailClientData.name.split(' ').slice(1).join(' ')}
+                                            onChange={e => {
+                                                const names = detailClientData.name.split(' ');
+                                                const newName = [names[0], e.target.value].join(' ');
+                                                setSelectedClient({ ...detailClientData, name: newName });
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label>Email</Label>
+                                        <Input
+                                            value={detailClientData.email}
+                                            onChange={e => setSelectedClient({ ...detailClientData, email: e.target.value })}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Phone</Label>
+                                        <Input
+                                            value={detailClientData.phone || ''}
+                                            onChange={e => setSelectedClient({ ...detailClientData, phone: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label>Website</Label>
+                                    <Input
+                                        value={detailClientData.website || ''}
+                                        placeholder="https://example.com"
+                                        onChange={e => setSelectedClient({ ...detailClientData, website: e.target.value })}
+                                    />
+                                </div>
+
+                                <div className="space-y-4 border rounded-md p-4 bg-secondary/5">
+                                    <Label className="font-semibold text-base">Billing Address</Label>
+                                    <div className="space-y-3">
+                                        <div className="space-y-1">
+                                            <Label className="text-xs text-muted-foreground">Address Line 1</Label>
+                                            <Input
+                                                placeholder="123 Main St"
+                                                value={detailClientData.billingAddress?.line1 || detailClientData.address || ''}
+                                                onChange={e => setSelectedClient({
+                                                    ...detailClientData,
+                                                    address: e.target.value, // Keep sync for backward compat
+                                                    billingAddress: { ...detailClientData.billingAddress, line1: e.target.value, city: detailClientData.billingAddress?.city || '', state: detailClientData.billingAddress?.state || '', zip: detailClientData.billingAddress?.zip || '' }
+                                                })}
+                                            />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-xs text-muted-foreground">Address Line 2 (Optional)</Label>
+                                            <Input
+                                                placeholder="Suite 100"
+                                                value={detailClientData.billingAddress?.line2 || ''}
+                                                onChange={e => setSelectedClient({
+                                                    ...detailClientData,
+                                                    billingAddress: { ...detailClientData.billingAddress!, line2: e.target.value }
+                                                })}
+                                            />
+                                        </div>
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className="space-y-1">
+                                                <Label className="text-xs text-muted-foreground">City</Label>
+                                                <Input
+                                                    placeholder="City"
+                                                    value={detailClientData.billingAddress?.city || ''}
+                                                    onChange={e => setSelectedClient({
+                                                        ...detailClientData,
+                                                        billingAddress: { ...detailClientData.billingAddress!, city: e.target.value }
+                                                    })}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-xs text-muted-foreground">State</Label>
+                                                <Input
+                                                    placeholder="State"
+                                                    value={detailClientData.billingAddress?.state || ''}
+                                                    onChange={e => setSelectedClient({
+                                                        ...detailClientData,
+                                                        billingAddress: { ...detailClientData.billingAddress!, state: e.target.value }
+                                                    })}
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-xs text-muted-foreground">Zip Code</Label>
+                                                <Input
+                                                    placeholder="Zip"
+                                                    value={detailClientData.billingAddress?.zip || ''}
+                                                    onChange={e => setSelectedClient({
+                                                        ...detailClientData,
+                                                        billingAddress: { ...detailClientData.billingAddress!, zip: e.target.value }
+                                                    })}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-end pt-4">
+                                    <Button onClick={() => onSaveProfile(detailClientData)} size="lg">Save Changes</Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    {/* Subscription Tab */}
+                    <TabsContent value="subscription" className="space-y-6">
+                        {detailClientSub ? (
+                            <div className="space-y-6">
+                                <Card>
+                                    <CardContent className="p-6 space-y-6">
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <h3 className="font-bold text-lg">{SUBSCRIPTION_TIER_LABELS[detailClientSub.tier]} Plan</h3>
+                                                <div className="flex gap-2 mt-2">
+                                                    <Badge variant={detailClientSub.status === 'active' ? 'default' : detailClientSub.status === 'trial' ? 'outline' : 'destructive'} className="capitalize">
+                                                        {detailClientSub.status}
+                                                    </Badge>
+                                                    {detailClientSub.status === 'trial' && (
+                                                        <Badge variant="secondary">Trial ends {format(detailClientSub.trialEndDate || new Date(), 'MMM dd')}</Badge>
+                                                    )}
+                                                </div>
+                                                <div className="mt-3 space-y-1">
+                                                    <div className="text-xs text-muted-foreground">
+                                                        <span className="font-medium text-foreground">Profile ID:</span> {detailClientSub.id}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        <span className="font-medium text-foreground">Created:</span> {format(new Date(detailClientSub.startDate), 'MMM dd, yyyy')}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-2xl font-bold">${detailClientSub.monthlyPrice}</div>
+                                                <div className="text-sm text-muted-foreground">per month</div>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <div className="space-y-2">
+                                                <Label>Change Plan</Label>
+                                                <Select defaultValue={detailClientSub.tier} onValueChange={(v) => upgradeSubscription(detailClientData.id, v as SubscriptionTier)}>
+                                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="starter">Starter</SelectItem>
+                                                        <SelectItem value="growth">Growth</SelectItem>
+                                                        <SelectItem value="enterprise">Enterprise</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Status Action</Label>
+                                                {detailClientSub.status === 'active' || detailClientSub.status === 'trial' ? (
+                                                    <div className="flex gap-2">
+                                                        <Button variant="outline" size="sm" onClick={() => onSubscriptionAction('pause', detailClientSub.id)} className="flex-1">Pause</Button>
+                                                        <Button variant="destructive" size="sm" onClick={() => onSubscriptionAction('cancel', detailClientSub.id)} className="flex-1">Cancel</Button>
+                                                    </div>
+                                                ) : detailClientSub.status === 'paused' ? (
+                                                    <Button variant="outline" size="sm" onClick={() => onSubscriptionAction('resume', detailClientSub.id)} className="w-full">Resume</Button>
+                                                ) : (
+                                                    <div className="text-sm text-muted-foreground py-2">Subscription is {detailClientSub.status}</div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Trial Extension */}
+                                        {detailClientSub.status === 'trial' && (
+                                            <div className="border-t pt-4">
+                                                <Label className="mb-2 block">Extend Trial Period</Label>
+                                                <div className="flex gap-2">
+                                                    <Button size="sm" variant="outline" onClick={() => onExtendTrial(detailClientSub.id, 7)}>+7 Days</Button>
+                                                    <Button size="sm" variant="outline" onClick={() => onExtendTrial(detailClientSub.id, 14)}>+14 Days</Button>
+                                                    <Button size="sm" variant="outline" onClick={() => onExtendTrial(detailClientSub.id, 30)}>+30 Days</Button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+
+                                {/* Payment History */}
+                                <div className="space-y-3">
+                                    <h4 className="font-semibold flex items-center gap-2"><CreditCard className="w-4 h-4" /> Payment History</h4>
+                                    <div className="border rounded-md overflow-hidden bg-white">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Date</TableHead>
+                                                    <TableHead>Transaction ID</TableHead>
+                                                    <TableHead>Amount</TableHead>
+                                                    <TableHead>Status</TableHead>
+                                                    <TableHead className="text-right">Action</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {detailClientPayments.map(payment => (
+                                                    <TableRow key={payment.id}>
+                                                        <TableCell>{format(payment.paymentDate, 'MMM dd, yyyy')}</TableCell>
+                                                        <TableCell className="font-mono text-xs text-muted-foreground">
+                                                            {payment.transactionId || `TXN-${payment.id.substring(0, 8)}`}
+                                                        </TableCell>
+                                                        <TableCell>${payment.amount}</TableCell>
+                                                        <TableCell>
+                                                            <span className={cn(
+                                                                "text-xs px-2 py-1 rounded-full",
+                                                                payment.status === 'paid' ? "bg-green-100 text-green-700" :
+                                                                    payment.status === 'refunded' ? "bg-red-100 text-red-700" :
+                                                                        "bg-gray-100 text-gray-700"
+                                                            )}>
+                                                                {payment.status}
+                                                            </span>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            <div className="flex justify-end gap-1">
+                                                                <Button size="icon" variant="ghost" className="h-6 w-6" title="Download Invoice">
+                                                                    <Download className="w-3 h-3" />
+                                                                </Button>
+                                                                {payment.status === 'paid' && (
+                                                                    <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive"
+                                                                        title="Refund"
+                                                                        onClick={() => {
+                                                                            if (confirm('Issue full refund?')) refundPayment(payment.id);
+                                                                        }}
+                                                                    >
+                                                                        <RotateCcw className="w-3 h-3" />
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                                {detailClientPayments.length === 0 && (
+                                                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-4">No payment history found</TableCell></TableRow>
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground bg-secondary/20 rounded-lg">
+                                <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                No active subscription found for this client.
+                            </div>
+                        )}
+                    </TabsContent>
+
+                    {/* Login History Tab */}
+                    <TabsContent value="history" className="space-y-4">
+                        <div className="border rounded-md bg-white">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Date & Time</TableHead>
+                                        <TableHead>IP Address</TableHead>
+                                        <TableHead>Session Time</TableHead>
+                                        <TableHead>User</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {detailLoginHistory?.length ? detailLoginHistory.map(log => (
+                                        <TableRow key={log.id}>
+                                            <TableCell>{format(log.loginTime, 'MMM dd, yyyy HH:mm')}</TableCell>
+                                            <TableCell className="font-mono text-xs">{log.ipAddress}</TableCell>
+                                            <TableCell>{log.sessionTime}</TableCell>
+                                            <TableCell>{log.userName}</TableCell>
+                                        </TableRow>
+                                    )) : (
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                                                No login history available.
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -221,302 +583,6 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                     </Table>
                 </CardContent>
             </Card>
-
-            {/* Detailed Client View Sheet */}
-            <Sheet open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-                <SheetContent className="w-[400px] sm:w-[600px] sm:max-w-[700px] overflow-y-auto">
-                    <SheetHeader className="mb-6">
-                        <SheetTitle>Client Details: {detailClientData?.company}</SheetTitle>
-                        <SheetDescription>Manage profile, subscription, and view history</SheetDescription>
-                    </SheetHeader>
-
-                    {detailClientData && (
-                        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                            <TabsList className="grid w-full grid-cols-3 mb-6">
-                                <TabsTrigger value="profile">Profile</TabsTrigger>
-                                <TabsTrigger value="subscription">Subscription & Billing</TabsTrigger>
-                                <TabsTrigger value="history">Login History</TabsTrigger>
-                            </TabsList>
-
-                            {/* Profile Tab */}
-                            <TabsContent value="profile" className="space-y-4">
-                                <div className="grid gap-4 py-2">
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center bg-secondary/20 p-4 rounded-lg">
-                                            <div className="flex items-center gap-2">
-                                                {detailClientData.isActive ? <UserCheck className="text-green-500 w-5 h-5" /> : <UserX className="text-destructive w-5 h-5" />}
-                                                <span className="font-medium">Account Status</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Label htmlFor="active-mode">Active?</Label>
-                                                <Switch
-                                                    id="active-mode"
-                                                    checked={detailClientData.isActive}
-                                                    onCheckedChange={(c) => {
-                                                        onSaveProfile({ ...detailClientData, isActive: c });
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Company Name</Label>
-                                                <Input
-                                                    value={detailClientData.company}
-                                                    onChange={e => setSelectedClient({ ...detailClientData, company: e.target.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Industry</Label>
-                                                <Input
-                                                    value={detailClientData.industry || ''}
-                                                    placeholder="e.g. Legal, Medical"
-                                                    onChange={e => setSelectedClient({ ...detailClientData, industry: e.target.value })}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>First Name</Label>
-                                                <Input
-                                                    value={detailClientData.name.split(' ')[0]}
-                                                    onChange={e => {
-                                                        const names = detailClientData.name.split(' ');
-                                                        const newName = [e.target.value, ...names.slice(1)].join(' ');
-                                                        setSelectedClient({ ...detailClientData, name: newName });
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Last Name</Label>
-                                                <Input
-                                                    value={detailClientData.name.split(' ').slice(1).join(' ')}
-                                                    onChange={e => {
-                                                        const names = detailClientData.name.split(' ');
-                                                        const newName = [names[0], e.target.value].join(' ');
-                                                        setSelectedClient({ ...detailClientData, name: newName });
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Email</Label>
-                                                <Input
-                                                    value={detailClientData.email}
-                                                    onChange={e => setSelectedClient({ ...detailClientData, email: e.target.value })}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Phone</Label>
-                                                <Input
-                                                    value={detailClientData.phone || ''}
-                                                    onChange={e => setSelectedClient({ ...detailClientData, phone: e.target.value })}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label>Website</Label>
-                                            <Input
-                                                value={detailClientData.website || ''}
-                                                placeholder="https://example.com"
-                                                onChange={e => setSelectedClient({ ...detailClientData, website: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <div className="space-y-2">
-                                            <Label>Address</Label>
-                                            <Input
-                                                value={detailClientData.address || ''}
-                                                onChange={e => setSelectedClient({ ...detailClientData, address: e.target.value })}
-                                            />
-                                        </div>
-
-                                        <Button onClick={() => onSaveProfile(detailClientData)} className="w-full">Save Changes</Button>
-                                    </div>
-                                </div>
-                            </TabsContent>
-
-                            {/* Subscription Tab */}
-                            <TabsContent value="subscription" className="space-y-6">
-                                {detailClientSub ? (
-                                    <div className="space-y-6">
-                                        <Card>
-                                            <CardContent className="p-6 space-y-6">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <h3 className="font-bold text-lg">{SUBSCRIPTION_TIER_LABELS[detailClientSub.tier]} Plan</h3>
-                                                        <div className="flex gap-2 mt-2">
-                                                            <Badge variant={detailClientSub.status === 'active' ? 'default' : detailClientSub.status === 'trial' ? 'outline' : 'destructive'} className="capitalize">
-                                                                {detailClientSub.status}
-                                                            </Badge>
-                                                            {detailClientSub.status === 'trial' && (
-                                                                <Badge variant="secondary">Trial ends {format(detailClientSub.trialEndDate || new Date(), 'MMM dd')}</Badge>
-                                                            )}
-                                                        </div>
-                                                        <div className="mt-3 space-y-1">
-                                                            <div className="text-xs text-muted-foreground">
-                                                                <span className="font-medium text-foreground">Profile ID:</span> {detailClientSub.id}
-                                                            </div>
-                                                            <div className="text-xs text-muted-foreground">
-                                                                <span className="font-medium text-foreground">Created:</span> {format(new Date(detailClientSub.startDate), 'MMM dd, yyyy')}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <div className="text-2xl font-bold">${detailClientSub.monthlyPrice}</div>
-                                                        <div className="text-sm text-muted-foreground">per month</div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Actions */}
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <div className="space-y-2">
-                                                        <Label>Change Plan</Label>
-                                                        <Select defaultValue={detailClientSub.tier} onValueChange={(v) => upgradeSubscription(detailClientData.id, v as SubscriptionTier)}>
-                                                            <SelectTrigger><SelectValue /></SelectTrigger>
-                                                            <SelectContent>
-                                                                <SelectItem value="starter">Starter</SelectItem>
-                                                                <SelectItem value="growth">Growth</SelectItem>
-                                                                <SelectItem value="enterprise">Enterprise</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </div>
-                                                    <div className="space-y-2">
-                                                        <Label>Status Action</Label>
-                                                        {detailClientSub.status === 'active' || detailClientSub.status === 'trial' ? (
-                                                            <div className="flex gap-2">
-                                                                <Button variant="outline" size="sm" onClick={() => onSubscriptionAction('pause', detailClientSub.id)} className="flex-1">Pause</Button>
-                                                                <Button variant="destructive" size="sm" onClick={() => onSubscriptionAction('cancel', detailClientSub.id)} className="flex-1">Cancel</Button>
-                                                            </div>
-                                                        ) : detailClientSub.status === 'paused' ? (
-                                                            <Button variant="outline" size="sm" onClick={() => onSubscriptionAction('resume', detailClientSub.id)} className="w-full">Resume</Button>
-                                                        ) : (
-                                                            <div className="text-sm text-muted-foreground py-2">Subscription is {detailClientSub.status}</div>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* Trial Extension */}
-                                                {detailClientSub.status === 'trial' && (
-                                                    <div className="border-t pt-4">
-                                                        <Label className="mb-2 block">Extend Trial Period</Label>
-                                                        <div className="flex gap-2">
-                                                            <Button size="sm" variant="outline" onClick={() => onExtendTrial(detailClientSub.id, 7)}>+7 Days</Button>
-                                                            <Button size="sm" variant="outline" onClick={() => onExtendTrial(detailClientSub.id, 14)}>+14 Days</Button>
-                                                            <Button size="sm" variant="outline" onClick={() => onExtendTrial(detailClientSub.id, 30)}>+30 Days</Button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </CardContent>
-                                        </Card>
-
-                                        {/* Payment History */}
-                                        <div className="space-y-3">
-                                            <h4 className="font-semibold flex items-center gap-2"><CreditCard className="w-4 h-4" /> Payment History</h4>
-                                            <div className="border rounded-md overflow-hidden">
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow>
-                                                            <TableHead>Date</TableHead>
-                                                            <TableHead>Transaction ID</TableHead>
-                                                            <TableHead>Amount</TableHead>
-                                                            <TableHead>Status</TableHead>
-                                                            <TableHead className="text-right">Action</TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {detailClientPayments.map(payment => (
-                                                            <TableRow key={payment.id}>
-                                                                <TableCell>{format(payment.paymentDate, 'MMM dd, yyyy')}</TableCell>
-                                                                <TableCell className="font-mono text-xs text-muted-foreground">
-                                                                    {payment.transactionId || `TXN-${payment.id.substring(0, 8)}`}
-                                                                </TableCell>
-                                                                <TableCell>${payment.amount}</TableCell>
-                                                                <TableCell>
-                                                                    <span className={cn(
-                                                                        "text-xs px-2 py-1 rounded-full",
-                                                                        payment.status === 'paid' ? "bg-green-100 text-green-700" :
-                                                                            payment.status === 'refunded' ? "bg-red-100 text-red-700" :
-                                                                                "bg-gray-100 text-gray-700"
-                                                                    )}>
-                                                                        {payment.status}
-                                                                    </span>
-                                                                </TableCell>
-                                                                <TableCell className="text-right">
-                                                                    <div className="flex justify-end gap-1">
-                                                                        <Button size="icon" variant="ghost" className="h-6 w-6" title="Download Invoice">
-                                                                            <Download className="w-3 h-3" />
-                                                                        </Button>
-                                                                        {payment.status === 'paid' && (
-                                                                            <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive"
-                                                                                title="Refund"
-                                                                                onClick={() => {
-                                                                                    if (confirm('Issue full refund?')) refundPayment(payment.id);
-                                                                                }}
-                                                                            >
-                                                                                <RotateCcw className="w-3 h-3" />
-                                                                            </Button>
-                                                                        )}
-                                                                    </div>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                        {detailClientPayments.length === 0 && (
-                                                            <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-4">No payment history found</TableCell></TableRow>
-                                                        )}
-                                                    </TableBody>
-                                                </Table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8 text-muted-foreground bg-secondary/20 rounded-lg">
-                                        <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                        No active subscription found for this client.
-                                    </div>
-                                )}
-                            </TabsContent>
-
-                            {/* Login History Tab */}
-                            <TabsContent value="history" className="space-y-4">
-                                <div className="border rounded-md">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Date & Time</TableHead>
-                                                <TableHead>IP Address</TableHead>
-                                                <TableHead>Session Time</TableHead>
-                                                <TableHead>User</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {detailLoginHistory?.length ? detailLoginHistory.map(log => (
-                                                <TableRow key={log.id}>
-                                                    <TableCell>{format(log.loginTime, 'MMM dd, yyyy HH:mm')}</TableCell>
-                                                    <TableCell className="font-mono text-xs">{log.ipAddress}</TableCell>
-                                                    <TableCell>{log.sessionTime}</TableCell>
-                                                    <TableCell>{log.userName}</TableCell>
-                                                </TableRow>
-                                            )) : (
-                                                <TableRow>
-                                                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                                                        No login history available.
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </TabsContent>
-                        </Tabs>
-                    )}
-                </SheetContent>
-            </Sheet >
-        </div >
+        </div>
     );
 }

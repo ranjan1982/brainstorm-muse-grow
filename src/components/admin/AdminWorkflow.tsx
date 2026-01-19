@@ -47,6 +47,8 @@ export function AdminWorkflow() {
         tiers: ['starter', 'growth', 'enterprise']
     });
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+    const [phaseFilter, setPhaseFilter] = useState<string>('all');
+    const [tierFilter, setTierFilter] = useState<string>('all');
 
     // Phase Config State - minimal implementation for enabling/disabling
 
@@ -133,8 +135,37 @@ export function AdminWorkflow() {
                 </TabsContent>
 
                 <TabsContent value="tasks" className="space-y-4">
-                    <div className="flex justify-end">
-                        <Button onClick={() => { setIsTaskDialogOpen(true); setEditingTaskId(null); setTaskState({ phase: 'execution', isActive: true, cadence: 'monthly', tiers: ['starter', 'growth', 'enterprise'] }); }}>
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <Label>Filter by Phase:</Label>
+                            <Select value={phaseFilter} onValueChange={setPhaseFilter}>
+                                <SelectTrigger className="w-[200px]">
+                                    <SelectValue placeholder="All Phases" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Phases</SelectItem>
+                                    {phaseConfigs
+                                        .sort((a, b) => a.order - b.order)
+                                        .map(p => (
+                                            <SelectItem key={p.slug} value={p.slug}>{p.name}</SelectItem>
+                                        ))}
+                                </SelectContent>
+                            </Select>
+
+                            <Label className="ml-4">Filter by Tier:</Label>
+                            <Select value={tierFilter} onValueChange={setTierFilter}>
+                                <SelectTrigger className="w-[200px]">
+                                    <SelectValue placeholder="All Tiers" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Tiers</SelectItem>
+                                    <SelectItem value="starter">Starter</SelectItem>
+                                    <SelectItem value="growth">Growth</SelectItem>
+                                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button onClick={() => { setIsTaskDialogOpen(true); setEditingTaskId(null); setTaskState({ phase: 'execution', isActive: true, cadence: 'monthly', tiers: ['starter', 'growth', 'enterprise'], order: (taskTemplates.length + 1) }); }}>
                             <Plus className="w-4 h-4 mr-2" /> Add Task Template
                         </Button>
                     </div>
@@ -144,6 +175,7 @@ export function AdminWorkflow() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
+                                        <TableHead className="w-[80px]">Order</TableHead>
                                         <TableHead>ID</TableHead>
                                         <TableHead>Task Title</TableHead>
                                         <TableHead>Phase</TableHead>
@@ -153,32 +185,36 @@ export function AdminWorkflow() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {taskTemplates.map((task) => (
-                                        <TableRow key={task.id}>
-                                            <TableCell className="font-mono text-xs font-medium">{task.taskId}</TableCell>
-                                            <TableCell>
-                                                <div className="flex flex-col">
-                                                    <span>{task.title}</span>
-                                                    {task.description && <span className="text-xs text-muted-foreground truncate max-w-[300px]">{task.description}</span>}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell><Badge variant="outline">{PHASE_LABELS[task.phase]}</Badge></TableCell>
-                                            <TableCell className="capitalize">{task.cadence}</TableCell>
-                                            <TableCell>
-                                                <div className="flex gap-1">
-                                                    {task.tiers.map(t => (
-                                                        <span key={t} className="w-2 h-2 rounded-full bg-primary" title={t} />
-                                                    ))}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex gap-2">
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditTask(task)}><Edit2 className="w-4 h-4" /></Button>
-                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => { if (confirm('Delete this template?')) deleteTaskTemplate(task.id); }}><Trash2 className="w-4 h-4" /></Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
+                                    {taskTemplates
+                                        .filter(t => (phaseFilter === 'all' || t.phase === phaseFilter) && (tierFilter === 'all' || t.tiers.includes(tierFilter as SubscriptionTier)))
+                                        .sort((a, b) => (a.order || 0) - (b.order || 0))
+                                        .map((task) => (
+                                            <TableRow key={task.id}>
+                                                <TableCell className="font-medium text-center">{task.order}</TableCell>
+                                                <TableCell className="font-mono text-xs font-medium">{task.taskId}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex flex-col">
+                                                        <span>{task.title}</span>
+                                                        {task.description && <span className="text-xs text-muted-foreground truncate max-w-[300px]">{task.description}</span>}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell><Badge variant="outline">{PHASE_LABELS[task.phase]}</Badge></TableCell>
+                                                <TableCell className="capitalize">{task.cadence}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex gap-1">
+                                                        {task.tiers.map(t => (
+                                                            <span key={t} className="w-2 h-2 rounded-full bg-primary" title={t} />
+                                                        ))}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex gap-2">
+                                                        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditTask(task)}><Edit2 className="w-4 h-4" /></Button>
+                                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => { if (confirm('Delete this template?')) deleteTaskTemplate(task.id); }}><Trash2 className="w-4 h-4" /></Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
                                 </TableBody>
                             </Table>
                         </CardContent>
@@ -194,6 +230,14 @@ export function AdminWorkflow() {
                     </DialogHeader>
                     <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
                         <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Order / Sequence</Label>
+                                <Input
+                                    type="number"
+                                    value={taskState.order || 0}
+                                    onChange={e => setTaskState({ ...taskState, order: parseInt(e.target.value) })}
+                                />
+                            </div>
                             <div className="space-y-2">
                                 <Label>Task Code (ID)</Label>
                                 <Input value={taskState.taskId || ''} onChange={e => setTaskState({ ...taskState, taskId: e.target.value.toUpperCase() })} placeholder="e.g. ST-EXE-005" />
