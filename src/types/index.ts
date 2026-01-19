@@ -106,6 +106,15 @@ export interface Discount {
   validUpto?: Date;
 }
 
+export interface BillingAddress {
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country?: string;
+}
+
 export interface Client {
   id: string;
   name: string;
@@ -113,6 +122,7 @@ export interface Client {
   company: string;
   phone?: string;
   address?: string;
+  billingAddress?: BillingAddress;
   avatar?: string;
   createdAt: Date;
   isActive: boolean;

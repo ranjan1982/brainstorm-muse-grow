@@ -217,7 +217,11 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
                         >
                           <div className="flex items-center gap-2">
                             <span>{phaseIcons[phase]}</span>
-                            <span className="text-sm">{PHASE_LABELS[phase].split('&')[0].trim()}</span>
+                            <span className="text-sm">
+                              {currentUser?.role === 'client' && phase === 'onboarding'
+                                ? 'Tasks'
+                                : PHASE_LABELS[phase].split('&')[0].trim()}
+                            </span>
                           </div>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -251,6 +255,25 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
                       >
                         <UserCog className="w-4 h-4" />
                         <span>Profile & Org</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+
+            {/* Account Management (Internal Roles) */}
+            {['us-strategy', 'seo-head', 'seo-junior'].includes(currentUser?.role || '') && (
+              <SidebarGroup>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={activeView === 'profile'}
+                        onClick={() => onViewChange('profile')}
+                      >
+                        <UserCog className="w-4 h-4" />
+                        <span>My Profile</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>

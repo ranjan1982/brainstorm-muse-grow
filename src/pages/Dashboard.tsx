@@ -333,10 +333,12 @@ export default function Dashboard() {
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium truncate">{task.title}</p>
                                   <div className="flex items-center gap-2">
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                      <Building2 className="w-3 h-3" />
-                                      {clients.find(c => c.id === task.clientId)?.company}
-                                    </p>
+                                    {currentUser?.role !== 'client' && (
+                                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                        <Building2 className="w-3 h-3" />
+                                        {clients.find(c => c.id === task.clientId)?.company}
+                                      </p>
+                                    )}
                                     <span className="text-[10px] bg-[#f1f5f9] text-[#475569] px-2 py-0.5 rounded-full font-medium uppercase tracking-tight">
                                       {PHASE_LABELS[task.phase]}
                                     </span>

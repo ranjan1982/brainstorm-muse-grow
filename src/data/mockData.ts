@@ -9,6 +9,13 @@ export const mockClients: Client[] = [
     company: 'Acme Plumbing Co.',
     phone: '+1 (555) 123-4567',
     address: '123 Main St, Los Angeles, CA 90001',
+    billingAddress: {
+      line1: '123 Main St',
+      city: 'Los Angeles',
+      state: 'CA',
+      zip: '90001',
+      country: 'USA'
+    },
     createdAt: new Date('2024-01-01'),
     isActive: true
   },
@@ -19,6 +26,13 @@ export const mockClients: Client[] = [
     company: 'GreenScape Landscaping',
     phone: '+1 (555) 234-5678',
     address: '456 Oak Ave, San Diego, CA 92101',
+    billingAddress: {
+      line1: '456 Oak Ave',
+      city: 'San Diego',
+      state: 'CA',
+      zip: '92101',
+      country: 'USA'
+    },
     createdAt: new Date('2024-01-15'),
     isActive: true
   },
@@ -29,6 +43,13 @@ export const mockClients: Client[] = [
     company: 'Elite Auto Repair',
     phone: '+1 (555) 345-6789',
     address: '789 Industrial Blvd, Phoenix, AZ 85001',
+    billingAddress: {
+      line1: '789 Industrial Blvd',
+      city: 'Phoenix',
+      state: 'AZ',
+      zip: '85001',
+      country: 'USA'
+    },
     createdAt: new Date('2024-02-01'),
     isActive: true
   },
@@ -39,6 +60,13 @@ export const mockClients: Client[] = [
     company: 'HomeClean Pro Services',
     phone: '+1 (555) 456-7890',
     address: '321 Service Rd, Denver, CO 80202',
+    billingAddress: {
+      line1: '321 Service Rd',
+      city: 'Denver',
+      state: 'CO',
+      zip: '80202',
+      country: 'USA'
+    },
     createdAt: new Date('2024-02-15'),
     isActive: false
   },
@@ -49,6 +77,13 @@ export const mockClients: Client[] = [
     company: 'TechStart Inc.',
     phone: '+1 (555) 567-8901',
     address: '101 Tech Blvd, Austin, TX 78701',
+    billingAddress: {
+      line1: '101 Tech Blvd',
+      city: 'Austin',
+      state: 'TX',
+      zip: '78701',
+      country: 'USA'
+    },
     createdAt: new Date('2026-01-10'),
     isActive: true
   },
