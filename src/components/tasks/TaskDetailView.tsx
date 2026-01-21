@@ -213,6 +213,12 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
                         <Badge variant="secondary" className="bg-[#f8fafc] text-[#64748b] border-[#e2e8f0] border font-mono text-[10px] px-3 py-1 rounded-full shadow-sm">
                             {task.taskId}
                         </Badge>
+                        {task.duration && (
+                            <Badge variant="secondary" className="bg-[#fff7ed] text-[#9a3412] border-[#fed7aa] border font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm text-[10px]">
+                                <Clock className="w-3 h-3" />
+                                {task.duration} Days
+                            </Badge>
+                        )}
                         <Badge className={cn("font-bold px-5 py-1.5 rounded-full shadow-sm border text-xs tracking-wide", getStatusColors(task.status))}>
                             {STATUS_LABELS[task.status].toUpperCase()}
                         </Badge>

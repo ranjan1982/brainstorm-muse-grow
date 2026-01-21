@@ -180,6 +180,7 @@ export function AdminWorkflow() {
                                         <TableHead>Task Title</TableHead>
                                         <TableHead>Phase</TableHead>
                                         <TableHead>Cadence</TableHead>
+                                        <TableHead>Duration (Days)</TableHead>
                                         <TableHead>Tiers</TableHead>
                                         <TableHead className="w-[100px]">Actions</TableHead>
                                     </TableRow>
@@ -200,6 +201,7 @@ export function AdminWorkflow() {
                                                 </TableCell>
                                                 <TableCell><Badge variant="outline">{PHASE_LABELS[task.phase]}</Badge></TableCell>
                                                 <TableCell className="capitalize">{task.cadence}</TableCell>
+                                                <TableCell>{task.duration || '-'}</TableCell>
                                                 <TableCell>
                                                     <div className="flex gap-1">
                                                         {task.tiers.map(t => (
@@ -281,6 +283,15 @@ export function AdminWorkflow() {
                                         <SelectItem value="quarterly">Quarterly</SelectItem>
                                     </SelectContent>
                                 </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Duration (Days)</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Enter days"
+                                    value={taskState.duration || ''}
+                                    onChange={e => setTaskState({ ...taskState, duration: Number(e.target.value) })}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Assigned Role</Label>

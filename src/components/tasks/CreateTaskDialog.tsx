@@ -31,7 +31,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
   const { currentUser, addTask } = useApp();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -39,6 +39,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
     assignTo: 'seo-head' as UserRole,
     approver: 'us-strategy' as UserRole,
     cadence: '' as '' | 'once' | 'monthly' | 'weekly' | 'ongoing',
+    duration: '' as number | '',
   });
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -80,7 +81,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
     }));
 
     setAttachments(prev => [...prev, ...newAttachments]);
-    
+
     // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -104,10 +105,10 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
     }
 
     setIsSubmitting(true);
-    
+
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     addTask({
       title: formData.title.trim(),
       description: formData.description.trim(),
@@ -115,11 +116,12 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
       owner: formData.assignTo,
       approver: formData.approver,
       cadence: formData.cadence || undefined,
+      duration: formData.duration !== '' ? Number(formData.duration) : undefined,
       attachments: attachments,
     });
 
     toast.success('Task created successfully');
-    
+
     // Reset form
     setFormData({
       title: '',
@@ -128,9 +130,10 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
       assignTo: 'seo-head',
       approver: 'us-strategy',
       cadence: '',
+      duration: '',
     });
     setAttachments([]);
-    
+
     setIsSubmitting(false);
     onOpenChange(false);
   };
@@ -174,8 +177,8 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
           {/* Phase (Work Phase) */}
           <div className="space-y-2">
             <Label>Add to Work Phase</Label>
-            <Select 
-              value={formData.phase} 
+            <Select
+              value={formData.phase}
               onValueChange={(v) => setFormData(prev => ({ ...prev, phase: v as Phase }))}
             >
               <SelectTrigger>
@@ -194,8 +197,8 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
           {/* Assign To */}
           <div className="space-y-2">
             <Label>Assign Task To</Label>
-            <Select 
-              value={formData.assignTo} 
+            <Select
+              value={formData.assignTo}
               onValueChange={(v) => setFormData(prev => ({ ...prev, assignTo: v as UserRole }))}
             >
               <SelectTrigger>
@@ -214,8 +217,8 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
           {/* Approver */}
           <div className="space-y-2">
             <Label>Task Approver</Label>
-            <Select 
-              value={formData.approver} 
+            <Select
+              value={formData.approver}
               onValueChange={(v) => setFormData(prev => ({ ...prev, approver: v as UserRole }))}
             >
               <SelectTrigger>
@@ -237,8 +240,8 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
           {/* Cadence */}
           <div className="space-y-2">
             <Label>Task Cadence (Optional)</Label>
-            <Select 
-              value={formData.cadence} 
+            <Select
+              value={formData.cadence}
               onValueChange={(v) => setFormData(prev => ({ ...prev, cadence: v as any }))}
             >
               <SelectTrigger>
@@ -254,6 +257,18 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
             </Select>
           </div>
 
+          {/* Duration */}
+          <div className="space-y-2">
+            <Label htmlFor="duration">Task Duration (Days)</Label>
+            <Input
+              id="duration"
+              type="number"
+              placeholder="Estimate duration in days..."
+              value={formData.duration}
+              onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value === '' ? '' : Number(e.target.value) }))}
+            />
+          </div>
+
           {/* Attachments */}
           <div className="space-y-2">
             <Label>Attachments</Label>
@@ -262,7 +277,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
               {attachments.length > 0 && (
                 <div className="space-y-2">
                   {attachments.map((attachment) => (
-                    <div 
+                    <div
                       key={attachment.id}
                       className="flex items-center justify-between p-2 bg-muted rounded-lg"
                     >
@@ -285,7 +300,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
                   ))}
                 </div>
               )}
-              
+
               {/* Upload Button */}
               <div>
                 <input
@@ -317,8 +332,8 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
           <Button variant="ghost" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button 
-            variant="accent" 
+          <Button
+            variant="accent"
             onClick={handleSubmit}
             disabled={isSubmitting || !formData.title.trim()}
           >

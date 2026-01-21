@@ -11,6 +11,7 @@ interface NewTaskData {
   cadence?: Task['cadence'];
   attachments?: Task['attachments'];
   clientId?: string;
+  duration?: number;
 }
 
 interface TaskWithClient extends Task {
@@ -167,6 +168,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       approver: taskData.approver,
       status: 'pending',
       cadence: taskData.cadence,
+      duration: taskData.duration,
       comments: [],
       documents: [],
       attachments: taskData.attachments || [],

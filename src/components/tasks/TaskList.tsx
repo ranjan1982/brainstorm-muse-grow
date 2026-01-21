@@ -204,6 +204,7 @@ export function TaskList({ phase, initialStatus = 'all', onViewTask }: TaskListP
                 <TableHead>Assigned To</TableHead>
                 <TableHead>Client Name</TableHead>
                 <TableHead>Month/Cadence</TableHead>
+                <TableHead>Due Date</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -273,6 +274,15 @@ export function TaskList({ phase, initialStatus = 'all', onViewTask }: TaskListP
                           : task.cadence?.charAt(0).toUpperCase() + task.cadence?.slice(1) || 'Once'}
                     </Badge>
                   </TableCell>
+                  <TableCell className="font-mono text-xs">
+                    {task.dueDate ? (() => {
+                      const d = new Date(task.dueDate);
+                      const mm = String(d.getMonth() + 1).padStart(2, '0');
+                      const dd = String(d.getDate()).padStart(2, '0');
+                      const yyyy = d.getFullYear();
+                      return `${mm}/${dd}/${yyyy}`;
+                    })() : '-'}
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="ghost"
@@ -286,17 +296,20 @@ export function TaskList({ phase, initialStatus = 'all', onViewTask }: TaskListP
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
-        </div>
-      )}
+          </Table >
+        </div >
+      )
+      }
 
-      {!onViewTask && (
-        <TaskDetailModal
-          task={selectedTask}
-          open={!!selectedTask}
-          onOpenChange={(open) => !open && setSelectedTask(null)}
-        />
-      )}
+      {
+        !onViewTask && (
+          <TaskDetailModal
+            task={selectedTask}
+            open={!!selectedTask}
+            onOpenChange={(open) => !open && setSelectedTask(null)}
+          />
+        )
+      }
 
       <CreateTaskDialog
         open={createDialogOpen}

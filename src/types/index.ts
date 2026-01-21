@@ -43,6 +43,7 @@ export interface Task {
   updatedAt: Date;
   dueDate?: Date;
   order?: number; // For task ordering within phase
+  duration?: number; // Duration in days
 }
 
 export interface Attachment {
@@ -178,6 +179,7 @@ export interface TaskTemplate {
   order: number;
   tiers: SubscriptionTier[]; // Which subscription tiers include this task
   notes?: string; // Additional notes about the task
+  duration?: number; // Duration in days
 }
 
 export interface EmailTemplate {
