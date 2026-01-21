@@ -75,6 +75,7 @@ interface AppContextType {
   addDiscount: (discount: Omit<Discount, 'id'>) => void;
   deleteDiscount: (id: string) => void;
   addManualClient: (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive'>, subscriptionData: { tier: SubscriptionTier, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => void;
+  associateTeamToClient: (clientId: string, team: Client['associatedTeam'], reassignExistingTasks?: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -430,11 +431,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const clientId = `client-${Date.now()}`;
     const timestamp = new Date();
 
+    const defaultTeam = {
+      usStrategyId: users.find(u => u.role === 'us-strategy' && u.isDefaultAssociate)?.id,
+      seoHeadId: users.find(u => u.role === 'seo-head' && u.isDefaultAssociate)?.id,
+      seoJuniorId: users.find(u => u.role === 'seo-junior' && u.isDefaultAssociate)?.id,
+    };
+
     const newClient: Client = {
       ...clientData,
       id: clientId,
       isActive: true,
       createdAt: timestamp,
+      associatedTeam: clientData.associatedTeam || defaultTeam,
     };
 
     const newUser: User = {
@@ -463,6 +471,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     // Simulate sending email
     console.log(`Sending login details to ${clientData.email}: User: ${clientData.email}, Pass: password123`);
+  };
+
+  const associateTeamToClient = (clientId: string, team: Client['associatedTeam'], reassignExistingTasks: boolean = false) => {
+    setClients(prev => prev.map(c => c.id === clientId ? { ...c, associatedTeam: team } : c));
+
+    if (reassignExistingTasks) {
+      setTasks(prev => prev.map(task => {
+        if (task.clientId !== clientId) return task;
+
+        let newAssignedTo = task.assignedTo;
+        // Role based mapping
+        if (task.owner === 'us-strategy' && team?.usStrategyId) newAssignedTo = team.usStrategyId;
+        if (task.owner === 'seo-head' && team?.seoHeadId) newAssignedTo = team.seoHeadId;
+        if (task.owner === 'seo-junior' && team?.seoJuniorId) newAssignedTo = team.seoJuniorId;
+
+        return { ...task, assignedTo: newAssignedTo };
+      }));
+    }
   };
 
   return (
@@ -523,6 +549,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addDiscount,
       deleteDiscount,
       addManualClient,
+      associateTeamToClient,
     }}>
       {children}
     </AppContext.Provider>

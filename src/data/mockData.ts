@@ -17,7 +17,12 @@ export const mockClients: Client[] = [
       country: 'USA'
     },
     createdAt: new Date('2024-01-01'),
-    isActive: true
+    isActive: true,
+    associatedTeam: {
+      usStrategyId: 'us-1',
+      seoHeadId: 'seo-head-1',
+      seoJuniorId: 'seo-junior-1'
+    }
   },
   {
     id: 'client-2',
@@ -34,7 +39,12 @@ export const mockClients: Client[] = [
       country: 'USA'
     },
     createdAt: new Date('2024-01-15'),
-    isActive: true
+    isActive: true,
+    associatedTeam: {
+      usStrategyId: 'us-1',
+      seoHeadId: 'seo-head-1',
+      seoJuniorId: 'seo-junior-1'
+    }
   },
   {
     id: 'client-3',
@@ -51,7 +61,12 @@ export const mockClients: Client[] = [
       country: 'USA'
     },
     createdAt: new Date('2024-02-01'),
-    isActive: true
+    isActive: true,
+    associatedTeam: {
+      usStrategyId: 'us-1',
+      seoHeadId: 'seo-head-1',
+      seoJuniorId: 'seo-junior-1'
+    }
   },
   {
     id: 'client-4',
@@ -68,7 +83,12 @@ export const mockClients: Client[] = [
       country: 'USA'
     },
     createdAt: new Date('2024-02-15'),
-    isActive: false
+    isActive: false,
+    associatedTeam: {
+      usStrategyId: 'us-1',
+      seoHeadId: 'seo-head-1',
+      seoJuniorId: 'seo-junior-1'
+    }
   },
   {
     id: 'client-5',
@@ -85,7 +105,12 @@ export const mockClients: Client[] = [
       country: 'USA'
     },
     createdAt: new Date('2026-01-10'),
-    isActive: true
+    isActive: true,
+    associatedTeam: {
+      usStrategyId: 'us-1',
+      seoHeadId: 'seo-head-1',
+      seoJuniorId: 'seo-junior-1'
+    }
   },
 ];
 
@@ -351,9 +376,12 @@ export const mockEmailTemplates: EmailTemplate[] = [
 
 export const mockUsers: User[] = [
   { id: 'admin-1', name: 'Alex Thompson', email: 'alex@seosuite.com', password: 'password123', role: 'admin' },
-  { id: 'us-1', name: 'Sarah Mitchell', email: 'sarah@seosuite.com', password: 'password123', role: 'us-strategy' },
-  { id: 'seo-head-1', name: 'Robert Harrison', email: 'robert@seosuite.com', password: 'password123', role: 'seo-head' },
-  { id: 'seo-junior-1', name: 'Jennifer Davis', email: 'jennifer@seosuite.com', password: 'password123', role: 'seo-junior' },
+  { id: 'us-1', name: 'Sarah Mitchell', email: 'sarah@seosuite.com', password: 'password123', role: 'us-strategy', isDefaultAssociate: true },
+  { id: 'us-2', name: 'Marcus Bloom', email: 'marcus@seosuite.com', password: 'password123', role: 'us-strategy' },
+  { id: 'seo-head-1', name: 'Robert Harrison', email: 'robert@seosuite.com', password: 'password123', role: 'seo-head', isDefaultAssociate: true },
+  { id: 'seo-head-2', name: 'Vikram Singh', email: 'vikram@seosuite.com', password: 'password123', role: 'seo-head' },
+  { id: 'seo-junior-1', name: 'Jennifer Davis', email: 'jennifer@seosuite.com', password: 'password123', role: 'seo-junior', isDefaultAssociate: true },
+  { id: 'seo-junior-2', name: 'Amit Patel', email: 'amit@seosuite.com', password: 'password123', role: 'seo-junior' },
   // Client users (linked to clients)
   { id: 'client-1', name: 'John Martinez', email: 'john@acmeplumbing.com', password: 'password123', role: 'client' },
   { id: 'client-2', name: 'Emily Chen', email: 'emily@greenscapelandscaping.com', password: 'password123', role: 'client' },

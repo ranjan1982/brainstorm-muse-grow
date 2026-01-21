@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -62,8 +62,32 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
         tier: 'starter' as SubscriptionTier,
         billingCycle: 'monthly' as 'monthly' | 'yearly' | 'one-time',
         monthlyPrice: 100,
-        sendCredentials: true
+        sendCredentials: true,
+        usStrategyId: '',
+        seoHeadId: '',
+        seoJuniorId: '',
     });
+
+    const { users } = useApp();
+    const usStrategyUsers = users.filter(u => u.role === 'us-strategy');
+    const seoHeadUsers = users.filter(u => u.role === 'seo-head');
+    const seoJuniorUsers = users.filter(u => u.role === 'seo-junior');
+
+    // Update form when tiers or roles might change defaults
+    useEffect(() => {
+        if (!isAddClientDialogOpen) return;
+
+        const defaultUS = users.find(u => u.role === 'us-strategy' && u.isDefaultAssociate)?.id || '';
+        const defaultHead = users.find(u => u.role === 'seo-head' && u.isDefaultAssociate)?.id || '';
+        const defaultJunior = users.find(u => u.role === 'seo-junior' && u.isDefaultAssociate)?.id || '';
+
+        setNewClientState(prev => ({
+            ...prev,
+            usStrategyId: defaultUS,
+            seoHeadId: defaultHead,
+            seoJuniorId: defaultJunior
+        }));
+    }, [isAddClientDialogOpen, users]);
 
     const handleAddManualClient = () => {
         if (!newClientState.firstName || !newClientState.email || !newClientState.company) {
@@ -81,6 +105,11 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                 phone: newClientState.phone,
                 website: newClientState.website,
                 industry: newClientState.industry,
+                associatedTeam: {
+                    usStrategyId: newClientState.usStrategyId || undefined,
+                    seoHeadId: newClientState.seoHeadId || undefined,
+                    seoJuniorId: newClientState.seoJuniorId || undefined,
+                }
             },
             {
                 tier: newClientState.tier,
@@ -107,7 +136,10 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
             tier: 'starter',
             billingCycle: 'monthly',
             monthlyPrice: 100,
-            sendCredentials: true
+            sendCredentials: true,
+            usStrategyId: '',
+            seoHeadId: '',
+            seoJuniorId: '',
         });
     };
 
@@ -187,9 +219,10 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                 </div>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 md:w-[600px] mb-6">
+                    <TabsList className="grid w-full grid-cols-4 md:w-[800px] mb-6">
                         <TabsTrigger value="profile">Profile</TabsTrigger>
                         <TabsTrigger value="subscription">Subscription & Billing</TabsTrigger>
+                        <TabsTrigger value="team">Team Association</TabsTrigger>
                         <TabsTrigger value="history">Login History</TabsTrigger>
                     </TabsList>
 
@@ -354,6 +387,24 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                 <div className="flex justify-end pt-4">
                                     <Button onClick={() => onSaveProfile(detailClientData)} size="lg">Save Changes</Button>
                                 </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="team" className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Team Association</CardTitle>
+                                <CardDescription>Assign specific team members to manage specialists for {detailClientData.company}.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                {detailClientData && (
+                                    <TeamAssignmentSection
+                                        key={detailClientData.id}
+                                        clientId={detailClientData.id}
+                                        initialTeam={detailClientData.associatedTeam || {}}
+                                    />
+                                )}
                             </CardContent>
                         </Card>
                     </TabsContent>
@@ -684,12 +735,47 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                 onChange={e => setNewClientState({ ...newClientState, industry: e.target.value })}
                             />
                         </div>
+
+                        <div className="col-span-2 space-y-4 border-t pt-4">
+                            <Label className="text-base font-semibold">Team Assignment</Label>
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <Label>US Strategy</Label>
+                                    <Select value={newClientState.usStrategyId} onValueChange={v => setNewClientState({ ...newClientState, usStrategyId: v })}>
+                                        <SelectTrigger><SelectValue placeholder="Select User" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">None</SelectItem>
+                                            {usStrategyUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>SEO Head</Label>
+                                    <Select value={newClientState.seoHeadId} onValueChange={v => setNewClientState({ ...newClientState, seoHeadId: v })}>
+                                        <SelectTrigger><SelectValue placeholder="Select User" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">None</SelectItem>
+                                            {seoHeadUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>SEO Junior</Label>
+                                    <Select value={newClientState.seoJuniorId} onValueChange={v => setNewClientState({ ...newClientState, seoJuniorId: v })}>
+                                        <SelectTrigger><SelectValue placeholder="Select User" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="">None</SelectItem>
+                                            {seoJuniorUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex gap-3 text-sm text-amber-800">
                         <AlertTriangle className="w-5 h-5 shrink-0" />
                         <p>No recurring payment will be collected by the system. Billing must be managed manually outside the portal if required.</p>
                     </div>
-
                     <div className="flex items-center gap-2 mt-4">
                         <Switch
                             id="send-email"
@@ -789,3 +875,105 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
         </div>
     );
 }
+
+function TeamAssignmentSection({ clientId, initialTeam }: { clientId: string, initialTeam?: Client['associatedTeam'] }) {
+    const { users, associateTeamToClient } = useApp();
+    const [team, setTeam] = useState({
+        usStrategyId: initialTeam?.usStrategyId || '',
+        seoHeadId: initialTeam?.seoHeadId || '',
+        seoJuniorId: initialTeam?.seoJuniorId || '',
+    });
+    const [reassignTasks, setReassignTasks] = useState(false);
+
+    // Sync state when initialTeam changes (e.g. switching clients)
+    useEffect(() => {
+        setTeam({
+            usStrategyId: initialTeam?.usStrategyId || '',
+            seoHeadId: initialTeam?.seoHeadId || '',
+            seoJuniorId: initialTeam?.seoJuniorId || '',
+        });
+    }, [initialTeam]);
+
+    const usStrategyUsers = users.filter(u => u.role === 'us-strategy');
+    const seoHeadUsers = users.filter(u => u.role === 'seo-head');
+    const seoJuniorUsers = users.filter(u => u.role === 'seo-junior');
+
+    const handleSave = () => {
+        associateTeamToClient(clientId, {
+            usStrategyId: team.usStrategyId || undefined,
+            seoHeadId: team.seoHeadId || undefined,
+            seoJuniorId: team.seoJuniorId || undefined,
+        }, reassignTasks);
+        toast.success('Team association updated');
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">US Strategy</Label>
+                    <Select value={team.usStrategyId || "none"} onValueChange={v => setTeam(prev => ({ ...prev, usStrategyId: v === "none" ? "" : v }))}>
+                        <SelectTrigger className="bg-white"><SelectValue placeholder="Select US Strategist" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">Not Assigned</SelectItem>
+                            {usStrategyUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">SEO Head</Label>
+                    <Select value={team.seoHeadId || "none"} onValueChange={v => setTeam(prev => ({ ...prev, seoHeadId: v === "none" ? "" : v }))}>
+                        <SelectTrigger className="bg-white"><SelectValue placeholder="Select SEO Head" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">Not Assigned</SelectItem>
+                            {seoHeadUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label className="text-sm font-semibold text-slate-700">SEO Junior</Label>
+                    <Select value={team.seoJuniorId || "none"} onValueChange={v => setTeam(prev => ({ ...prev, seoJuniorId: v === "none" ? "" : v }))}>
+                        <SelectTrigger className="bg-white"><SelectValue placeholder="Select SEO Junior" /></SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">Not Assigned</SelectItem>
+                            {seoJuniorUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                <Switch
+                    id="reassign"
+                    checked={reassignTasks}
+                    onCheckedChange={setReassignTasks}
+                />
+                <div className="space-y-0.5">
+                    <Label htmlFor="reassign" className="text-blue-900 font-semibold cursor-pointer">Shift existing tasks to new team members</Label>
+                    <p className="text-xs text-blue-700">If enabled, all currently pending tasks for this client will be reassigned to the selected users.</p>
+                </div>
+            </div>
+
+            <div className="flex justify-end pt-4">
+                <Button type="button" onClick={handleSave} className="gap-2">
+                    <Save className="w-4 h-4" /> Save Team Association
+                </Button>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-dashed">
+                <div className="flex items-center justify-between mb-4">
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">Available Resource Pool</p>
+                    <Badge variant="outline" className="text-[9px] h-4">Verified Sync</Badge>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    {(users || []).filter(u => u && u.role !== 'client' && u.role !== 'admin').map(u => (
+                        <div key={u.id} className="text-[10px] px-2 py-1 bg-secondary/50 rounded-md text-secondary-foreground border border-border/50">
+                            {u.name} • <span className="opacity-70 font-semibold uppercase">{u.role}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+

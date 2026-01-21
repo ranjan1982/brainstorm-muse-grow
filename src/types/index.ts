@@ -14,6 +14,7 @@ export interface User {
   isActive?: boolean;
   phone?: string;
   lastLogin?: Date;
+  isDefaultAssociate?: boolean;
 }
 
 export interface LoginHistory {
@@ -129,6 +130,11 @@ export interface Client {
   isActive: boolean;
   website?: string;
   industry?: string;
+  associatedTeam?: {
+    usStrategyId?: string;
+    seoHeadId?: string;
+    seoJuniorId?: string;
+  };
 }
 
 export interface Subscription {

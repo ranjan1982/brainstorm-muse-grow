@@ -332,6 +332,7 @@ export function AdminUsers() {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Email</TableHead>
                                 <TableHead>Role</TableHead>
+                                <TableHead>Default Assoc.</TableHead>
                                 <TableHead className="w-[100px]">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -342,6 +343,9 @@ export function AdminUsers() {
                                     <TableCell>{user.email}</TableCell>
                                     <TableCell>
                                         <Badge variant="outline">{ROLE_LABELS[user.role]}</Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        {user.isDefaultAssociate ? <Badge variant="secondary">Yes</Badge> : '-'}
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex gap-2">
@@ -382,6 +386,14 @@ export function AdminUsers() {
                                     <SelectItem value="client">Client</SelectItem>
                                 </SelectContent>
                             </Select>
+                        </div>
+                        <div className="flex items-center gap-2 pt-2">
+                            <Switch
+                                id="default-assoc"
+                                checked={userState.isDefaultAssociate}
+                                onCheckedChange={c => setUserState({ ...userState, isDefaultAssociate: c })}
+                            />
+                            <Label htmlFor="default-assoc">Default Associate with clients</Label>
                         </div>
                     </div>
                     <DialogFooter>

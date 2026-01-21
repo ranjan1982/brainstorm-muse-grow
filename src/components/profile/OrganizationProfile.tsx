@@ -227,6 +227,8 @@ export function OrganizationProfile() {
                     </Card>
                 )}
 
+
+
                 <Card className="border-accent/20">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
