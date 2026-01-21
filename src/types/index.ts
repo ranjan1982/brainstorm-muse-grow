@@ -141,6 +141,7 @@ export interface Subscription {
   nextBillingDate?: Date;
   monthlyPrice: number;
   trialEndDate?: Date;
+  billingCycle?: 'monthly' | 'yearly' | 'one-time';
 }
 
 export interface PaymentHistory {

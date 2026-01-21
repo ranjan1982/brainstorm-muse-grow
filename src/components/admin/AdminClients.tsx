@@ -33,7 +33,7 @@ import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon, Download, AlertTriangle, UserCheck, UserX, Monitor, Activity, Eye, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, Download, AlertTriangle, UserCheck, UserX, Monitor, Activity, Eye, ArrowLeft, Plus, Save } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AdminClientsProps {
@@ -41,7 +41,7 @@ interface AdminClientsProps {
 }
 
 export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
-    const { clients, getClientSubscription, getClientPaymentHistory, updateClientInfo, updateSubscriptionStatus, refundPayment, upgradeSubscription } = useApp();
+    const { clients, getClientSubscription, getClientPaymentHistory, updateClientInfo, updateSubscriptionStatus, refundPayment, upgradeSubscription, addManualClient } = useApp();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState(defaultFilter);
 
@@ -49,6 +49,67 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [activeTab, setActiveTab] = useState('profile');
+
+    const [isAddClientDialogOpen, setIsAddClientDialogOpen] = useState(false);
+    const [newClientState, setNewClientState] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        company: '',
+        phone: '',
+        website: '',
+        industry: '',
+        tier: 'starter' as SubscriptionTier,
+        billingCycle: 'monthly' as 'monthly' | 'yearly' | 'one-time',
+        monthlyPrice: 100,
+        sendCredentials: true
+    });
+
+    const handleAddManualClient = () => {
+        if (!newClientState.firstName || !newClientState.email || !newClientState.company) {
+            toast.error('First Name, Email and Company are required');
+            return;
+        }
+
+        const fullName = `${newClientState.firstName} ${newClientState.lastName}`.trim();
+
+        addManualClient(
+            {
+                name: fullName,
+                email: newClientState.email,
+                company: newClientState.company,
+                phone: newClientState.phone,
+                website: newClientState.website,
+                industry: newClientState.industry,
+            },
+            {
+                tier: newClientState.tier,
+                monthlyPrice: newClientState.monthlyPrice,
+                billingCycle: newClientState.billingCycle
+            }
+        );
+
+        if (newClientState.sendCredentials) {
+            toast.success('Client added manually. Login details sent to client.');
+        } else {
+            toast.success('Client added manually.');
+        }
+
+        setIsAddClientDialogOpen(false);
+        setNewClientState({
+            firstName: '',
+            lastName: '',
+            email: '',
+            company: '',
+            phone: '',
+            website: '',
+            industry: '',
+            tier: 'starter',
+            billingCycle: 'monthly',
+            monthlyPrice: 100,
+            sendCredentials: true
+        });
+    };
 
     const filteredClients = clients.filter(client => {
         const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -500,8 +561,150 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-[250px]"
                     />
+                    <Button onClick={() => setIsAddClientDialogOpen(true)}>
+                        <Plus className="w-4 h-4 mr-2" /> Add Client
+                    </Button>
                 </div>
             </div>
+
+            <Dialog open={isAddClientDialogOpen} onOpenChange={setIsAddClientDialogOpen}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Add New Client Manually</DialogTitle>
+                        <DialogDescription>
+                            Create a client account without payment gateway. Subscription will be activated immediately.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-4">
+                        <div className="col-span-1 space-y-2">
+                            <Label>Client Name (Contact person)</Label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] text-muted-foreground uppercase font-bold">First Name</Label>
+                                    <Input
+                                        placeholder="e.g. John"
+                                        value={newClientState.firstName}
+                                        onChange={e => setNewClientState({ ...newClientState, firstName: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-[10px] text-muted-foreground uppercase font-bold">Last Name</Label>
+                                    <Input
+                                        placeholder="Doe"
+                                        value={newClientState.lastName}
+                                        onChange={e => setNewClientState({ ...newClientState, lastName: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Client Email</Label>
+                            <div className="pt-5">
+                                <Input
+                                    type="email"
+                                    placeholder="john@company.com"
+                                    value={newClientState.email}
+                                    onChange={e => setNewClientState({ ...newClientState, email: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Company Name</Label>
+                            <Input
+                                placeholder="Company LLC"
+                                value={newClientState.company}
+                                onChange={e => setNewClientState({ ...newClientState, company: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Phone Number</Label>
+                            <Input
+                                placeholder="+1 (555) 000-0000"
+                                value={newClientState.phone}
+                                onChange={e => setNewClientState({ ...newClientState, phone: e.target.value })}
+                            />
+                        </div>
+                        <div className="space-y-2 border-t pt-4">
+                            <Label>Subscription Tier</Label>
+                            <Select
+                                value={newClientState.tier}
+                                onValueChange={(v: any) => {
+                                    let price = 100; // default for starter monthly
+                                    if (v === 'growth') price = 300; // estimated
+                                    if (v === 'enterprise') price = 500; // estimated
+                                    setNewClientState({ ...newClientState, tier: v, monthlyPrice: price, billingCycle: 'monthly' });
+                                }}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Tier" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="starter">Starter</SelectItem>
+                                    <SelectItem value="growth">Growth</SelectItem>
+                                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2 border-t pt-4">
+                            <Label>Subscription Plan / Cycle</Label>
+                            <Select
+                                value={newClientState.billingCycle}
+                                onValueChange={(v: any) => {
+                                    let price = newClientState.monthlyPrice;
+                                    if (v === 'one-time') {
+                                        if (newClientState.tier === 'starter') price = 500;
+                                        else if (newClientState.tier === 'growth') price = 1200;
+                                        else price = 2500;
+                                    } else {
+                                        if (newClientState.tier === 'starter') price = 100;
+                                        else if (newClientState.tier === 'growth') price = 300;
+                                        else price = 500;
+                                    }
+                                    setNewClientState({ ...newClientState, billingCycle: v, monthlyPrice: price });
+                                }}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Plan" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="one-time">
+                                        {newClientState.tier.charAt(0).toUpperCase() + newClientState.tier.slice(1)} onetime ({newClientState.tier === 'starter' ? '$500.00' : (newClientState.tier === 'growth' ? '$1200.00' : '$2500.00')})
+                                    </SelectItem>
+                                    <SelectItem value="monthly">
+                                        {newClientState.tier.charAt(0).toUpperCase() + newClientState.tier.slice(1)} Monthly ({newClientState.tier === 'starter' ? '$100.00' : (newClientState.tier === 'growth' ? '$300.00' : '$500.00')})
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="col-span-2 space-y-2 border-t pt-4">
+                            <Label>Industry</Label>
+                            <Input
+                                placeholder="e.g. Legal Services"
+                                value={newClientState.industry}
+                                onChange={e => setNewClientState({ ...newClientState, industry: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg flex gap-3 text-sm text-amber-800">
+                        <AlertTriangle className="w-5 h-5 shrink-0" />
+                        <p>No recurring payment will be collected by the system. Billing must be managed manually outside the portal if required.</p>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-4">
+                        <Switch
+                            id="send-email"
+                            checked={newClientState.sendCredentials}
+                            onCheckedChange={(c) => setNewClientState({ ...newClientState, sendCredentials: c })}
+                        />
+                        <Label htmlFor="send-email" className="text-red-600 font-medium">Will login credential send to client</Label>
+                    </div>
+
+                    <DialogFooter className="mt-4">
+                        <Button variant="outline" onClick={() => setIsAddClientDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleAddManualClient}>Create Client & Send Login</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <Card>
                 <CardContent className="p-0">

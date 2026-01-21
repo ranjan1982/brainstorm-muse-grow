@@ -74,6 +74,7 @@ interface AppContextType {
   updateDiscount: (id: string, updates: Partial<Discount>) => void;
   addDiscount: (discount: Omit<Discount, 'id'>) => void;
   deleteDiscount: (id: string) => void;
+  addManualClient: (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive'>, subscriptionData: { tier: SubscriptionTier, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -425,6 +426,45 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUsers(prev => [...prev, newUser]);
   };
 
+  const addManualClient = (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive'>, subscriptionData: { tier: SubscriptionTier, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => {
+    const clientId = `client-${Date.now()}`;
+    const timestamp = new Date();
+
+    const newClient: Client = {
+      ...clientData,
+      id: clientId,
+      isActive: true,
+      createdAt: timestamp,
+    };
+
+    const newUser: User = {
+      id: clientId,
+      name: clientData.name,
+      email: clientData.email,
+      password: 'password123', // Default password
+      role: 'client',
+      isActive: true,
+    };
+
+    const newSubscription: Subscription = {
+      id: `sub-${Date.now()}`,
+      clientId: clientId,
+      tier: subscriptionData.tier,
+      status: 'active',
+      startDate: timestamp,
+      monthlyPrice: subscriptionData.monthlyPrice,
+      billingCycle: subscriptionData.billingCycle,
+      nextBillingDate: new Date(timestamp.getTime() + 30 * 24 * 60 * 60 * 1000), // Month later
+    };
+
+    setClients(prev => [...prev, newClient]);
+    setUsers(prev => [...prev, newUser]);
+    setSubscriptions(prev => [...prev, newSubscription]);
+
+    // Simulate sending email
+    console.log(`Sending login details to ${clientData.email}: User: ${clientData.email}, Pass: password123`);
+  };
+
   return (
     <AppContext.Provider value={{
       currentUser,
@@ -482,6 +522,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateDiscount,
       addDiscount,
       deleteDiscount,
+      addManualClient,
     }}>
       {children}
     </AppContext.Provider>
