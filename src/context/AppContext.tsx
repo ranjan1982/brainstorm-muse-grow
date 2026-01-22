@@ -467,6 +467,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       startDate: timestamp,
       monthlyPrice: subscriptionData.monthlyPrice,
       billingCycle: subscriptionData.billingCycle,
+      purchaseType: 'manual',
       nextBillingDate: new Date(timestamp.getTime() + 30 * 24 * 60 * 60 * 1000), // Month later
     };
 

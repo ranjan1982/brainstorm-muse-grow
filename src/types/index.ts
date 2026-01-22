@@ -7,12 +7,19 @@ export type Phase = 'onboarding' | 'foundation' | 'execution' | 'ai' | 'reportin
 export interface User {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   email: string;
   password?: string;
   role: UserRole;
   avatar?: string;
   isActive?: boolean;
   phone?: string;
+  address?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
   lastLogin?: Date;
   isDefaultAssociate?: boolean;
 }
@@ -153,6 +160,7 @@ export interface Subscription {
   monthlyPrice: number;
   trialEndDate?: Date;
   billingCycle?: 'monthly' | 'yearly' | 'one-time';
+  purchaseType?: 'manual' | 'auto';
 }
 
 export interface PaymentHistory {

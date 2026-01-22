@@ -800,6 +800,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                 <TableHead>Client / Company</TableHead>
                                 <TableHead>Contact Info</TableHead>
                                 <TableHead>Plan</TableHead>
+                                <TableHead>Purchase Type</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Joined</TableHead>
                                 <TableHead>Billing</TableHead>
@@ -835,6 +836,16 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                             {sub ? (
                                                 <Badge variant="outline" className="font-semibold">
                                                     {SUBSCRIPTION_TIER_LABELS[sub.tier]}
+                                                </Badge>
+                                            ) : <span className="text-muted-foreground">-</span>}
+                                        </TableCell>
+                                        <TableCell>
+                                            {sub ? (
+                                                <Badge variant="secondary" className={cn(
+                                                    "capitalize font-medium",
+                                                    sub.purchaseType === 'manual' ? "bg-blue-50 text-blue-700 border-blue-100" : "bg-slate-50 text-slate-700 border-slate-100"
+                                                )}>
+                                                    {sub.purchaseType || 'Auto'}
                                                 </Badge>
                                             ) : <span className="text-muted-foreground">-</span>}
                                         </TableCell>

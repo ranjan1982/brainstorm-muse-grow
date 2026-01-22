@@ -31,6 +31,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { User, UserRole, ROLE_LABELS, SubscriptionPlan, Discount, EmailTemplate } from '@/types';
 import { toast } from 'sonner';
 import { Plus, Trash2, Edit2, Send } from 'lucide-react';
@@ -288,14 +289,25 @@ export function AdminUsers() {
     const { users, addUser, updateUserProfile, deleteUserAccount } = useApp();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [userState, setUserState] = useState<Partial<User>>({ role: 'seo-junior', isActive: true });
+    const [sendCredentials, setSendCredentials] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const handleSave = () => {
+        const fullState = {
+            ...userState,
+            name: (`${userState.firstName || ''} ${userState.lastName || ''}`.trim()) || userState.name || ''
+        };
+
         if (editingId) {
-            updateUserProfile(editingId, userState);
+            updateUserProfile(editingId, fullState);
         } else {
-            addUser(userState as any);
+            addUser(fullState as any);
         }
+
+        if (sendCredentials) {
+            toast.success(`Login credentials sent to ${userState.email}`);
+        }
+
         setIsDialogOpen(false);
         setEditingId(null);
         setUserState({ role: 'seo-junior', isActive: true });
@@ -361,43 +373,118 @@ export function AdminUsers() {
             </Card>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{editingId ? 'Edit User' : 'Add User'}</DialogTitle>
+                <DialogContent className="max-w-md">
+                    <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <DialogTitle className="text-xl">{editingId ? 'Edit User' : 'Add User'}</DialogTitle>
+                        <div className="flex items-center gap-2">
+                            <Checkbox
+                                id="is-active"
+                                checked={userState.isActive}
+                                onCheckedChange={(c) => setUserState({ ...userState, isActive: !!c })}
+                            />
+                            <Label htmlFor="is-active" className="text-red-500 font-medium">? Is Active</Label>
+                        </div>
                     </DialogHeader>
+
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
                             <Label>Full Name</Label>
-                            <Input value={userState.name || ''} onChange={e => setUserState({ ...userState, name: e.target.value })} />
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    placeholder="First Name"
+                                    value={userState.firstName || ''}
+                                    onChange={e => setUserState({ ...userState, firstName: e.target.value })}
+                                />
+                                <Input
+                                    placeholder="Last Name"
+                                    value={userState.lastName || ''}
+                                    onChange={e => setUserState({ ...userState, lastName: e.target.value })}
+                                />
+                            </div>
                         </div>
+
+                        <div className="space-y-2">
+                            <Label className="flex items-center gap-2">
+                                Contact Number <span className="text-red-400 font-normal text-xs">(xxx) xxx-xxxx</span>
+                            </Label>
+                            <Input
+                                placeholder="(xxx) xxx-xxxx"
+                                value={userState.phone || ''}
+                                onChange={e => setUserState({ ...userState, phone: e.target.value })}
+                            />
+                        </div>
+
                         <div className="space-y-2">
                             <Label>Email Address</Label>
-                            <Input value={userState.email || ''} onChange={e => setUserState({ ...userState, email: e.target.value })} />
+                            <Input
+                                value={userState.email || ''}
+                                onChange={e => setUserState({ ...userState, email: e.target.value })}
+                                placeholder="email@example.com"
+                            />
                         </div>
+
+                        <div className="space-y-2">
+                            <Label className="text-red-500">Address (Line1, Line2, City, state, Zip)</Label>
+                            <div className="grid gap-2">
+                                <Input
+                                    placeholder="Line 1"
+                                    value={userState.address || ''}
+                                    onChange={e => setUserState({ ...userState, address: e.target.value })}
+                                />
+                                <Input
+                                    placeholder="Line 2"
+                                    value={userState.addressLine2 || ''}
+                                    onChange={e => setUserState({ ...userState, addressLine2: e.target.value })}
+                                />
+                                <div className="grid grid-cols-3 gap-2">
+                                    <Input
+                                        placeholder="City"
+                                        value={userState.city || ''}
+                                        onChange={e => setUserState({ ...userState, city: e.target.value })}
+                                    />
+                                    <Input
+                                        placeholder="State"
+                                        value={userState.state || ''}
+                                        onChange={e => setUserState({ ...userState, state: e.target.value })}
+                                    />
+                                    <Input
+                                        placeholder="Zip"
+                                        value={userState.zip || ''}
+                                        onChange={e => setUserState({ ...userState, zip: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
                             <Label>Role</Label>
                             <Select value={userState.role} onValueChange={(v: any) => setUserState({ ...userState, role: v })}>
                                 <SelectTrigger><SelectValue /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="admin">Portal Admin</SelectItem>
+                                    <SelectItem value="admin">Backoffice User</SelectItem>
                                     <SelectItem value="us-strategy">US Strategy</SelectItem>
-                                    <SelectItem value="seo-head">SEO Head</SelectItem>
-                                    <SelectItem value="seo-junior">SEO Junior</SelectItem>
-                                    <SelectItem value="client">Client</SelectItem>
+                                    {/* SEO roles hidden in this dropdown based on mockup notes */}
+                                    {userState.role && ['seo-head', 'seo-junior'].includes(userState.role) && (
+                                        <>
+                                            <SelectItem value="seo-head">SEO Head</SelectItem>
+                                            <SelectItem value="seo-junior">SEO Junior</SelectItem>
+                                        </>
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
+
                         <div className="flex items-center gap-2 pt-2">
-                            <Switch
-                                id="default-assoc"
-                                checked={userState.isDefaultAssociate}
-                                onCheckedChange={c => setUserState({ ...userState, isDefaultAssociate: c })}
+                            <Checkbox
+                                id="send-credentials"
+                                checked={sendCredentials}
+                                onCheckedChange={(c) => setSendCredentials(!!c)}
                             />
-                            <Label htmlFor="default-assoc">Default Associate with clients</Label>
+                            <Label htmlFor="send-credentials" className="text-red-500">Login credential send to the users</Label>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button onClick={handleSave}>Save User</Button>
+                        <Button className="w-full bg-[#0f172a] hover:bg-[#1e293b]" onClick={handleSave}>Save User</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

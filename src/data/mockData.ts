@@ -123,7 +123,8 @@ export const mockSubscriptions: Subscription[] = [
     status: 'active',
     startDate: new Date('2024-01-01'),
     nextBillingDate: new Date('2025-02-01'),
-    monthlyPrice: 599
+    monthlyPrice: 599,
+    purchaseType: 'auto'
   },
   {
     id: 'sub-2',
@@ -132,7 +133,8 @@ export const mockSubscriptions: Subscription[] = [
     status: 'active',
     startDate: new Date('2024-01-15'),
     nextBillingDate: new Date('2025-02-15'),
-    monthlyPrice: 299
+    monthlyPrice: 299,
+    purchaseType: 'auto'
   },
   {
     id: 'sub-3',
@@ -141,7 +143,8 @@ export const mockSubscriptions: Subscription[] = [
     status: 'active',
     startDate: new Date('2024-02-01'),
     nextBillingDate: new Date('2025-03-01'),
-    monthlyPrice: 999
+    monthlyPrice: 999,
+    purchaseType: 'auto'
   },
   {
     id: 'sub-4',
@@ -150,7 +153,8 @@ export const mockSubscriptions: Subscription[] = [
     status: 'cancelled',
     startDate: new Date('2024-02-15'),
     endDate: new Date('2024-06-15'),
-    monthlyPrice: 299
+    monthlyPrice: 299,
+    purchaseType: 'auto'
   },
   {
     id: 'sub-5',
@@ -160,7 +164,8 @@ export const mockSubscriptions: Subscription[] = [
     startDate: new Date('2026-01-10'),
     nextBillingDate: new Date('2026-01-24'),
     trialEndDate: new Date('2026-01-24'),
-    monthlyPrice: 599
+    monthlyPrice: 599,
+    purchaseType: 'auto'
   },
 ];
 
