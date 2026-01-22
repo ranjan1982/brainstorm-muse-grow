@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, Task, UserRole, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, KPIData, SubscriptionTier, LoginHistory, SubscriptionPlan, Discount, PhaseConfig } from '@/types';
-import { mockUsers, mockTasks, mockClients, mockSubscriptions, mockPaymentHistory, mockTaskTemplates, mockEmailTemplates, mockKPIData, mockLoginHistory, mockPlans, mockDiscounts, mockPhaseConfigs } from '@/data/mockData';
+import { User, Task, UserRole, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, KPIData, SubscriptionTier, LoginHistory, SubscriptionPlan, Discount, PhaseConfig, Package } from '@/types';
+import { mockUsers, mockTasks, mockClients, mockSubscriptions, mockPaymentHistory, mockTaskTemplates, mockEmailTemplates, mockKPIData, mockLoginHistory, mockPlans, mockDiscounts, mockPhaseConfigs, mockPackages } from '@/data/mockData';
 
 interface NewTaskData {
   title: string;
@@ -74,6 +74,8 @@ interface AppContextType {
   updateDiscount: (id: string, updates: Partial<Discount>) => void;
   addDiscount: (discount: Omit<Discount, 'id'>) => void;
   deleteDiscount: (id: string) => void;
+  packages: Package[];
+  updatePackage: (id: string, updates: Partial<Package>) => void;
   addManualClient: (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive'>, subscriptionData: { tier: SubscriptionTier, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => void;
   associateTeamToClient: (clientId: string, team: Client['associatedTeam'], reassignExistingTasks?: boolean) => void;
 }
@@ -93,6 +95,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [plans, setPlans] = useState<SubscriptionPlan[]>(mockPlans);
   const [discounts, setDiscounts] = useState<Discount[]>(mockDiscounts);
   const [phaseConfigs, setPhaseConfigs] = useState<PhaseConfig[]>(mockPhaseConfigs);
+  const [packages, setPackages] = useState<Package[]>(mockPackages);
   const [users, setUsers] = useState<User[]>(mockUsers);
 
   const updateTask = (taskId: string, updates: Partial<Task>, editor?: { userId: string, userName: string }) => {
@@ -422,6 +425,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setDiscounts(prev => prev.filter(d => d.id !== id));
   };
 
+  const updatePackage = (id: string, updates: Partial<Package>) => {
+    setPackages(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
   const addUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
     const newUser: User = {
       ...userData,
@@ -554,6 +561,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateDiscount,
       addDiscount,
       deleteDiscount,
+      packages,
+      updatePackage,
       addManualClient,
       associateTeamToClient,
     }}>

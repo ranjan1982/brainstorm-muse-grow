@@ -32,16 +32,20 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { User, UserRole, ROLE_LABELS, SubscriptionPlan, Discount, EmailTemplate } from '@/types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { User, UserRole, ROLE_LABELS, SubscriptionPlan, Discount, EmailTemplate, Package, SUBSCRIPTION_TIER_LABELS } from '@/types';
 import { toast } from 'sonner';
 import { Plus, Trash2, Edit2, Send } from 'lucide-react';
 
 
 export function AdminPlans() {
-    const { plans, addPlan, updatePlan, deletePlan } = useApp();
+    const { plans, addPlan, updatePlan, deletePlan, packages, updatePackage } = useApp();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [planState, setPlanState] = useState<Partial<SubscriptionPlan>>({ tier: 'starter', isActive: true, billingCycle: 'monthly', features: [] });
+    const [planState, setPlanState] = useState<Partial<SubscriptionPlan>>({ tier: 'starter', isActive: true, billingCycle: 'monthly', features: [], isSetupFeeApplicable: false });
     const [editingId, setEditingId] = useState<string | null>(null);
+
+    const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
+    const [packageState, setPackageState] = useState<Partial<Package>>({});
 
     const handleSave = () => {
         if (editingId) {
@@ -51,13 +55,25 @@ export function AdminPlans() {
         }
         setIsDialogOpen(false);
         setEditingId(null);
-        setPlanState({ tier: 'starter', isActive: true, billingCycle: 'monthly', features: [] });
+        setPlanState({ tier: 'starter', isActive: true, billingCycle: 'monthly', features: [], isSetupFeeApplicable: false });
+    };
+
+    const handleSavePackage = () => {
+        if (packageState.id) {
+            updatePackage(packageState.id, { setupCost: packageState.setupCost });
+        }
+        setIsPackageDialogOpen(false);
     };
 
     const openEdit = (plan: SubscriptionPlan) => {
         setPlanState(plan);
         setEditingId(plan.id);
         setIsDialogOpen(true);
+    };
+
+    const openEditPackage = (pkg: Package) => {
+        setPackageState(pkg);
+        setIsPackageDialogOpen(true);
     };
 
     return (
@@ -67,51 +83,102 @@ export function AdminPlans() {
                     <h2 className="text-3xl font-bold tracking-tight">Subscription Plans</h2>
                     <p className="text-muted-foreground">Manage pricing tiers and billing cycles</p>
                 </div>
-                <Button onClick={() => { setIsDialogOpen(true); setEditingId(null); setPlanState({ tier: 'starter', isActive: true, billingCycle: 'monthly', features: [] }); }}>
-                    <Plus className="w-4 h-4 mr-2" /> Create Plan
-                </Button>
             </div>
 
-            <Card>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Plan Name</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead>Cycle</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Features</TableHead>
-                                <TableHead className="w-[100px]">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {plans.map((plan) => (
-                                <TableRow key={plan.id}>
-                                    <TableCell className="font-medium">{plan.name}</TableCell>
-                                    <TableCell>${plan.price}</TableCell>
-                                    <TableCell className="capitalize">{plan.billingCycle}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={plan.isActive ? 'default' : 'secondary'}>
-                                            {plan.isActive ? 'Active' : 'Inactive'}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-xs text-muted-foreground">
-                                        {plan.features?.length || 0} features
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex gap-2">
-                                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(plan)}><Edit2 className="w-4 h-4" /></Button>
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => { if (confirm('Are you sure?')) deletePlan(plan.id); }}><Trash2 className="w-4 h-4" /></Button>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+            <Tabs defaultValue="packages" className="w-full">
+                <TabsList className="grid w-full max-w-[400px] grid-cols-2 mb-6">
+                    <TabsTrigger value="packages">Packages</TabsTrigger>
+                    <TabsTrigger value="plans">Subscription Plans</TabsTrigger>
+                </TabsList>
 
+                <TabsContent value="packages" className="space-y-4">
+                    <Card>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Package Name</TableHead>
+                                        <TableHead>Setup Cost</TableHead>
+                                        <TableHead className="w-[100px]">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {packages.map((pkg) => (
+                                        <TableRow key={pkg.id}>
+                                            <TableCell className="font-medium capitalize">{SUBSCRIPTION_TIER_LABELS[pkg.tier]}</TableCell>
+                                            <TableCell>${pkg.setupCost}</TableCell>
+                                            <TableCell>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditPackage(pkg)}>
+                                                    <Edit2 className="w-4 h-4" />
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="plans" className="space-y-4">
+                    <div className="flex justify-end">
+                        <Button onClick={() => { setIsDialogOpen(true); setEditingId(null); setPlanState({ tier: 'starter', isActive: true, billingCycle: 'monthly', features: [], isSetupFeeApplicable: false }); }}>
+                            <Plus className="w-4 h-4 mr-2" /> Create Plan
+                        </Button>
+                    </div>
+                    <Card>
+                        <CardContent className="p-0">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Plan Name</TableHead>
+                                        <TableHead>Price</TableHead>
+                                        <TableHead>Cycle</TableHead>
+                                        <TableHead>Setup Fee</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Features</TableHead>
+                                        <TableHead className="w-[100px]">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {plans.map((plan) => (
+                                        <TableRow key={plan.id}>
+                                            <TableCell className="font-medium">{plan.name}</TableCell>
+                                            <TableCell>${plan.price}</TableCell>
+                                            <TableCell className="capitalize">{plan.billingCycle}</TableCell>
+                                            <TableCell>
+                                                {plan.isSetupFeeApplicable ? (
+                                                    <span className="font-medium text-blue-600">
+                                                        ${packages.find(p => p.tier === plan.tier)?.setupCost || 0}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-muted-foreground">None</span>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={plan.isActive ? 'default' : 'secondary'}>
+                                                    {plan.isActive ? 'Active' : 'Inactive'}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">
+                                                {plan.features?.length || 0} features
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-2">
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(plan)}><Edit2 className="w-4 h-4" /></Button>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => { if (confirm('Are you sure?')) deletePlan(plan.id); }}><Trash2 className="w-4 h-4" /></Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+
+            {/* Plan Dialog */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
@@ -150,6 +217,21 @@ export function AdminPlans() {
                                 </SelectContent>
                             </Select>
                         </div>
+                        <div className="flex items-center gap-2 pt-2">
+                            <Switch
+                                id="setup-fee"
+                                checked={planState.isSetupFeeApplicable}
+                                onCheckedChange={c => setPlanState({ ...planState, isSetupFeeApplicable: c })}
+                            />
+                            <Label htmlFor="setup-fee" className="flex items-center gap-2">
+                                Is Setup Fee Applicable (one-time)
+                                {planState.isSetupFeeApplicable && (
+                                    <span className="text-blue-600 font-bold ml-1">
+                                        (${packages.find(p => p.tier === planState.tier)?.setupCost || 0})
+                                    </span>
+                                )}
+                            </Label>
+                        </div>
                         <div className="flex items-center gap-2">
                             <Switch checked={planState.isActive} onCheckedChange={c => setPlanState({ ...planState, isActive: c })} />
                             <Label>Active Plan</Label>
@@ -158,6 +240,36 @@ export function AdminPlans() {
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
                         <Button onClick={handleSave}>Save Plan</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Package Dialog */}
+            <Dialog open={isPackageDialogOpen} onOpenChange={setIsPackageDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Package Setup Cost</DialogTitle>
+                        <DialogDescription>
+                            Update the setup cost for {packageState.tier ? SUBSCRIPTION_TIER_LABELS[packageState.tier] : ''} package.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Package Name</Label>
+                            <Input value={packageState.tier ? SUBSCRIPTION_TIER_LABELS[packageState.tier] : ''} disabled />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Setup Cost ($)</Label>
+                            <Input
+                                type="number"
+                                value={packageState.setupCost || 0}
+                                onChange={e => setPackageState({ ...packageState, setupCost: Number(e.target.value) })}
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsPackageDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSavePackage}>Save Package</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -288,7 +400,7 @@ export function AdminDiscounts() {
 export function AdminUsers() {
     const { users, addUser, updateUserProfile, deleteUserAccount } = useApp();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [userState, setUserState] = useState<Partial<User>>({ role: 'seo-junior', isActive: true });
+    const [userState, setUserState] = useState<Partial<User>>({ role: 'seo-junior', isActive: true, isDefaultAssociate: false });
     const [sendCredentials, setSendCredentials] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -310,7 +422,7 @@ export function AdminUsers() {
 
         setIsDialogOpen(false);
         setEditingId(null);
-        setUserState({ role: 'seo-junior', isActive: true });
+        setUserState({ role: 'seo-junior', isActive: true, isDefaultAssociate: false });
     };
 
     const openEdit = (user: User) => {
@@ -324,14 +436,11 @@ export function AdminUsers() {
             <div className="flex items-center justify-between">
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight">System Users</h2>
-                    <p className="text-muted-foreground">Manage SEO team and Backoffice admins</p>
+                    <p className="text-muted-foreground">Manage SEO team and Backoffice users</p>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => { setIsDialogOpen(true); setEditingId(null); setUserState({ role: 'admin', isActive: true }); }}>
-                        <Plus className="w-4 h-4 mr-2" /> Add Admin
-                    </Button>
-                    <Button onClick={() => { setIsDialogOpen(true); setEditingId(null); setUserState({ role: 'seo-junior', isActive: true }); }}>
-                        <Plus className="w-4 h-4 mr-2" /> Add SEO User
+                    <Button onClick={() => { setIsDialogOpen(true); setEditingId(null); setUserState({ role: 'seo-junior', isActive: true, isDefaultAssociate: false }); }}>
+                        <Plus className="w-4 h-4 mr-2" /> Add User
                     </Button>
                 </div>
             </div>
@@ -349,7 +458,7 @@ export function AdminUsers() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {users.filter(u => u.role !== 'client').map((user) => (
+                            {users.filter(u => u.role !== 'client' && u.id !== 'admin-1').map((user) => (
                                 <TableRow key={user.id}>
                                     <TableCell className="font-medium">{user.name}</TableCell>
                                     <TableCell>{user.email}</TableCell>
@@ -404,9 +513,7 @@ export function AdminUsers() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="flex items-center gap-2">
-                                Contact Number <span className="text-red-400 font-normal text-xs">(xxx) xxx-xxxx</span>
-                            </Label>
+                            <Label>Contact Number</Label>
                             <Input
                                 placeholder="(xxx) xxx-xxxx"
                                 value={userState.phone || ''}
@@ -424,7 +531,7 @@ export function AdminUsers() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-red-500">Address (Line1, Line2, City, state, Zip)</Label>
+                            <Label>Address</Label>
                             <div className="grid gap-2">
                                 <Input
                                     placeholder="Line 1"
@@ -463,8 +570,8 @@ export function AdminUsers() {
                                 <SelectContent>
                                     <SelectItem value="admin">Backoffice User</SelectItem>
                                     <SelectItem value="us-strategy">US Strategy</SelectItem>
-                                    {/* SEO roles hidden in this dropdown based on mockup notes */}
-                                    {userState.role && ['seo-head', 'seo-junior'].includes(userState.role) && (
+                                    {/* SEO roles shown in this dropdown when adding/editing SEO users */}
+                                    {(userState.role && ['seo-head', 'seo-junior'].includes(userState.role)) && (
                                         <>
                                             <SelectItem value="seo-head">SEO Head</SelectItem>
                                             <SelectItem value="seo-junior">SEO Junior</SelectItem>
@@ -473,6 +580,21 @@ export function AdminUsers() {
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {userState.role && ['us-strategy', 'seo-head', 'seo-junior'].includes(userState.role) && (
+                            <div className="flex items-center gap-4 py-2">
+                                <Label className="flex-1">Default Associated with Client</Label>
+                                <div className="flex items-center gap-2">
+                                    <span className={`text-xs ${!userState.isDefaultAssociate ? 'font-bold' : 'text-muted-foreground'}`}>No</span>
+                                    <Switch
+                                        id="default-associate"
+                                        checked={userState.isDefaultAssociate}
+                                        onCheckedChange={(c) => setUserState({ ...userState, isDefaultAssociate: c })}
+                                    />
+                                    <span className={`text-xs ${userState.isDefaultAssociate ? 'font-bold' : 'text-muted-foreground'}`}>Yes</span>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="flex items-center gap-2 pt-2">
                             <Checkbox

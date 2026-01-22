@@ -104,7 +104,14 @@ export interface SubscriptionPlan {
   billingCycle: 'monthly' | 'yearly' | 'one-time';
   isActive: boolean;
   isArchived: boolean;
+  isSetupFeeApplicable?: boolean;
   features?: string[];
+}
+
+export interface Package {
+  id: string;
+  tier: SubscriptionTier;
+  setupCost: number;
 }
 
 export interface Discount {
@@ -234,7 +241,7 @@ export const SUBSCRIPTION_TIER_PRICES: Record<SubscriptionTier, number> = {
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {
-  'admin': 'Portal Admin',
+  'admin': 'Backoffice User',
   'us-strategy': 'US Strategy',
   'seo-head': 'SEO Head',
   'seo-junior': 'SEO Junior',

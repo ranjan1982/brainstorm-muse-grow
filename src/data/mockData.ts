@@ -1,4 +1,4 @@
-import { Task, User, KPIData, Phase, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, LoginHistory, SubscriptionPlan, Discount, PhaseConfig } from '@/types';
+import { Task, User, KPIData, Phase, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, LoginHistory, SubscriptionPlan, Discount, PhaseConfig, Package } from '@/types';
 
 // Multiple clients for team management
 export const mockClients: Client[] = [
@@ -1221,6 +1221,12 @@ export const mockPhaseConfigs: PhaseConfig[] = [
   { id: 'ph-4', name: 'AI / AEO Optimization', slug: 'ai', order: 4, predecessor: 'execution', successor: 'reporting', isActive: true },
   { id: 'ph-5', name: 'Reporting & Strategy', slug: 'reporting', order: 5, predecessor: 'ai', successor: 'monitoring', isActive: true },
   { id: 'ph-6', name: 'Failure Monitoring', slug: 'monitoring', order: 6, predecessor: 'reporting', isActive: true }
+];
+
+export const mockPackages: Package[] = [
+  { id: 'pkg-1', tier: 'starter', setupCost: 499 },
+  { id: 'pkg-2', tier: 'growth', setupCost: 999 },
+  { id: 'pkg-3', tier: 'enterprise', setupCost: 1999 }
 ];
 
 export const kpiHistory = [
