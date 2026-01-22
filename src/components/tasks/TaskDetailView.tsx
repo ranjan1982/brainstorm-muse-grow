@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useApp } from '@/context/AppContext';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
     MessageSquare,
     FileText,
@@ -25,9 +25,14 @@ import {
     Building2,
     ChevronDown,
     ChevronUp,
-    MoreHorizontal,
-    Plus
+    Plus,
+    Edit2,
+    Save,
+    MoreHorizontal
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn, getWeeklyInfo } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -56,8 +61,19 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
     const [isAssigning, setIsAssigning] = useState(false);
     const [commentAttachments, setCommentAttachments] = useState<CommentAttachmentInput[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
     const task = tasks.find(t => t.id === taskId);
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [editedTitle, setEditedTitle] = useState(task?.title || '');
+    const [editedDescription, setEditedDescription] = useState(task?.description || '');
+
+    // Sync state when task changes (e.g. initial load or remote update)
+    useEffect(() => {
+        if (task && !isEditing) {
+            setEditedTitle(task.title);
+            setEditedDescription(task.description || '');
+        }
+    }, [task, isEditing]);
 
     if (!task) {
         return (
@@ -130,6 +146,21 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
         if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
         return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     };
+
+    const handleSaveTaskEdit = () => {
+        if (!currentUser) return;
+        updateTask(task.id, {
+            title: editedTitle,
+            description: editedDescription
+        }, {
+            userId: currentUser.id,
+            userName: currentUser.name
+        });
+        setIsEditing(false);
+        toast.success('Task updated successfully');
+    };
+
+    const isEditorRole = currentUser?.role === 'us-strategy' || currentUser?.role === 'seo-head';
 
     const canEdit = () => {
         if (!currentUser) return false;
@@ -224,7 +255,64 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
                         </Badge>
                     </div>
                 </div>
-                <h1 className="text-3xl font-extrabold tracking-tight text-[#0f172a] mt-2">{task.title}</h1>
+                <div className="flex items-center gap-3 mt-2">
+                    {isEditing ? (
+                        <div className="flex-1 space-y-4 bg-white p-4 rounded-xl border border-accent/20 shadow-sm">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Task Title</Label>
+                                <Input
+                                    value={editedTitle}
+                                    onChange={(e) => setEditedTitle(e.target.value)}
+                                    className="text-lg font-bold"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Task Description</Label>
+                                <Textarea
+                                    value={editedDescription}
+                                    onChange={(e) => setEditedDescription(e.target.value)}
+                                    className="min-h-[100px]"
+                                />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <Button variant="outline" size="sm" onClick={() => {
+                                    setIsEditing(false);
+                                    setEditedTitle(task.title);
+                                    setEditedDescription(task.description || '');
+                                }}>Cancel</Button>
+                                <Button size="sm" className="bg-[#14b8a6] hover:bg-[#0d9488]" onClick={handleSaveTaskEdit}>
+                                    <Save className="w-4 h-4 mr-2" /> Save Changes
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <h1 className="text-3xl font-extrabold tracking-tight text-[#0f172a]">{task.title}</h1>
+                            {isEditorRole && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                                    onClick={() => {
+                                        setEditedTitle(task.title);
+                                        setEditedDescription(task.description || '');
+                                        setIsEditing(true);
+                                    }}
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </Button>
+                            )}
+                        </>
+                    )}
+                </div>
+                {task.lastEditedBy && (
+                    <div className="flex items-center gap-2 mt-1 px-1">
+                        <History className="w-3.5 h-3.5 text-orange-500" />
+                        <span className="text-[11px] text-orange-600 font-medium italic">
+                            Edited by {task.lastEditedBy.userName} on {format(new Date(task.lastEditedBy.at), 'MMM dd, yyyy')} at {format(new Date(task.lastEditedBy.at), 'h:mm a')}
+                        </span>
+                    </div>
+                )}
             </div>
 
             <div className="space-y-6">

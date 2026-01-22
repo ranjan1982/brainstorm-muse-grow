@@ -23,7 +23,7 @@ interface AppContextType {
   setCurrentUser: (user: User | null) => void;
   tasks: TaskWithClient[];
   setTasks: React.Dispatch<React.SetStateAction<TaskWithClient[]>>;
-  updateTask: (taskId: string, updates: Partial<Task>) => void;
+  updateTask: (taskId: string, updates: Partial<Task>, editor?: { userId: string, userName: string }) => void;
   addComment: (taskId: string, content: string, attachments?: { name: string; size: number; type: string; url: string }[]) => void;
   addDocumentToTask: (taskId: string, document: { name: string; url: string }) => void;
   addTask: (taskData: NewTaskData) => void;
@@ -95,10 +95,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [phaseConfigs, setPhaseConfigs] = useState<PhaseConfig[]>(mockPhaseConfigs);
   const [users, setUsers] = useState<User[]>(mockUsers);
 
-  const updateTask = (taskId: string, updates: Partial<Task>) => {
+  const updateTask = (taskId: string, updates: Partial<Task>, editor?: { userId: string, userName: string }) => {
     setTasks(prev => prev.map(task =>
       task.id === taskId
-        ? { ...task, ...updates, updatedAt: new Date() }
+        ? {
+          ...task,
+          ...updates,
+          updatedAt: new Date(),
+          ...(editor ? { lastEditedBy: { ...editor, at: new Date() } } : {})
+        }
         : task
     ));
   };

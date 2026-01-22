@@ -43,6 +43,11 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   dueDate?: Date;
+  lastEditedBy?: {
+    userId: string;
+    userName: string;
+    at: Date;
+  };
   order?: number; // For task ordering within phase
   duration?: number; // Duration in days
 }

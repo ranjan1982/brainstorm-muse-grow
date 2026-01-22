@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useApp } from '@/context/AppContext';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -26,10 +26,13 @@ import {
   Paperclip,
   Upload,
   X,
-  Download
+  Download,
+  Edit2,
+  Save
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -54,6 +57,16 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
   const [newComment, setNewComment] = useState('');
   const [commentAttachments, setCommentAttachments] = useState<CommentAttachmentInput[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(task?.title || '');
+  const [editedDescription, setEditedDescription] = useState(task?.description || '');
+
+  useEffect(() => {
+    if (task && !isEditing) {
+      setEditedTitle(task.title);
+      setEditedDescription(task.description || '');
+    }
+  }, [task, isEditing]);
 
   if (!task) return null;
 
@@ -111,6 +124,21 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
+
+  const handleSaveTaskEdit = () => {
+    if (!currentUser || !task) return;
+    updateTask(task.id, {
+      title: editedTitle,
+      description: editedDescription
+    }, {
+      userId: currentUser.id,
+      userName: currentUser.name
+    });
+    setIsEditing(false);
+    toast.success('Task updated successfully');
+  };
+
+  const isEditorRole = currentUser?.role === 'us-strategy' || currentUser?.role === 'seo-head';
 
   // Permission checks based on workflow document
   // US Strategy is the GATEKEEPER - only they approve and send to client
@@ -244,9 +272,54 @@ export function TaskDetailModal({ task, open, onOpenChange }: TaskDetailModalPro
                   </Badge>
                 )}
               </div>
-              <DialogTitle className="text-xl font-semibold">
-                {task.title}
-              </DialogTitle>
+              <div className="flex items-center gap-2">
+                {isEditing ? (
+                  <div className="flex-1 space-y-3 p-3 bg-secondary/30 rounded-lg">
+                    <Input
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="text-lg font-semibold bg-white"
+                      placeholder="Task Title"
+                    />
+                    <Textarea
+                      value={editedDescription}
+                      onChange={(e) => setEditedDescription(e.target.value)}
+                      className="text-sm bg-white"
+                      placeholder="Task Description"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>Cancel</Button>
+                      <Button size="sm" onClick={handleSaveTaskEdit} className="bg-accent text-accent-foreground">
+                        <Save className="w-4 h-4 mr-2" /> Save
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <DialogTitle className="text-xl font-semibold">
+                      {task.title}
+                    </DialogTitle>
+                    {isEditorRole && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground"
+                        onClick={() => setIsEditing(true)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </>
+                )}
+              </div>
+              {task.lastEditedBy && (
+                <div className="flex items-center gap-2 mt-1">
+                  <History className="w-3.5 h-3.5 text-orange-500" />
+                  <span className="text-[10px] text-orange-600 italic">
+                    Edited by {task.lastEditedBy.userName} on {format(new Date(task.lastEditedBy.at), 'MMM dd, yyyy')}
+                  </span>
+                </div>
+              )}
             </div>
             <Badge variant={task.status as any} className="shrink-0 text-sm">
               {statusIcon[task.status]}
