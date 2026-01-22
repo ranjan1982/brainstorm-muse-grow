@@ -16,6 +16,8 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     businessName: '',
+    contactFirstName: '',
+    contactLastName: '',
     email: '',
     phone: '',
     website: '',
@@ -42,25 +44,23 @@ export default function Register() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
           <div className="max-w-xl mx-auto">
             {/* Progress Steps */}
             <div className="flex items-center justify-center gap-4 mb-8">
               <div className={`flex items-center gap-2 ${step >= 1 ? 'text-foreground' : 'text-muted-foreground'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                  step >= 1 ? 'bg-accent text-accent-foreground' : 'bg-muted'
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${step >= 1 ? 'bg-accent text-accent-foreground' : 'bg-muted'
+                  }`}>
                   {step > 1 ? <CheckCircle2 className="w-5 h-5" /> : '1'}
                 </div>
                 <span className="text-sm font-medium">Business Info</span>
               </div>
               <div className="w-12 h-0.5 bg-border" />
               <div className={`flex items-center gap-2 ${step >= 2 ? 'text-foreground' : 'text-muted-foreground'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                  step >= 2 ? 'bg-accent text-accent-foreground' : 'bg-muted'
-                }`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${step >= 2 ? 'bg-accent text-accent-foreground' : 'bg-muted'
+                  }`}>
                   2
                 </div>
                 <span className="text-sm font-medium">Checkout</span>
@@ -77,8 +77,8 @@ export default function Register() {
                   {step === 1 ? 'Create Your Account' : 'Complete Your Purchase'}
                 </CardTitle>
                 <CardDescription>
-                  {step === 1 
-                    ? 'Tell us about your business to get started' 
+                  {step === 1
+                    ? 'Tell us about your business to get started'
                     : 'Enter payment details to activate your subscription'
                   }
                 </CardDescription>
@@ -97,6 +97,30 @@ export default function Register() {
                           onChange={handleChange}
                           required
                         />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="contactFirstName">Contact First Name</Label>
+                          <Input
+                            id="contactFirstName"
+                            name="contactFirstName"
+                            placeholder="John"
+                            value={formData.contactFirstName}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="contactLastName">Contact Last Name</Label>
+                          <Input
+                            id="contactLastName"
+                            name="contactLastName"
+                            placeholder="Doe"
+                            value={formData.contactLastName}
+                            onChange={handleChange}
+                            required
+                          />
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="email">Email Address</Label>
@@ -145,7 +169,7 @@ export default function Register() {
                           14-day free trial included
                         </p>
                       </div>
-                      
+
                       <div className="space-y-2">
                         <Label htmlFor="cardNumber">Card Number</Label>
                         <Input
@@ -174,7 +198,7 @@ export default function Register() {
                       </div>
                     </>
                   )}
-                  
+
                   <Button type="submit" variant="accent" className="w-full" size="lg">
                     {step === 1 ? (
                       <>
@@ -188,7 +212,7 @@ export default function Register() {
                       </>
                     )}
                   </Button>
-                  
+
                   {step === 2 && (
                     <p className="text-xs text-center text-muted-foreground">
                       You won't be charged until your 14-day trial ends. Cancel anytime.

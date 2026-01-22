@@ -13,10 +13,19 @@ import { toast } from 'sonner';
 
 export default function Purchase() {
     const navigate = useNavigate();
-    const { login } = useApp();
+    const { login, plans, packages } = useApp();
+
+    // Select a default plan for checkout (e.g., Starter Monthly)
+    const selectedPlan = plans.find(p => p.id === 'plan-starter-monthly') || plans[0];
+    const tierPackage = packages.find(pkg => pkg.tier === selectedPlan?.tier);
+    const setupFee = tierPackage?.setupCost || 0;
+    const isSetupFeeApplicable = selectedPlan?.isSetupFeeApplicable;
+    const totalAmount = (selectedPlan?.price || 0) + (isSetupFeeApplicable ? setupFee : 0);
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         businessName: '',
+        contactFirstName: '',
+        contactLastName: '',
         email: '',
         phone: '',
         website: '',
@@ -111,6 +120,32 @@ export default function Purchase() {
                                                     className="h-11"
                                                 />
                                             </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="contactFirstName" className="font-bold">Contact First Name</Label>
+                                                    <Input
+                                                        id="contactFirstName"
+                                                        name="contactFirstName"
+                                                        placeholder="John"
+                                                        value={formData.contactFirstName}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="h-11"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="contactLastName" className="font-bold">Contact Last Name</Label>
+                                                    <Input
+                                                        id="contactLastName"
+                                                        name="contactLastName"
+                                                        placeholder="Doe"
+                                                        value={formData.contactLastName}
+                                                        onChange={handleChange}
+                                                        required
+                                                        className="h-11"
+                                                    />
+                                                </div>
+                                            </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="email" className="font-bold">Email Address</Label>
                                                 <Input
@@ -185,19 +220,34 @@ export default function Purchase() {
                                         </>
                                     ) : (
                                         <>
-                                            <div className="bg-[#f8fafc] border rounded-xl p-5 mb-6 flex items-center justify-between shadow-inner">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                                                        <Zap className="w-5 h-5" />
+                                            <div className="bg-[#f8fafc] border rounded-xl overflow-hidden mb-6 shadow-inner">
+                                                <div className="p-5 flex items-center justify-between border-b bg-white">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                                                            <Zap className="w-5 h-5" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-black text-sm">{selectedPlan?.name || 'Starter Plan'}</p>
+                                                            <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">{selectedPlan?.billingCycle} Billing</p>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <p className="font-black text-sm">Starter Plan</p>
-                                                        <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">Monthly Billing</p>
+                                                    <div className="text-right">
+                                                        <p className="font-black text-xl">${selectedPlan?.price || 499}</p>
+                                                        <p className="text-[10px] font-bold text-muted-foreground">Billed {selectedPlan?.billingCycle}</p>
                                                     </div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <p className="font-black text-xl">$499</p>
-                                                    <p className="text-[10px] font-bold text-muted-foreground">Billed monthly</p>
+
+                                                <div className="p-4 space-y-3 bg-[#f8fafc]">
+                                                    <div className="flex justify-between items-center text-sm">
+                                                        <span className="text-muted-foreground font-medium">Setup Fee (one-time)</span>
+                                                        <span className={`font-bold ${!isSetupFeeApplicable ? 'line-through text-muted-foreground' : 'text-blue-600'}`}>
+                                                            ${setupFee}
+                                                        </span>
+                                                    </div>
+                                                    <div className="pt-3 border-t flex justify-between items-center">
+                                                        <span className="font-black text-base">Total Due Today</span>
+                                                        <span className="font-black text-2xl text-primary">${totalAmount}</span>
+                                                    </div>
                                                 </div>
                                             </div>
 

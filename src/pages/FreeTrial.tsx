@@ -16,6 +16,8 @@ export default function FreeTrial() {
     const { login } = useApp();
     const [formData, setFormData] = useState({
         businessName: '',
+        contactFirstName: '',
+        contactLastName: '',
         email: '',
         phone: '',
         website: '',
@@ -95,6 +97,30 @@ export default function FreeTrial() {
                                             onChange={handleChange}
                                             required
                                         />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="contactFirstName">Contact First Name</Label>
+                                            <Input
+                                                id="contactFirstName"
+                                                name="contactFirstName"
+                                                placeholder="John"
+                                                value={formData.contactFirstName}
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="contactLastName">Contact Last Name</Label>
+                                            <Input
+                                                id="contactLastName"
+                                                name="contactLastName"
+                                                placeholder="Doe"
+                                                value={formData.contactLastName}
+                                                onChange={handleChange}
+                                                required
+                                            />
+                                        </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="email">Email Address</Label>

@@ -1156,6 +1156,7 @@ export const mockPlans: SubscriptionPlan[] = [
     billingCycle: 'monthly',
     isActive: true,
     isArchived: false,
+    isSetupFeeApplicable: true,
     features: ['Basic GBP Audit', '2 Google Posts/mo', 'Monthly Reporting']
   },
   {
@@ -1166,6 +1167,7 @@ export const mockPlans: SubscriptionPlan[] = [
     billingCycle: 'monthly',
     isActive: true,
     isArchived: false,
+    isSetupFeeApplicable: true,
     features: ['Deep GBP Audit', '4 Google Posts/mo', 'Bi-monthly Strategy']
   },
   {
