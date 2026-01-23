@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/collapsible"
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/AppContext';
-import { Phase, PHASE_LABELS, ROLE_LABELS } from '@/types';
+import { Phase, PHASE_LABELS, ROLE_LABELS, SUBSCRIPTION_TIER_LABELS, TRACK_LABELS } from '@/types';
 import {
   Sidebar,
   SidebarContent,
@@ -72,9 +72,25 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
           <div className="flex flex-col">
             <span className="font-semibold text-sm">SEO Portal</span>
             {currentClient && currentUser?.role !== 'client' && (
-              <span className="text-xs text-muted-foreground truncate max-w-[140px]">
-                {currentClient.company}
-              </span>
+              <div className="flex flex-col">
+                <span className="text-xs text-muted-foreground truncate max-w-[140px]">
+                  {currentClient.company}
+                </span>
+                {(() => {
+                  const sub = getClientSubscription(currentClient.id);
+                  if (!sub) return null;
+                  return (
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <span className="text-[9px] font-bold bg-[#f1f5f9] text-[#475569] px-1 rounded uppercase tracking-tighter">
+                        {SUBSCRIPTION_TIER_LABELS[sub.tier]}
+                      </span>
+                      <span className="text-[9px] font-bold text-blue-600 uppercase tracking-tighter">
+                        {sub.track}
+                      </span>
+                    </div>
+                  );
+                })()}
+              </div>
             )}
             {isAdmin && <span className="text-xs text-muted-foreground">Administrator</span>}
           </div>

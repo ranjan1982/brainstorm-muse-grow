@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PHASE_LABELS, Phase } from '@/types';
+import { PHASE_LABELS, Phase, SUBSCRIPTION_TIER_LABELS, TRACK_LABELS } from '@/types';
 import { ChevronRight, CheckCircle2, AlertCircle, PlayCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -63,7 +63,22 @@ export function StrategyPhaseManagement() {
                                         <TableCell>
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-[#0f172a]">{client.company}</span>
-                                                <span className="text-xs text-muted-foreground">{client.name}</span>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    {(() => {
+                                                        const sub = useApp().getClientSubscription(client.id);
+                                                        if (!sub) return null;
+                                                        return (
+                                                            <>
+                                                                <span className="text-[9px] font-black bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                                                                    {SUBSCRIPTION_TIER_LABELS[sub.tier]}
+                                                                </span>
+                                                                <span className="text-[9px] font-black text-blue-600 uppercase tracking-tighter">
+                                                                    {TRACK_LABELS[sub.track]}
+                                                                </span>
+                                                            </>
+                                                        );
+                                                    })()}
+                                                </div>
                                             </div>
                                         </TableCell>
                                         <TableCell>

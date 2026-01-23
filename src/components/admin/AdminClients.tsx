@@ -66,6 +66,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
         usStrategyId: '',
         seoHeadId: '',
         seoJuniorId: '',
+        track: 'local' as any,
     });
 
     const { users } = useApp();
@@ -113,6 +114,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
             },
             {
                 tier: newClientState.tier,
+                track: newClientState.track,
                 monthlyPrice: newClientState.monthlyPrice,
                 billingCycle: newClientState.billingCycle
             }
@@ -140,6 +142,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
             usStrategyId: '',
             seoHeadId: '',
             seoJuniorId: '',
+            track: 'local',
         });
     };
 
@@ -422,6 +425,9 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                                     <Badge variant={detailClientSub.status === 'active' ? 'default' : detailClientSub.status === 'trial' ? 'outline' : 'destructive'} className="capitalize">
                                                         {detailClientSub.status}
                                                     </Badge>
+                                                    <Badge variant="outline" className="bg-blue-50">
+                                                        {detailClientSub.track.toUpperCase()} TRACK
+                                                    </Badge>
                                                     {detailClientSub.status === 'trial' && (
                                                         <Badge variant="secondary">Trial ends {format(detailClientSub.trialEndDate || new Date(), 'MMM dd')}</Badge>
                                                     )}
@@ -674,6 +680,22 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                             />
                         </div>
                         <div className="space-y-2 border-t pt-4">
+                            <Label>Service Track</Label>
+                            <Select
+                                value={newClientState.track}
+                                onValueChange={(v: any) => setNewClientState({ ...newClientState, track: v })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Track" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="local">LOCAL TRACK</SelectItem>
+                                    <SelectItem value="national">NATIONAL TRACK</SelectItem>
+                                    <SelectItem value="hybrid">HYBRID TRACK</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2 border-t pt-4">
                             <Label>Subscription Tier</Label>
                             <Select
                                 value={newClientState.tier}
@@ -694,7 +716,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="space-y-2 border-t pt-4">
+                        <div className="col-span-2 space-y-2 border-t pt-4">
                             <Label>Subscription Plan / Cycle</Label>
                             <Select
                                 value={newClientState.billingCycle}
@@ -797,7 +819,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                             <TableRow>
                                 <TableHead>Client / Company</TableHead>
                                 <TableHead>Contact Info</TableHead>
-                                <TableHead>Plan</TableHead>
+                                <TableHead>Plan & Track</TableHead>
                                 <TableHead>Purchase Type</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead>Joined</TableHead>
@@ -832,9 +854,12 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                                         </TableCell>
                                         <TableCell>
                                             {sub ? (
-                                                <Badge variant="outline" className="font-semibold">
-                                                    {SUBSCRIPTION_TIER_LABELS[sub.tier]}
-                                                </Badge>
+                                                <div className="flex flex-col gap-1">
+                                                    <Badge variant="outline" className="font-semibold w-fit">
+                                                        {SUBSCRIPTION_TIER_LABELS[sub.tier]}
+                                                    </Badge>
+                                                    <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">{sub.track} track</span>
+                                                </div>
                                             ) : <span className="text-muted-foreground">-</span>}
                                         </TableCell>
                                         <TableCell>

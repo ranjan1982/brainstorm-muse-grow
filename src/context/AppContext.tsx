@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, Task, UserRole, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, KPIData, SubscriptionTier, LoginHistory, SubscriptionPlan, Discount, PhaseConfig, Package, Phase } from '@/types';
+import { User, Task, UserRole, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, KPIData, SubscriptionTier, ServiceTrack, LoginHistory, SubscriptionPlan, Discount, PhaseConfig, Package, Phase } from '@/types';
 import { mockUsers, mockTasks, mockClients, mockSubscriptions, mockPaymentHistory, mockTaskTemplates, mockEmailTemplates, mockKPIData, mockLoginHistory, mockPlans, mockDiscounts, mockPhaseConfigs, mockPackages } from '@/data/mockData';
 import { toast } from 'sonner';
 
@@ -41,7 +41,7 @@ interface AppContextType {
   setCurrentClient: (client: Client | null) => void;
   getClientTasks: (clientId?: string) => TaskWithClient[];
   getClientTasksForTier: (clientId?: string) => TaskWithClient[];
-  getTaskTemplatesForTier: (tier: SubscriptionTier) => TaskTemplate[];
+  getTaskTemplatesForTier: (tier: SubscriptionTier, track?: ServiceTrack) => TaskTemplate[];
   getClientKPIData: (clientId: string) => KPIData;
   // Subscription management
   subscriptions: Subscription[];
@@ -78,7 +78,9 @@ interface AppContextType {
   deleteDiscount: (id: string) => void;
   packages: Package[];
   updatePackage: (id: string, updates: Partial<Package>) => void;
-  addManualClient: (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive' | 'currentPhase'>, subscriptionData: { tier: SubscriptionTier, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => void;
+  addPackage: (pkgData: Omit<Package, 'id'>) => void;
+  deletePackage: (id: string) => void;
+  addManualClient: (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive' | 'currentPhase'>, subscriptionData: { tier: SubscriptionTier, track: ServiceTrack, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => void;
   associateTeamToClient: (clientId: string, team: Client['associatedTeam'], reassignExistingTasks?: boolean) => void;
   proceedToNextPhase: (clientId: string) => void;
 }
@@ -242,9 +244,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return tasks.filter(t => t.clientId === targetClientId);
   };
 
-  // Get task templates available for a specific subscription tier
-  const getTaskTemplatesForTier = (tier: SubscriptionTier): TaskTemplate[] => {
-    return taskTemplates.filter(t => t.isActive && t.tiers.includes(tier));
+  // Get task templates available for a specific subscription tier and track
+  const getTaskTemplatesForTier = (tier: SubscriptionTier, track?: ServiceTrack): TaskTemplate[] => {
+    return taskTemplates.filter(t =>
+      t.isActive &&
+      t.tiers.includes(tier) &&
+      (!track || t.tracks.includes(track))
+    );
   };
 
   // Get client tasks filtered by their subscription tier
@@ -442,6 +448,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setPackages(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
   };
 
+  const addPackage = (pkgData: Omit<Package, 'id'>) => {
+    const newPkg: Package = {
+      ...pkgData,
+      id: `pkg-${Date.now()}`
+    };
+    setPackages(prev => [...prev, newPkg]);
+  };
+
+  const deletePackage = (id: string) => {
+    setPackages(prev => prev.filter(p => p.id !== id));
+  };
+
   const addUser = (userData: Omit<User, 'id' | 'createdAt'>) => {
     const newUser: User = {
       ...userData,
@@ -452,7 +470,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUsers(prev => [...prev, newUser]);
   };
 
-  const addManualClient = (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive'>, subscriptionData: { tier: SubscriptionTier, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => {
+  const addManualClient = (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive'>, subscriptionData: { tier: SubscriptionTier, track: ServiceTrack, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => {
     const clientId = `client-${Date.now()}`;
     const timestamp = new Date();
 
@@ -484,6 +502,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       id: `sub-${Date.now()}`,
       clientId: clientId,
       tier: subscriptionData.tier,
+      track: subscriptionData.track,
       status: 'active',
       startDate: timestamp,
       monthlyPrice: subscriptionData.monthlyPrice,
@@ -530,12 +549,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const nextPhase = allPhases[currentPhaseIndex + 1];
 
-    // Check if subscription exists to get tier
+    // Check if subscription exists to get tier and track
     const sub = getClientSubscription(clientId);
     const tier = sub?.tier || 'starter';
+    const track = sub?.track || 'local';
 
     // Generate tasks for the next phase from templates
-    const templates = getTaskTemplatesForTier(tier).filter(tpl => tpl.phase === nextPhase);
+    const templates = getTaskTemplatesForTier(tier, track).filter(tpl => tpl.phase === nextPhase);
 
     const newTasks: TaskWithClient[] = templates.map(tpl => ({
       id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -543,14 +563,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
       title: tpl.title,
       description: tpl.description,
       phase: nextPhase,
-      owner: tpl.owner as any,
+      owner: tpl.owner as Task['owner'],
       status: 'pending',
       comments: [],
       documents: [],
       createdAt: new Date(),
       updatedAt: new Date(),
       clientId: clientId,
-      assignedTo: client.associatedTeam?.[tpl.owner === 'us-strategy' ? 'usStrategyId' : (tpl.owner === 'seo-head' ? 'seoHeadId' : (tpl.owner === 'seo-junior' ? 'seoJuniorId' : undefined)) as any]
+      assignedTo: (tpl.owner === 'us-strategy' || tpl.owner === 'seo-head' || tpl.owner === 'seo-junior')
+        ? client.associatedTeam?.[tpl.owner === 'us-strategy' ? 'usStrategyId' : (tpl.owner === 'seo-head' ? 'seoHeadId' : 'seoJuniorId')]
+        : undefined
     }));
 
     setTasks(prev => [...prev, ...newTasks]);
@@ -621,6 +643,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       deleteDiscount,
       packages,
       updatePackage,
+      addPackage,
+      deletePackage,
       addManualClient,
       associateTeamToClient,
       proceedToNextPhase,

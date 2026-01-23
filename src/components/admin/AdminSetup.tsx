@@ -33,19 +33,19 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, UserRole, ROLE_LABELS, SubscriptionPlan, Discount, EmailTemplate, Package, SUBSCRIPTION_TIER_LABELS } from '@/types';
+import { User, UserRole, ROLE_LABELS, SubscriptionPlan, Discount, EmailTemplate, Package, SUBSCRIPTION_TIER_LABELS, ServiceTrack, TRACK_LABELS } from '@/types';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit2, Send } from 'lucide-react';
+import { Plus, Trash2, Edit2, Send, Globe } from 'lucide-react';
 
 
 export function AdminPlans() {
-    const { plans, addPlan, updatePlan, deletePlan, packages, updatePackage } = useApp();
+    const { plans, addPlan, updatePlan, deletePlan, packages, updatePackage, addPackage, deletePackage } = useApp();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [planState, setPlanState] = useState<Partial<SubscriptionPlan>>({ tier: 'starter', isActive: true, billingCycle: 'monthly', features: [], isSetupFeeApplicable: false });
+    const [planState, setPlanState] = useState<Partial<SubscriptionPlan>>({ tier: 'starter', track: 'local', isActive: true, billingCycle: 'monthly', features: [], isSetupFeeApplicable: false });
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const [isPackageDialogOpen, setIsPackageDialogOpen] = useState(false);
-    const [packageState, setPackageState] = useState<Partial<Package>>({});
+    const [packageState, setPackageState] = useState<Partial<Package>>({ tier: 'starter', track: 'local', setupCost: 0 });
 
     const handleSave = () => {
         if (editingId) {
@@ -60,7 +60,9 @@ export function AdminPlans() {
 
     const handleSavePackage = () => {
         if (packageState.id) {
-            updatePackage(packageState.id, { setupCost: packageState.setupCost });
+            updatePackage(packageState.id, packageState);
+        } else {
+            addPackage(packageState as any);
         }
         setIsPackageDialogOpen(false);
     };
@@ -97,6 +99,7 @@ export function AdminPlans() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
+                                        <TableHead>Track</TableHead>
                                         <TableHead>Package Name</TableHead>
                                         <TableHead>Setup Cost</TableHead>
                                         <TableHead className="w-[100px]">Actions</TableHead>
@@ -105,12 +108,22 @@ export function AdminPlans() {
                                 <TableBody>
                                     {packages.map((pkg) => (
                                         <TableRow key={pkg.id}>
+                                            <TableCell>
+                                                <Badge variant="outline" className="bg-slate-50">
+                                                    {TRACK_LABELS[pkg.track]}
+                                                </Badge>
+                                            </TableCell>
                                             <TableCell className="font-medium capitalize">{SUBSCRIPTION_TIER_LABELS[pkg.tier]}</TableCell>
                                             <TableCell>${pkg.setupCost}</TableCell>
                                             <TableCell>
-                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditPackage(pkg)}>
-                                                    <Edit2 className="w-4 h-4" />
-                                                </Button>
+                                                <div className="flex gap-2">
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEditPackage(pkg)}>
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => { if (confirm('Are you sure?')) deletePackage(pkg.id); }}>
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -131,7 +144,9 @@ export function AdminPlans() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
+                                        <TableHead>Track</TableHead>
                                         <TableHead>Plan Name</TableHead>
+                                        <TableHead>Tier</TableHead>
                                         <TableHead>Price</TableHead>
                                         <TableHead>Cycle</TableHead>
                                         <TableHead>Setup Fee</TableHead>
@@ -143,13 +158,19 @@ export function AdminPlans() {
                                 <TableBody>
                                     {plans.map((plan) => (
                                         <TableRow key={plan.id}>
+                                            <TableCell>
+                                                <Badge variant="outline" className="bg-slate-50">
+                                                    {TRACK_LABELS[plan.track]}
+                                                </Badge>
+                                            </TableCell>
                                             <TableCell className="font-medium">{plan.name}</TableCell>
+                                            <TableCell className="capitalize">{plan.tier}</TableCell>
                                             <TableCell>${plan.price}</TableCell>
                                             <TableCell className="capitalize">{plan.billingCycle}</TableCell>
                                             <TableCell>
                                                 {plan.isSetupFeeApplicable ? (
                                                     <span className="font-medium text-blue-600">
-                                                        ${packages.find(p => p.tier === plan.tier)?.setupCost || 0}
+                                                        ${packages.find(p => p.tier === plan.tier && p.track === plan.track)?.setupCost || 0}
                                                     </span>
                                                 ) : (
                                                     <span className="text-muted-foreground">None</span>
@@ -206,16 +227,29 @@ export function AdminPlans() {
                                 </Select>
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Tier Level</Label>
-                            <Select value={planState.tier} onValueChange={(v: any) => setPlanState({ ...planState, tier: v })}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="starter">Starter</SelectItem>
-                                    <SelectItem value="growth">Growth</SelectItem>
-                                    <SelectItem value="enterprise">Enterprise</SelectItem>
-                                </SelectContent>
-                            </Select>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Tier Level</Label>
+                                <Select value={planState.tier} onValueChange={(v: any) => setPlanState({ ...planState, tier: v })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="starter">Starter</SelectItem>
+                                        <SelectItem value="growth">Growth</SelectItem>
+                                        <SelectItem value="enterprise">Enterprise</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Service Track</Label>
+                                <Select value={planState.track} onValueChange={(v: any) => setPlanState({ ...planState, track: v })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="local">LOCAL TRACK</SelectItem>
+                                        <SelectItem value="national">NATIONAL/SAAS TRACK</SelectItem>
+                                        <SelectItem value="hybrid">HYBRID TRACK</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                         <div className="flex items-center gap-2 pt-2">
                             <Switch
@@ -227,7 +261,7 @@ export function AdminPlans() {
                                 Is Setup Fee Applicable (one-time)
                                 {planState.isSetupFeeApplicable && (
                                     <span className="text-blue-600 font-bold ml-1">
-                                        (${packages.find(p => p.tier === planState.tier)?.setupCost || 0})
+                                        (${packages.find(p => p.tier === planState.tier && p.track === planState.track)?.setupCost || 0})
                                     </span>
                                 )}
                             </Label>
@@ -236,16 +270,16 @@ export function AdminPlans() {
                             <Switch checked={planState.isActive} onCheckedChange={c => setPlanState({ ...planState, isActive: c })} />
                             <Label>Active Plan</Label>
                         </div>
-                    </div>
+                    </div >
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
                         <Button onClick={handleSave}>Save Plan</Button>
                     </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                </DialogContent >
+            </Dialog >
 
             {/* Package Dialog */}
-            <Dialog open={isPackageDialogOpen} onOpenChange={setIsPackageDialogOpen}>
+            < Dialog open={isPackageDialogOpen} onOpenChange={setIsPackageDialogOpen} >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Edit Package Setup Cost</DialogTitle>
@@ -254,9 +288,29 @@ export function AdminPlans() {
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                            <Label>Package Name</Label>
-                            <Input value={packageState.tier ? SUBSCRIPTION_TIER_LABELS[packageState.tier] : ''} disabled />
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Tier Level</Label>
+                                <Select value={packageState.tier} onValueChange={(v: any) => setPackageState({ ...packageState, tier: v })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="starter">Starter</SelectItem>
+                                        <SelectItem value="growth">Growth</SelectItem>
+                                        <SelectItem value="enterprise">Enterprise</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Service Track</Label>
+                                <Select value={packageState.track} onValueChange={(v: any) => setPackageState({ ...packageState, track: v })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="local">LOCAL TRACK</SelectItem>
+                                        <SelectItem value="national">NATIONAL/SAAS TRACK</SelectItem>
+                                        <SelectItem value="hybrid">HYBRID TRACK</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <Label>Setup Cost ($)</Label>
@@ -272,8 +326,8 @@ export function AdminPlans() {
                         <Button onClick={handleSavePackage}>Save Package</Button>
                     </DialogFooter>
                 </DialogContent>
-            </Dialog>
-        </div>
+            </Dialog >
+        </div >
     );
 }
 

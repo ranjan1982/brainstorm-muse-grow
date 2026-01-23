@@ -31,7 +31,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Switch } from '@/components/ui/switch';
-import { TaskTemplate, PhaseConfig, PHASE_LABELS, SubscriptionTier } from '@/types';
+import { TaskTemplate, PhaseConfig, PHASE_LABELS, SubscriptionTier, ServiceTrack, TRACK_LABELS } from '@/types';
 import { toast } from 'sonner';
 import { Plus, Trash2, Edit2, GripVertical, Check } from 'lucide-react';
 
@@ -44,11 +44,13 @@ export function AdminWorkflow() {
         phase: 'execution',
         isActive: true,
         cadence: 'monthly',
-        tiers: ['starter', 'growth', 'enterprise']
+        tiers: ['starter', 'growth', 'enterprise'],
+        tracks: ['local', 'national', 'hybrid']
     });
     const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
     const [phaseFilter, setPhaseFilter] = useState<string>('all');
     const [tierFilter, setTierFilter] = useState<string>('all');
+    const [trackFilter, setTrackFilter] = useState<string>('all');
 
     // Phase Config State - minimal implementation for enabling/disabling
 
@@ -68,7 +70,7 @@ export function AdminWorkflow() {
         }
         setIsTaskDialogOpen(false);
         setEditingTaskId(null);
-        setTaskState({ phase: 'execution', isActive: true, cadence: 'monthly', tiers: ['starter', 'growth', 'enterprise'] });
+        setTaskState({ phase: 'execution', isActive: true, cadence: 'monthly', tiers: ['starter', 'growth', 'enterprise'], tracks: ['local', 'national', 'hybrid'] });
     };
 
     const openEditTask = (task: TaskTemplate) => {
@@ -154,7 +156,7 @@ export function AdminWorkflow() {
 
                             <Label className="ml-4">Filter by Tier:</Label>
                             <Select value={tierFilter} onValueChange={setTierFilter}>
-                                <SelectTrigger className="w-[200px]">
+                                <SelectTrigger className="w-[150px]">
                                     <SelectValue placeholder="All Tiers" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -164,8 +166,21 @@ export function AdminWorkflow() {
                                     <SelectItem value="enterprise">Enterprise</SelectItem>
                                 </SelectContent>
                             </Select>
+
+                            <Label className="ml-4">Filter by Track:</Label>
+                            <Select value={trackFilter} onValueChange={setTrackFilter}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="All Tracks" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Tracks</SelectItem>
+                                    <SelectItem value="local">LOCAL TRACK</SelectItem>
+                                    <SelectItem value="national">NATIONAL TRACK</SelectItem>
+                                    <SelectItem value="hybrid">HYBRID TRACK</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <Button onClick={() => { setIsTaskDialogOpen(true); setEditingTaskId(null); setTaskState({ phase: 'execution', isActive: true, cadence: 'monthly', tiers: ['starter', 'growth', 'enterprise'], order: (taskTemplates.length + 1) }); }}>
+                        <Button onClick={() => { setIsTaskDialogOpen(true); setEditingTaskId(null); setTaskState({ phase: 'execution', isActive: true, cadence: 'monthly', tiers: ['starter', 'growth', 'enterprise'], tracks: ['local', 'national', 'hybrid'], order: (taskTemplates.length + 1) }); }}>
                             <Plus className="w-4 h-4 mr-2" /> Add Task Template
                         </Button>
                     </div>
@@ -180,14 +195,19 @@ export function AdminWorkflow() {
                                         <TableHead>Task Title</TableHead>
                                         <TableHead>Phase</TableHead>
                                         <TableHead>Cadence</TableHead>
-                                        <TableHead>Duration (Days)</TableHead>
+                                        <TableHead>Duration</TableHead>
                                         <TableHead>Tiers</TableHead>
+                                        <TableHead>Tracks</TableHead>
                                         <TableHead className="w-[100px]">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {taskTemplates
-                                        .filter(t => (phaseFilter === 'all' || t.phase === phaseFilter) && (tierFilter === 'all' || t.tiers.includes(tierFilter as SubscriptionTier)))
+                                        .filter(t =>
+                                            (phaseFilter === 'all' || t.phase === phaseFilter) &&
+                                            (tierFilter === 'all' || t.tiers.includes(tierFilter as SubscriptionTier)) &&
+                                            (trackFilter === 'all' || t.tracks.includes(trackFilter as ServiceTrack))
+                                        )
                                         .sort((a, b) => (a.order || 0) - (b.order || 0))
                                         .map((task) => (
                                             <TableRow key={task.id}>
@@ -206,6 +226,13 @@ export function AdminWorkflow() {
                                                     <div className="flex gap-1">
                                                         {task.tiers.map(t => (
                                                             <span key={t} className="w-2 h-2 rounded-full bg-primary" title={t} />
+                                                        ))}
+                                                    </div>
+                                                </TableCell>
+                                                <TableCell>
+                                                    <div className="flex gap-1">
+                                                        {task.tracks?.map(t => (
+                                                            <span key={t} className="w-2 h-2 rounded-full bg-blue-500" title={t} />
                                                         ))}
                                                     </div>
                                                 </TableCell>
@@ -336,7 +363,29 @@ export function AdminWorkflow() {
                                                 }
                                             }}
                                         />
-                                        <Label className="capitalize">{tier}</Label>
+                                        <Label className="capitalize text-xs">{tier}</Label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 pt-2 border-t">
+                            <Label>Applicable Tracks</Label>
+                            <div className="flex gap-4">
+                                {(['local', 'national', 'hybrid'] as ServiceTrack[]).map(track => (
+                                    <div key={track} className="flex items-center space-x-2">
+                                        <Switch
+                                            checked={taskState.tracks?.includes(track)}
+                                            onCheckedChange={(checked) => {
+                                                const currentOptions = taskState.tracks || [];
+                                                if (checked) {
+                                                    setTaskState({ ...taskState, tracks: [...currentOptions, track] });
+                                                } else {
+                                                    setTaskState({ ...taskState, tracks: currentOptions.filter(t => t !== track) });
+                                                }
+                                            }}
+                                        />
+                                        <Label className="capitalize text-xs">{track}</Label>
                                     </div>
                                 ))}
                             </div>

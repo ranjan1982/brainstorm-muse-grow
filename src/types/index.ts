@@ -1,4 +1,5 @@
 export type UserRole = 'admin' | 'us-strategy' | 'seo-head' | 'seo-junior' | 'client';
+export type ServiceTrack = 'local' | 'national' | 'hybrid';
 
 export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'submitted' | 'approved' | 'resubmit';
 
@@ -100,6 +101,7 @@ export interface SubscriptionPlan {
   id: string;
   name: string;
   tier: SubscriptionTier; // Mapping to code tier
+  track: ServiceTrack;
   price: number;
   billingCycle: 'monthly' | 'yearly' | 'one-time';
   isActive: boolean;
@@ -111,6 +113,7 @@ export interface SubscriptionPlan {
 export interface Package {
   id: string;
   tier: SubscriptionTier;
+  track: ServiceTrack;
   setupCost: number;
 }
 
@@ -161,6 +164,7 @@ export interface Subscription {
   id: string;
   clientId: string;
   tier: SubscriptionTier;
+  track: ServiceTrack;
   status: 'active' | 'cancelled' | 'pending' | 'expired' | 'paused' | 'trial';
   startDate: Date;
   endDate?: Date;
@@ -206,6 +210,7 @@ export interface TaskTemplate {
   isActive: boolean;
   order: number;
   tiers: SubscriptionTier[]; // Which subscription tiers include this task
+  tracks: ServiceTrack[]; // Which tracks include this task
   notes?: string; // Additional notes about the task
   duration?: number; // Duration in days
   approver?: UserRole | 'system' | 'client';
@@ -240,6 +245,12 @@ export const SUBSCRIPTION_TIER_PRICES: Record<SubscriptionTier, number> = {
   'starter': 299,
   'growth': 599,
   'enterprise': 999
+};
+
+export const TRACK_LABELS: Record<ServiceTrack, string> = {
+  'local': 'LOCAL TRACK',
+  'national': 'NATIONAL/SAAS TRACK',
+  'hybrid': 'HYBRID TRACK'
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {

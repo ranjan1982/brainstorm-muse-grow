@@ -17,6 +17,8 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Badge } from '@/components/ui/badge';
+import { SUBSCRIPTION_TIER_LABELS, TRACK_LABELS } from '@/types';
 
 export function OrganizationProfile() {
     const { currentUser, currentClient, updateUserProfile, updateClientInfo, deleteUserAccount } = useApp();
@@ -123,26 +125,38 @@ export function OrganizationProfile() {
                 </div>
 
                 {currentUser.role === 'client' && (
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">Delete Profile</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete your account
-                                    and remove your data from our servers.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleDeleteProfile} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                    Delete Account
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
+                    <div className="flex items-center gap-2">
+                        {currentClient && (() => {
+                            const sub = useApp().getClientSubscription(currentClient.id);
+                            if (!sub) return null;
+                            return (
+                                <div className="flex items-center gap-2 mr-4">
+                                    <Badge variant="outline" className="text-[10px] font-bold uppercase">{SUBSCRIPTION_TIER_LABELS[sub.tier]}</Badge>
+                                    <Badge variant="secondary" className="text-[10px] font-bold uppercase bg-blue-50 text-blue-700">{sub.track} track</Badge>
+                                </div>
+                            );
+                        })()}
+                        <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                                <Button variant="destructive" size="sm">Delete Profile</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This action cannot be undone. This will permanently delete your account
+                                        and remove your data from our servers.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleDeleteProfile} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                        Delete Account
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                    </div>
                 )}
             </div>
 

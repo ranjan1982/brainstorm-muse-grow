@@ -7,7 +7,7 @@ import { OrganizationProfile } from '@/components/profile/OrganizationProfile';
 import { TaskDetailView } from '@/components/tasks/TaskDetailView';
 import { KPIDashboard } from '@/components/dashboard/KPIDashboard';
 import { useApp } from '@/context/AppContext';
-import { Phase, ROLE_LABELS, STATUS_LABELS, PHASE_LABELS, SUBSCRIPTION_TIER_LABELS, SUBSCRIPTION_TIER_PRICES, SubscriptionTier } from '@/types';
+import { Phase, ROLE_LABELS, STATUS_LABELS, PHASE_LABELS, SUBSCRIPTION_TIER_LABELS, SUBSCRIPTION_TIER_PRICES, SubscriptionTier, TRACK_LABELS } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -420,6 +420,9 @@ export default function Dashboard() {
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <p className="text-2xl font-black text-[#0f172a] tracking-tight">{SUBSCRIPTION_TIER_LABELS[clientSubscription.tier]}</p>
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                                {TRACK_LABELS[clientSubscription.track]}
+                              </Badge>
                               <Badge className="bg-[#14b8a6] text-white px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest leading-none">
                                 {clientSubscription.status}
                               </Badge>
