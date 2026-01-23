@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,20 +10,26 @@ import { useApp } from '@/context/AppContext';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, Zap, ArrowRight, CreditCard, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { TRACK_LABELS, SUBSCRIPTION_TIER_LABELS } from '@/types';
 
 export default function Purchase() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+    const planId = searchParams.get('planId');
     const { login, plans, packages, discounts } = useApp();
 
-    // Select a default plan for checkout (e.g., Starter Monthly)
-    const selectedPlan = plans.find(p => p.id === 'plan-starter-monthly') || plans[0];
-    const tierPackage = packages.find(pkg => pkg.tier === selectedPlan?.tier);
+    // Select the plan based on URL or default
+    const selectedPlan = plans.find(p => p.id === planId) || plans.find(p => p.id === 'plan-starter-monthly') || plans[0];
+
+    // Find setup fee for the specific tier AND track
+    const tierPackage = packages.find(pkg => pkg.tier === selectedPlan?.tier && pkg.track === selectedPlan?.track);
+
     const setupFee = tierPackage?.setupCost || 0;
     const isSetupFeeApplicable = selectedPlan?.isSetupFeeApplicable;
     const subtotal = (selectedPlan?.price || 0) + (isSetupFeeApplicable ? setupFee : 0);
 
     const [couponInput, setCouponInput] = useState('');
-    const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
+    const [appliedDiscount, setAppliedDiscount] = useState<import('@/types').Discount | null>(null);
 
     const handleApplyCoupon = () => {
         const found = discounts.find(d => d.code.toUpperCase() === couponInput.toUpperCase() && d.isActive);
@@ -249,7 +255,12 @@ export default function Purchase() {
                                                             <Zap className="w-5 h-5" />
                                                         </div>
                                                         <div>
-                                                            <p className="font-black text-sm">{selectedPlan?.name || 'Starter Plan'}</p>
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="font-black text-sm">{selectedPlan ? SUBSCRIPTION_TIER_LABELS[selectedPlan.tier] : 'Starter Plan'}</p>
+                                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 text-[9px] font-bold px-1.5 py-0 h-4">
+                                                                    {selectedPlan ? TRACK_LABELS[selectedPlan.track] : 'LOCAL'}
+                                                                </Badge>
+                                                            </div>
                                                             <p className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">{selectedPlan?.billingCycle} Billing</p>
                                                         </div>
                                                     </div>

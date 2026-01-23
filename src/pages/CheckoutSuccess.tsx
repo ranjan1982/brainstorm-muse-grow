@@ -8,20 +8,20 @@ export default function CheckoutSuccess() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-6">
           <div className="max-w-xl mx-auto text-center">
             <div className="w-20 h-20 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-6 animate-fade-in">
               <CheckCircle2 className="w-10 h-10 text-success" />
             </div>
-            
+
             <h1 className="text-3xl font-bold mb-4 animate-fade-in stagger-1">
               Welcome to SEO Suite!
             </h1>
-            
+
             <p className="text-muted-foreground mb-8 animate-fade-in stagger-2">
-              Your Starter Plan subscription is now active. 
+              Your subscription is now active and your account has been created.
               Your 14-day free trial has begun.
             </p>
 
