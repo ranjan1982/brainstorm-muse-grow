@@ -28,7 +28,7 @@ interface CreateTaskDialogProps {
 }
 
 export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) {
-  const { currentUser, addTask } = useApp();
+  const { currentUser, addTask, clients, currentClient } = useApp();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -40,6 +40,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
     approver: 'us-strategy' as UserRole,
     cadence: '' as '' | 'once' | 'monthly' | 'weekly' | 'ongoing',
     duration: '' as number | '',
+    clientId: currentClient?.id || '',
   });
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -104,6 +105,11 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
       return;
     }
 
+    if (!formData.clientId) {
+      toast.error('Please select a client');
+      return;
+    }
+
     setIsSubmitting(true);
 
     // Simulate API delay
@@ -118,6 +124,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
       cadence: formData.cadence || undefined,
       duration: formData.duration !== '' ? Number(formData.duration) : undefined,
       attachments: attachments,
+      clientId: formData.clientId,
     });
 
     toast.success('Task created successfully');
@@ -131,6 +138,7 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
       approver: 'us-strategy',
       cadence: '',
       duration: '',
+      clientId: currentClient?.id || '',
     });
     setAttachments([]);
 
@@ -172,6 +180,26 @@ export function CreateTaskDialog({ open, onOpenChange }: CreateTaskDialogProps) 
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               className="min-h-[100px] resize-none"
             />
+          </div>
+
+          {/* Client Selection */}
+          <div className="space-y-2">
+            <Label>Select Client *</Label>
+            <Select
+              value={formData.clientId}
+              onValueChange={(v) => setFormData(prev => ({ ...prev, clientId: v }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a client..." />
+              </SelectTrigger>
+              <SelectContent>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>
+                    {client.name} ({client.company})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Phase (Work Phase) */}

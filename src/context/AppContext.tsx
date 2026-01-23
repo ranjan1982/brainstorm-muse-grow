@@ -27,6 +27,7 @@ interface AppContextType {
   addComment: (taskId: string, content: string, attachments?: { name: string; size: number; type: string; url: string }[]) => void;
   addDocumentToTask: (taskId: string, document: { name: string; url: string }) => void;
   addTask: (taskData: NewTaskData) => void;
+  deleteTask: (taskId: string, auditNote?: string) => void;
   isAuthenticated: boolean;
   login: (email: string, password?: string) => boolean;
   logout: () => void;
@@ -188,6 +189,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
 
     setTasks(prev => [...prev, newTask]);
+  };
+
+  const deleteTask = (taskId: string, auditNote?: string) => {
+    // In a real app, we might log the auditNote to a separate collection/log
+    if (auditNote) {
+      console.log(`Audit: Task ${taskId} deleted by ${currentUser?.name}. Reason: ${auditNote}`);
+    }
+    setTasks(prev => prev.filter(t => t.id !== taskId));
   };
 
   const login = (identifier: string, password?: string): boolean => {
@@ -565,6 +574,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updatePackage,
       addManualClient,
       associateTeamToClient,
+      deleteTask,
     }}>
       {children}
     </AppContext.Provider>

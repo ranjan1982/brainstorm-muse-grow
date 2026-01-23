@@ -28,6 +28,7 @@ import {
     Plus,
     Edit2,
     Save,
+    Trash2,
     MoreHorizontal
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -55,10 +56,12 @@ interface CommentAttachmentInput {
 }
 
 export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
-    const { currentUser, tasks, updateTask, addComment, users, clients } = useApp();
+    const { currentUser, tasks, updateTask, addComment, users, clients, deleteTask } = useApp();
     const [newComment, setNewComment] = useState('');
     const [assignmentNote, setAssignmentNote] = useState('');
+    const [deleteNote, setDeleteNote] = useState('');
     const [isAssigning, setIsAssigning] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [commentAttachments, setCommentAttachments] = useState<CommentAttachmentInput[]>([]);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const task = tasks.find(t => t.id === taskId);
@@ -160,6 +163,16 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
         toast.success('Task updated successfully');
     };
 
+    const handleDeleteTask = () => {
+        if (!deleteNote.trim()) {
+            toast.error('Please provide a reason for deletion');
+            return;
+        }
+        deleteTask(task.id, deleteNote.trim());
+        toast.success('Task deleted successfully');
+        onBack();
+    };
+
     const isEditorRole = currentUser?.role === 'us-strategy' || currentUser?.role === 'seo-head';
 
     const canEdit = () => {
@@ -255,55 +268,63 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
                         </Badge>
                     </div>
                 </div>
-                <div className="flex items-center gap-3 mt-2">
-                    {isEditing ? (
-                        <div className="flex-1 space-y-4 bg-white p-4 rounded-xl border border-accent/20 shadow-sm">
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Task Title</Label>
-                                <Input
-                                    value={editedTitle}
-                                    onChange={(e) => setEditedTitle(e.target.value)}
-                                    className="text-lg font-bold"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Task Description</Label>
-                                <Textarea
-                                    value={editedDescription}
-                                    onChange={(e) => setEditedDescription(e.target.value)}
-                                    className="min-h-[100px]"
-                                />
-                            </div>
-                            <div className="flex justify-end gap-2">
-                                <Button variant="outline" size="sm" onClick={() => {
-                                    setIsEditing(false);
-                                    setEditedTitle(task.title);
-                                    setEditedDescription(task.description || '');
-                                }}>Cancel</Button>
-                                <Button size="sm" className="bg-[#14b8a6] hover:bg-[#0d9488]" onClick={handleSaveTaskEdit}>
-                                    <Save className="w-4 h-4 mr-2" /> Save Changes
-                                </Button>
-                            </div>
+                <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                        <div className="px-2 py-0.5 bg-[#f0fdf4] border border-[#bbf7d0] rounded text-[10px] font-black text-[#166534] uppercase tracking-wider flex items-center gap-1">
+                            <Building2 className="w-3 h-3" />
+                            Client: {client?.company || 'Internal Task'}
                         </div>
-                    ) : (
-                        <>
-                            <h1 className="text-3xl font-extrabold tracking-tight text-[#0f172a]">{task.title}</h1>
-                            {isEditorRole && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-accent hover:bg-accent/10"
-                                    onClick={() => {
+                    </div>
+                    <div className="flex items-center gap-3">
+                        {isEditing ? (
+                            <div className="flex-1 space-y-4 bg-white p-4 rounded-xl border border-accent/20 shadow-sm">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Task Title</Label>
+                                    <Input
+                                        value={editedTitle}
+                                        onChange={(e) => setEditedTitle(e.target.value)}
+                                        className="text-lg font-bold"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Task Description</Label>
+                                    <Textarea
+                                        value={editedDescription}
+                                        onChange={(e) => setEditedDescription(e.target.value)}
+                                        className="min-h-[100px]"
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => {
+                                        setIsEditing(false);
                                         setEditedTitle(task.title);
                                         setEditedDescription(task.description || '');
-                                        setIsEditing(true);
-                                    }}
-                                >
-                                    <Edit2 className="w-4 h-4" />
-                                </Button>
-                            )}
-                        </>
-                    )}
+                                    }}>Cancel</Button>
+                                    <Button size="sm" className="bg-[#14b8a6] hover:bg-[#0d9488]" onClick={handleSaveTaskEdit}>
+                                        <Save className="w-4 h-4 mr-2" /> Save Changes
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <h1 className="text-3xl font-extrabold tracking-tight text-[#0f172a]">{task.title}</h1>
+                                {isEditorRole && (
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                                        onClick={() => {
+                                            setEditedTitle(task.title);
+                                            setEditedDescription(task.description || '');
+                                            setIsEditing(true);
+                                        }}
+                                    >
+                                        <Edit2 className="w-4 h-4" />
+                                    </Button>
+                                )}
+                            </>
+                        )}
+                    </div>
                 </div>
                 {task.lastEditedBy && (
                     <div className="flex items-center gap-2 mt-1 px-1">
@@ -388,18 +409,58 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
                     </Avatar>
                     <div className="flex-1 space-y-3">
                         <div className="bg-white border border-[#e2e8f0] rounded-lg p-3 shadow-sm focus-within:border-accent group transition-all">
+                            <div className="mb-2 flex items-center gap-1.5 opacity-60 group-focus-within:opacity-100 transition-opacity">
+                                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Posting to:</span>
+                                <span className="text-[10px] font-black text-accent uppercase tracking-widest">{client?.company || 'Internal Task'}</span>
+                            </div>
                             <Textarea
                                 placeholder="Add a comment..."
                                 className="min-h-[80px] border-none shadow-none resize-none p-0 focus-visible:ring-0 text-sm"
                                 value={newComment}
                                 onChange={(e) => setNewComment(e.target.value)}
                             />
-                            <div className="flex justify-end pt-2">
+
+                            {/* Attachment Previews */}
+                            {commentAttachments.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-3 pb-2 border-b border-dashed border-[#e2e8f0]">
+                                    {commentAttachments.map((file, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 px-2 py-1 bg-accent/5 border border-accent/20 rounded-md">
+                                            <FileText className="w-3.5 h-3.5 text-accent" />
+                                            <span className="text-[11px] font-medium text-accent max-w-[120px] truncate">{file.name}</span>
+                                            <button
+                                                onClick={() => removeAttachment(idx)}
+                                                className="text-accent/60 hover:text-accent transition-colors"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <div className="flex justify-between items-center pt-2">
+                                <div>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileSelect}
+                                        className="hidden"
+                                        multiple
+                                    />
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <Paperclip className="w-4 h-4" />
+                                    </Button>
+                                </div>
                                 <Button
                                     size="sm"
                                     className="bg-[#14b8a6] hover:bg-[#0d9488] font-bold h-8 px-4"
                                     onClick={handleSubmitComment}
-                                    disabled={!newComment.trim()}
+                                    disabled={!newComment.trim() && commentAttachments.length === 0}
                                 >
                                     Post Comment
                                 </Button>
@@ -484,6 +545,29 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
                                             </span>
                                         </div>
                                         <p className="text-sm text-[#334155] leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+
+                                        {/* Render Comment Attachments */}
+                                        {comment.attachments && comment.attachments.length > 0 && (
+                                            <div className="flex flex-wrap gap-3 mt-3">
+                                                {comment.attachments.map((file, idx) => (
+                                                    <a
+                                                        key={idx}
+                                                        href={file.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="group flex flex-col w-32 border border-[#e2e8f0] rounded-lg overflow-hidden bg-white hover:border-accent/30 transition-all shadow-sm"
+                                                    >
+                                                        <div className="h-16 bg-[#f8fafc] flex items-center justify-center border-b border-[#e2e8f0] group-hover:bg-accent/5 transition-colors">
+                                                            <FileText className="w-6 h-6 text-[#94a3b8] group-hover:text-accent transition-colors" />
+                                                        </div>
+                                                        <div className="p-2 bg-white">
+                                                            <p className="text-[10px] font-bold text-[#1e293b] truncate mb-0.5">{file.name}</p>
+                                                            <p className="text-[9px] text-[#64748b]">{formatFileSize(file.size)}</p>
+                                                        </div>
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -515,6 +599,33 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
                                 <Button variant="outline" size="sm" onClick={() => setIsAssigning(false)}>Cancel</Button>
                                 <Button size="sm" className="bg-[#14b8a6] hover:bg-[#0d9488]" disabled={!assignmentNote.trim()} onClick={() => handleStatusChange('submitted')}>
                                     Assign & Send for Review
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {isDeleting && (
+                    <div className="max-w-6xl mx-auto w-full pb-2 animate-in slide-in-from-bottom-2 duration-300">
+                        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-xs font-bold text-destructive uppercase tracking-wider flex items-center gap-2">
+                                    <Trash2 className="w-3.5 h-3.5" /> Deletion Audit Note (Required)
+                                </h4>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive" onClick={() => setIsDeleting(false)}>
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <Textarea
+                                placeholder="Enter the reason for deleting this task for audit purposes..."
+                                className="min-h-[80px] bg-white border-destructive/20 text-sm focus-visible:ring-destructive/20"
+                                value={deleteNote}
+                                onChange={(e) => setDeleteNote(e.target.value)}
+                            />
+                            <div className="flex justify-end mt-3 gap-2">
+                                <Button variant="outline" size="sm" onClick={() => setIsDeleting(false)}>Cancel</Button>
+                                <Button size="sm" variant="destructive" disabled={!deleteNote.trim()} onClick={handleDeleteTask}>
+                                    Confirm Permanent Deletion
                                 </Button>
                             </div>
                         </div>
@@ -553,6 +664,11 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
                                 updateTask(task.id, { status: 'pending', owner: 'client', approver: 'client' });
                             }}>
                                 <Send className="w-4 h-4 mr-2" /> Handoff to Client
+                            </Button>
+                        )}
+                        {(currentUser?.role === 'us-strategy' || currentUser?.role === 'seo-head') && !isAssigning && !isDeleting && (
+                            <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 font-semibold" onClick={() => setIsDeleting(true)}>
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete Task
                             </Button>
                         )}
                     </div>

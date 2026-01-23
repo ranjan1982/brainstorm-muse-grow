@@ -294,13 +294,26 @@ export function AdminWorkflow() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Assigned Role</Label>
+                                <Label>Assign Task To</Label>
                                 <Select value={taskState.owner || 'us-strategy'} onValueChange={(v: any) => setTaskState({ ...taskState, owner: v })}>
                                     <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="us-strategy">US Strategy</SelectItem>
                                         <SelectItem value="seo-head">India Head</SelectItem>
                                         <SelectItem value="seo-junior">India Junior</SelectItem>
+                                        <SelectItem value="system">System (Auto)</SelectItem>
+                                        <SelectItem value="client">Client</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Task Approver</Label>
+                                <Select value={taskState.approver || 'us-strategy'} onValueChange={(v: any) => setTaskState({ ...taskState, approver: v })}>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="us-strategy">US Strategy</SelectItem>
+                                        <SelectItem value="seo-head">India Head</SelectItem>
+                                        <SelectItem value="client">Client</SelectItem>
                                         <SelectItem value="system">System (Auto)</SelectItem>
                                     </SelectContent>
                                 </Select>

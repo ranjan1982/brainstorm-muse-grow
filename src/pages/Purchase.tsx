@@ -13,14 +13,36 @@ import { toast } from 'sonner';
 
 export default function Purchase() {
     const navigate = useNavigate();
-    const { login, plans, packages } = useApp();
+    const { login, plans, packages, discounts } = useApp();
 
     // Select a default plan for checkout (e.g., Starter Monthly)
     const selectedPlan = plans.find(p => p.id === 'plan-starter-monthly') || plans[0];
     const tierPackage = packages.find(pkg => pkg.tier === selectedPlan?.tier);
     const setupFee = tierPackage?.setupCost || 0;
     const isSetupFeeApplicable = selectedPlan?.isSetupFeeApplicable;
-    const totalAmount = (selectedPlan?.price || 0) + (isSetupFeeApplicable ? setupFee : 0);
+    const subtotal = (selectedPlan?.price || 0) + (isSetupFeeApplicable ? setupFee : 0);
+
+    const [couponInput, setCouponInput] = useState('');
+    const [appliedDiscount, setAppliedDiscount] = useState<any>(null);
+
+    const handleApplyCoupon = () => {
+        const found = discounts.find(d => d.code.toUpperCase() === couponInput.toUpperCase() && d.isActive);
+        if (found) {
+            setAppliedDiscount(found);
+            toast.success(`Coupon "${found.code}" applied!`);
+        } else {
+            toast.error('Invalid or expired coupon code.');
+            setAppliedDiscount(null);
+        }
+    };
+
+    const discountAmount = appliedDiscount
+        ? (appliedDiscount.type === 'percentage'
+            ? (selectedPlan?.price || 0) * (appliedDiscount.value / 100)
+            : appliedDiscount.value)
+        : 0;
+
+    const totalPayableAmount = Math.max(0, subtotal - discountAmount);
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState({
         businessName: '',
@@ -244,9 +266,35 @@ export default function Purchase() {
                                                             ${setupFee}
                                                         </span>
                                                     </div>
+
+                                                    <div className="pt-2">
+                                                        <div className="flex gap-2">
+                                                            <Input
+                                                                placeholder="Coupon Code"
+                                                                value={couponInput}
+                                                                onChange={(e) => setCouponInput(e.target.value)}
+                                                                className="h-9 text-xs font-bold uppercase"
+                                                            />
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                onClick={handleApplyCoupon}
+                                                                className="h-9 text-xs"
+                                                            >
+                                                                Apply
+                                                            </Button>
+                                                        </div>
+                                                        {appliedDiscount && (
+                                                            <div className="flex justify-between items-center mt-2 text-[11px] text-success font-bold px-1">
+                                                                <span>Coupon ({appliedDiscount.code}) applied</span>
+                                                                <span>-${discountAmount.toFixed(2)}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
                                                     <div className="pt-3 border-t flex justify-between items-center">
-                                                        <span className="font-black text-base">Total Due Today</span>
-                                                        <span className="font-black text-2xl text-primary">${totalAmount}</span>
+                                                        <span className="font-black text-base">Total Payable Amount</span>
+                                                        <span className="font-black text-2xl text-primary">${totalPayableAmount.toFixed(2)}</span>
                                                     </div>
                                                 </div>
                                             </div>

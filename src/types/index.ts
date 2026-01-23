@@ -207,6 +207,7 @@ export interface TaskTemplate {
   tiers: SubscriptionTier[]; // Which subscription tiers include this task
   notes?: string; // Additional notes about the task
   duration?: number; // Duration in days
+  approver?: UserRole | 'system' | 'client';
 }
 
 export interface EmailTemplate {
