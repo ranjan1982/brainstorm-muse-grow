@@ -61,8 +61,10 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
     const [assignmentNote, setAssignmentNote] = useState('');
     const [deleteNote, setDeleteNote] = useState('');
     const [isAssigning, setIsAssigning] = useState(false);
+    const [isDelegating, setIsDelegating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [commentAttachments, setCommentAttachments] = useState<CommentAttachmentInput[]>([]);
+    const [delegationNote, setDelegationNote] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const task = tasks.find(t => t.id === taskId);
 
@@ -173,11 +175,27 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
         onBack();
     };
 
+    const handleDelegateTask = () => {
+        if (!delegationNote.trim()) {
+            toast.error('Please provide instructions for SEO Head');
+            return;
+        }
+        updateTask(task.id, {
+            status: 'completed',
+            owner: 'seo-head'
+        });
+        addComment(task.id, `Delegated to SEO Head for further improvement: \n${delegationNote.trim()}`);
+        setDelegationNote('');
+        setIsDelegating(false);
+        toast.success('Task delegated to SEO Head successfully');
+    };
+
     const isEditorRole = currentUser?.role === 'us-strategy' || currentUser?.role === 'seo-head';
 
     const canEdit = () => {
         if (!currentUser) return false;
         if (currentUser.role === 'admin') return true;
+        if (currentUser.role === 'us-strategy') return task.owner === 'us-strategy' && task.status !== 'approved' && task.status !== 'submitted';
         if (currentUser.role === 'seo-head') return task.status !== 'approved' && task.status !== 'submitted';
         if (currentUser.role === 'seo-junior') {
             const isAssignedToJunior = task.owner === 'seo-junior' || task.assignedTo === currentUser.id;
@@ -605,6 +623,33 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
                     </div>
                 )}
 
+                {isDelegating && (
+                    <div className="max-w-6xl mx-auto w-full pb-2 animate-in slide-in-from-bottom-2 duration-300">
+                        <div className="bg-[#fdf4ff] border border-[#f5d0fe] rounded-xl p-4 shadow-sm">
+                            <div className="flex items-center justify-between mb-2">
+                                <h4 className="text-xs font-bold text-[#a21caf] uppercase tracking-wider flex items-center gap-2">
+                                    <Send className="w-3.5 h-3.5" /> Instructions for SEO Head
+                                </h4>
+                                <Button variant="ghost" size="icon" className="h-6 w-6 text-[#a21caf]" onClick={() => setIsDelegating(false)}>
+                                    <X className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <Textarea
+                                placeholder="Provide specific instructions or improvements needed from SEO Head..."
+                                className="min-h-[80px] bg-white border-[#f5d0fe] text-sm focus-visible:ring-[#a21caf]/20"
+                                value={delegationNote}
+                                onChange={(e) => setDelegationNote(e.target.value)}
+                            />
+                            <div className="flex justify-end mt-3 gap-2">
+                                <Button variant="outline" size="sm" onClick={() => setIsDelegating(false)}>Cancel</Button>
+                                <Button size="sm" className="bg-[#a21caf] hover:bg-[#86198f] text-white" disabled={!delegationNote.trim()} onClick={handleDelegateTask}>
+                                    Delegate to SEO Head
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {isDeleting && (
                     <div className="max-w-6xl mx-auto w-full pb-2 animate-in slide-in-from-bottom-2 duration-300">
                         <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 shadow-sm">
@@ -634,9 +679,14 @@ export function TaskDetailView({ taskId, onBack }: TaskDetailViewProps) {
 
                 <div className="max-w-6xl mx-auto w-full flex justify-between items-center">
                     <div className="flex gap-3">
-                        {canEdit() && (currentUser?.role === 'seo-head' || currentUser?.role === 'seo-junior') && !isAssigning && (
+                        {canEdit() && (currentUser?.role === 'seo-head' || currentUser?.role === 'seo-junior') && !isAssigning && !isDelegating && (
                             <Button className="bg-[#14b8a6] hover:bg-[#0d9488] shadow-sm font-semibold" onClick={() => setIsAssigning(true)}>
                                 <Send className="w-4 h-4 mr-2" /> Assign to US Strategy
+                            </Button>
+                        )}
+                        {currentUser?.role === 'us-strategy' && task.owner === 'us-strategy' && task.status !== 'approved' && task.status !== 'submitted' && !isDelegating && (
+                            <Button className="bg-[#a21caf] hover:bg-[#86198f] text-white shadow-sm font-semibold" onClick={() => setIsDelegating(true)}>
+                                <Send className="w-4 h-4 mr-2" /> Delegate to SEO Head
                             </Button>
                         )}
                         {canEdit() && task.status === 'pending' && (
