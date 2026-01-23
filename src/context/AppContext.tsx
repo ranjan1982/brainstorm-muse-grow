@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, Task, UserRole, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, KPIData, SubscriptionTier, LoginHistory, SubscriptionPlan, Discount, PhaseConfig, Package } from '@/types';
+import { User, Task, UserRole, Client, Subscription, PaymentHistory, TaskTemplate, EmailTemplate, KPIData, SubscriptionTier, LoginHistory, SubscriptionPlan, Discount, PhaseConfig, Package, Phase } from '@/types';
 import { mockUsers, mockTasks, mockClients, mockSubscriptions, mockPaymentHistory, mockTaskTemplates, mockEmailTemplates, mockKPIData, mockLoginHistory, mockPlans, mockDiscounts, mockPhaseConfigs, mockPackages } from '@/data/mockData';
+import { toast } from 'sonner';
 
 interface NewTaskData {
   title: string;
@@ -77,8 +78,9 @@ interface AppContextType {
   deleteDiscount: (id: string) => void;
   packages: Package[];
   updatePackage: (id: string, updates: Partial<Package>) => void;
-  addManualClient: (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive'>, subscriptionData: { tier: SubscriptionTier, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => void;
+  addManualClient: (clientData: Omit<Client, 'id' | 'createdAt' | 'isActive' | 'currentPhase'>, subscriptionData: { tier: SubscriptionTier, monthlyPrice: number, billingCycle: Subscription['billingCycle'] }) => void;
   associateTeamToClient: (clientId: string, team: Client['associatedTeam'], reassignExistingTasks?: boolean) => void;
+  proceedToNextPhase: (clientId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -98,6 +100,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [phaseConfigs, setPhaseConfigs] = useState<PhaseConfig[]>(mockPhaseConfigs);
   const [packages, setPackages] = useState<Package[]>(mockPackages);
   const [users, setUsers] = useState<User[]>(mockUsers);
+
+  const allPhases: Phase[] = ['onboarding', 'foundation', 'execution', 'ai', 'reporting', 'monitoring'];
 
   const updateTask = (taskId: string, updates: Partial<Task>, editor?: { userId: string, userName: string }) => {
     setTasks(prev => prev.map(task =>
@@ -464,6 +468,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       isActive: true,
       createdAt: timestamp,
       associatedTeam: clientData.associatedTeam || defaultTeam,
+      currentPhase: 'onboarding',
     };
 
     const newUser: User = {
@@ -511,6 +516,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return { ...task, assignedTo: newAssignedTo };
       }));
     }
+  };
+
+  const proceedToNextPhase = (clientId: string) => {
+    const client = clients.find(c => c.id === clientId);
+    if (!client) return;
+
+    const currentPhaseIndex = allPhases.indexOf(client.currentPhase);
+    if (currentPhaseIndex === -1 || currentPhaseIndex >= allPhases.length - 1) {
+      toast.error('No next phase available');
+      return;
+    }
+
+    const nextPhase = allPhases[currentPhaseIndex + 1];
+
+    // Check if subscription exists to get tier
+    const sub = getClientSubscription(clientId);
+    const tier = sub?.tier || 'starter';
+
+    // Generate tasks for the next phase from templates
+    const templates = getTaskTemplatesForTier(tier).filter(tpl => tpl.phase === nextPhase);
+
+    const newTasks: TaskWithClient[] = templates.map(tpl => ({
+      id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      taskId: tpl.taskId,
+      title: tpl.title,
+      description: tpl.description,
+      phase: nextPhase,
+      owner: tpl.owner as any,
+      status: 'pending',
+      comments: [],
+      documents: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      clientId: clientId,
+      assignedTo: client.associatedTeam?.[tpl.owner === 'us-strategy' ? 'usStrategyId' : (tpl.owner === 'seo-head' ? 'seoHeadId' : (tpl.owner === 'seo-junior' ? 'seoJuniorId' : undefined)) as any]
+    }));
+
+    setTasks(prev => [...prev, ...newTasks]);
+    setClients(prev => prev.map(c => c.id === clientId ? { ...c, currentPhase: nextPhase } : c));
+    if (currentClient?.id === clientId) {
+      setCurrentClient(prev => prev ? { ...prev, currentPhase: nextPhase } : null);
+    }
+
+    toast.success(`Client proceeded to ${nextPhase} phase and ${newTasks.length} tasks created.`);
   };
 
   return (
@@ -574,6 +623,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updatePackage,
       addManualClient,
       associateTeamToClient,
+      proceedToNextPhase,
       deleteTask,
     }}>
       {children}

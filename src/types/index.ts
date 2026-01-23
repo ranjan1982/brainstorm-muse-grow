@@ -154,6 +154,7 @@ export interface Client {
     seoHeadId?: string;
     seoJuniorId?: string;
   };
+  currentPhase: Phase;
 }
 
 export interface Subscription {

@@ -22,7 +22,8 @@ export const mockClients: Client[] = [
       usStrategyId: 'us-1',
       seoHeadId: 'seo-head-1',
       seoJuniorId: 'seo-junior-1'
-    }
+    },
+    currentPhase: 'onboarding'
   },
   {
     id: 'client-2',
@@ -44,7 +45,8 @@ export const mockClients: Client[] = [
       usStrategyId: 'us-1',
       seoHeadId: 'seo-head-1',
       seoJuniorId: 'seo-junior-1'
-    }
+    },
+    currentPhase: 'onboarding'
   },
   {
     id: 'client-3',
@@ -66,7 +68,8 @@ export const mockClients: Client[] = [
       usStrategyId: 'us-1',
       seoHeadId: 'seo-head-1',
       seoJuniorId: 'seo-junior-1'
-    }
+    },
+    currentPhase: 'onboarding'
   },
   {
     id: 'client-4',
@@ -88,7 +91,8 @@ export const mockClients: Client[] = [
       usStrategyId: 'us-1',
       seoHeadId: 'seo-head-1',
       seoJuniorId: 'seo-junior-1'
-    }
+    },
+    currentPhase: 'onboarding'
   },
   {
     id: 'client-5',
@@ -110,7 +114,8 @@ export const mockClients: Client[] = [
       usStrategyId: 'us-1',
       seoHeadId: 'seo-head-1',
       seoJuniorId: 'seo-junior-1'
-    }
+    },
+    currentPhase: 'onboarding'
   },
 ];
 

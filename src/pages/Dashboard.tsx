@@ -15,6 +15,7 @@ import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/s
 import { AdminClients } from '@/components/admin/AdminClients';
 import { AdminWorkflow } from '@/components/admin/AdminWorkflow';
 import { AdminPlans, AdminDiscounts, AdminUsers, AdminTemplates, AdminBlast } from '@/components/admin/AdminSetup';
+import { StrategyPhaseManagement } from '@/components/strategy/StrategyPhaseManagement';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -36,7 +37,8 @@ import {
   Eye,
   Ban,
   MessageSquare,
-  Download
+  Download,
+  PlayCircle
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -97,9 +99,15 @@ export default function Dashboard() {
         const strategyRevision = tasks.filter(t => t.owner === 'us-strategy' && t.status === 'resubmit').length;
         const totalClients = clients.filter(c => c.isActive).length;
 
+        const clientsReadyForNextPhase = clients.filter(c => {
+          const currentPhaseTasks = tasks.filter(t => t.clientId === c.id && t.phase === c.currentPhase);
+          return currentPhaseTasks.length > 0 && currentPhaseTasks.every(t => t.status === 'approved');
+        }).length;
+
         return [
           { label: 'Awaiting My Approval', value: strategyAwaiting, icon: Eye, color: 'text-warning', status: 'submitted' },
           { label: 'My Active Tasks', value: strategyPending, icon: Clock, color: 'text-info', status: 'in-progress' },
+          { label: 'Ready for Next Phase', value: clientsReadyForNextPhase, icon: PlayCircle, color: 'text-emerald-500', status: 'strategy-phase-mgmt' },
           { label: 'Revision Required', value: strategyRevision, icon: AlertCircle, color: 'text-destructive', status: 'resubmit' },
           { label: 'Active Clients', value: totalClients, icon: Building2, color: 'text-muted-foreground', status: 'all' },
         ];
@@ -605,6 +613,7 @@ export default function Dashboard() {
             {activeView === 'admin-setup-users' && <AdminUsers />}
             {activeView === 'admin-setup-templates' && <AdminTemplates />}
             {activeView === 'admin-setup-blast' && <AdminBlast />}
+            {activeView === 'strategy-phase-mgmt' && <StrategyPhaseManagement />}
             {activeView === 'admin-profile' && <OrganizationProfile />}
 
             {/* Revenue Chart specific for Admin Dashboard Main View */}

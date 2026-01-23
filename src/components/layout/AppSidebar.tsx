@@ -7,6 +7,7 @@ import {
   Settings,
   GitMerge,
   ChevronRight,
+  PlayCircle,
 } from 'lucide-react';
 import {
   Collapsible,
@@ -255,6 +256,29 @@ export function AppSidebar({ selectedPhase, onPhaseSelect, activeView, onViewCha
                       >
                         <UserCog className="w-4 h-4" />
                         <span>Profile & Org</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+
+            {/* Strategy Management (US Strategy Only) */}
+            {currentUser?.role === 'us-strategy' && (
+              <SidebarGroup>
+                <div className="px-2 py-1.5 flex items-center gap-2 text-xs font-medium text-sidebar-foreground/70">
+                  <GitMerge className="w-4 h-4" />
+                  <span>Strategy Control</span>
+                </div>
+                <SidebarGroupContent className="mt-2">
+                  <SidebarMenu>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        isActive={activeView === 'strategy-phase-mgmt'}
+                        onClick={() => onViewChange('strategy-phase-mgmt')}
+                      >
+                        <PlayCircle className="w-4 h-4" />
+                        <span>Phase Management</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   </SidebarMenu>
