@@ -619,7 +619,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
             </div>
 
             <Dialog open={isAddClientDialogOpen} onOpenChange={setIsAddClientDialogOpen}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle>Add New Client Manually</DialogTitle>
                         <DialogDescription>
@@ -650,14 +650,12 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                         </div>
                         <div className="space-y-2">
                             <Label>Client Email</Label>
-                            <div className="pt-5">
-                                <Input
-                                    type="email"
-                                    placeholder="john@company.com"
-                                    value={newClientState.email}
-                                    onChange={e => setNewClientState({ ...newClientState, email: e.target.value })}
-                                />
-                            </div>
+                            <Input
+                                type="email"
+                                placeholder="john@company.com"
+                                value={newClientState.email}
+                                onChange={e => setNewClientState({ ...newClientState, email: e.target.value })}
+                            />
                         </div>
                         <div className="space-y-2">
                             <Label>Company Name</Label>
@@ -741,30 +739,30 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                             <div className="grid grid-cols-3 gap-4">
                                 <div className="space-y-2">
                                     <Label>US Strategy</Label>
-                                    <Select value={newClientState.usStrategyId} onValueChange={v => setNewClientState({ ...newClientState, usStrategyId: v })}>
+                                    <Select value={newClientState.usStrategyId || "none"} onValueChange={v => setNewClientState({ ...newClientState, usStrategyId: v === "none" ? "" : v })}>
                                         <SelectTrigger><SelectValue placeholder="Select User" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">None</SelectItem>
+                                            <SelectItem value="none">None / Not Assigned</SelectItem>
                                             {usStrategyUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
                                     <Label>SEO Head</Label>
-                                    <Select value={newClientState.seoHeadId} onValueChange={v => setNewClientState({ ...newClientState, seoHeadId: v })}>
+                                    <Select value={newClientState.seoHeadId || "none"} onValueChange={v => setNewClientState({ ...newClientState, seoHeadId: v === "none" ? "" : v })}>
                                         <SelectTrigger><SelectValue placeholder="Select User" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">None</SelectItem>
+                                            <SelectItem value="none">None / Not Assigned</SelectItem>
                                             {seoHeadUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="space-y-2">
                                     <Label>SEO Junior</Label>
-                                    <Select value={newClientState.seoJuniorId} onValueChange={v => setNewClientState({ ...newClientState, seoJuniorId: v })}>
+                                    <Select value={newClientState.seoJuniorId || "none"} onValueChange={v => setNewClientState({ ...newClientState, seoJuniorId: v === "none" ? "" : v })}>
                                         <SelectTrigger><SelectValue placeholder="Select User" /></SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="">None</SelectItem>
+                                            <SelectItem value="none">None / Not Assigned</SelectItem>
                                             {seoJuniorUsers.map(u => <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>)}
                                         </SelectContent>
                                     </Select>
@@ -883,7 +881,7 @@ export function AdminClients({ defaultFilter = 'all' }: AdminClientsProps) {
                     </Table>
                 </CardContent>
             </Card>
-        </div>
+        </div >
     );
 }
 
