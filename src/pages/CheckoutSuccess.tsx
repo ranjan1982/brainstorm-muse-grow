@@ -22,7 +22,6 @@ export default function CheckoutSuccess() {
 
             <p className="text-muted-foreground mb-8 animate-fade-in stagger-2">
               Your subscription is now active and your account has been created.
-              Your 14-day free trial has begun.
             </p>
 
             <Card className="mb-8 animate-fade-in stagger-3">

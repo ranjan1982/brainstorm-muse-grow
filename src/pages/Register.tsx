@@ -160,14 +160,9 @@ export default function Register() {
                     </>
                   ) : (
                     <>
-                      <div className="bg-secondary/50 rounded-lg p-4 mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="font-medium">Starter Plan</span>
-                          <span className="font-bold">$499/mo</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          14-day free trial included
-                        </p>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium">Starter Plan</span>
+                        <span className="font-bold">$499/mo</span>
                       </div>
 
                       <div className="space-y-2">
@@ -207,17 +202,13 @@ export default function Register() {
                       </>
                     ) : (
                       <>
-                        Start Free Trial
+                        Purchase Subscription
                         <Zap className="w-4 h-4 ml-2" />
                       </>
                     )}
                   </Button>
 
-                  {step === 2 && (
-                    <p className="text-xs text-center text-muted-foreground">
-                      You won't be charged until your 14-day trial ends. Cancel anytime.
-                    </p>
-                  )}
+
                 </form>
               </CardContent>
             </Card>

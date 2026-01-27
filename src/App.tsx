@@ -7,7 +7,6 @@ import { AppProvider } from "@/context/AppContext";
 import Index from "./pages/Index";
 import Pricing from "./pages/Pricing";
 import Register from "./pages/Register";
-import FreeTrial from "./pages/FreeTrial";
 import Purchase from "./pages/Purchase";
 import Login from "./pages/Login";
 import CheckoutSuccess from "./pages/CheckoutSuccess";
@@ -27,7 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/free-trial" element={<FreeTrial />} />
+
             <Route path="/purchase" element={<Purchase />} />
             <Route path="/login" element={<Login />} />
             <Route path="/checkout-success" element={<CheckoutSuccess />} />

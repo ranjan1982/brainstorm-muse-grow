@@ -74,29 +74,15 @@ export default function Landing() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in stagger-3">
-              <Link to="/free-trial">
-                <Button variant="accent" size="xl" className="gap-2 shadow-glow animate-pulse-glow">
-                  Start Free Trial
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
               <Link to="/pricing">
-                <Button variant="hero-outline" size="xl">
-                  View Pricing
+                <Button variant="accent" size="xl" className="gap-2 shadow-glow animate-pulse-glow">
+                  Get Started Now
+                  <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-8 mt-12 animate-fade-in stagger-4">
-              <div className="flex items-center gap-2 text-primary-foreground/70">
-                <Shield className="w-5 h-5" />
-                <span className="text-sm">No credit card required</span>
-              </div>
-              <div className="flex items-center gap-2 text-primary-foreground/70">
-                <Clock className="w-5 h-5" />
-                <span className="text-sm">14-day free trial</span>
-              </div>
-            </div>
+
           </div>
         </div>
 

@@ -95,11 +95,6 @@ export function Header() {
                   Login
                 </Button>
               </Link>
-              <Link to="/free-trial">
-                <Button variant={isLandingPage ? "hero" : "accent"} size="sm">
-                  Start Free Trial
-                </Button>
-              </Link>
             </>
           )}
         </div>

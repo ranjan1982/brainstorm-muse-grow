@@ -249,11 +249,6 @@ export default function Pricing() {
                           Purchase Subscription
                         </Button>
                       </Link>
-                      <Link to="/free-trial" className="block text-center">
-                        <button className="text-sm font-bold text-muted-foreground hover:text-accent transition-colors">
-                          Start 14-Day Free Trial
-                        </button>
-                      </Link>
                     </div>
                   ) : (
                     <Button variant="outline" className="w-full" size="lg" disabled>
@@ -271,10 +266,6 @@ export default function Pricing() {
             <h2 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
             <div className="space-y-4">
               {[
-                {
-                  q: 'What\'s included in the free trial?',
-                  a: 'Your 14-day free trial includes full access to the Starter tier features. No credit card required.'
-                },
                 {
                   q: 'Can I upgrade my plan later?',
                   a: 'Absolutely! You can upgrade to Growth or Enterprise at any time. Your data and progress will be preserved.'
