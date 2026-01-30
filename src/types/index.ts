@@ -23,6 +23,7 @@ export interface User {
   zip?: string;
   lastLogin?: Date;
   isDefaultAssociate?: boolean;
+  emailNotificationsEnabled?: boolean;
 }
 
 export interface LoginHistory {

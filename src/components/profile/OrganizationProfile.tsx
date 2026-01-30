@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from '@/components/ui/badge';
 import { SUBSCRIPTION_TIER_LABELS, TRACK_LABELS } from '@/types';
+import { Switch } from '@/components/ui/switch';
 
 export function OrganizationProfile() {
     const { currentUser, currentClient, updateUserProfile, updateClientInfo, deleteUserAccount } = useApp();
@@ -31,6 +33,7 @@ export function OrganizationProfile() {
 
     const [email, setEmail] = useState(currentUser?.email || '');
     const [phone, setPhone] = useState(currentUser?.phone || '');
+    const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(currentUser?.emailNotificationsEnabled || false);
 
     // Client specific
     const [company, setCompany] = useState(currentClient?.company || '');
@@ -61,7 +64,8 @@ export function OrganizationProfile() {
         updateUserProfile(currentUser.id, {
             name: fullName,
             email,
-            phone
+            phone,
+            emailNotificationsEnabled
         });
 
         // Update Client Org if applicable
@@ -279,6 +283,35 @@ export function OrganizationProfile() {
                         )}
                     </CardContent>
                 </Card>
+
+                {['us-strategy', 'client', 'seo-head', 'seo-junior'].includes(currentUser.role) && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Notification Settings</CardTitle>
+                            <CardDescription>Configure how you receive updates</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between space-x-2">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base">Task communication email notification</Label>
+                                    <p className="text-sm text-muted-foreground">
+                                        Receive email updates for task communications and status changes
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className={cn("text-xs font-bold uppercase tracking-wider", !emailNotificationsEnabled ? "text-muted-foreground" : "text-primary")}>
+                                        {emailNotificationsEnabled ? 'Yes' : 'No'}
+                                    </span>
+                                    <Switch
+                                        disabled={!isEditing}
+                                        checked={emailNotificationsEnabled}
+                                        onCheckedChange={setEmailNotificationsEnabled}
+                                    />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
             </div>
 
             <div className="flex justify-end gap-2">

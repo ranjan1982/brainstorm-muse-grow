@@ -391,18 +391,18 @@ export const mockEmailTemplates: EmailTemplate[] = [
 
 export const mockUsers: User[] = [
   { id: 'admin-1', name: 'Alex Thompson', email: 'alex@seosuite.com', password: 'password123', role: 'admin' },
-  { id: 'us-1', name: 'Sarah Mitchell', email: 'sarah@seosuite.com', password: 'password123', role: 'us-strategy', isDefaultAssociate: true },
-  { id: 'us-2', name: 'Marcus Bloom', email: 'marcus@seosuite.com', password: 'password123', role: 'us-strategy' },
-  { id: 'seo-head-1', name: 'Robert Harrison', email: 'robert@seosuite.com', password: 'password123', role: 'seo-head', isDefaultAssociate: true },
-  { id: 'seo-head-2', name: 'Vikram Singh', email: 'vikram@seosuite.com', password: 'password123', role: 'seo-head' },
-  { id: 'seo-junior-1', name: 'Jennifer Davis', email: 'jennifer@seosuite.com', password: 'password123', role: 'seo-junior', isDefaultAssociate: true },
-  { id: 'seo-junior-2', name: 'Amit Patel', email: 'amit@seosuite.com', password: 'password123', role: 'seo-junior' },
+  { id: 'us-1', name: 'Sarah Mitchell', email: 'sarah@seosuite.com', password: 'password123', role: 'us-strategy', isDefaultAssociate: true, emailNotificationsEnabled: true },
+  { id: 'us-2', name: 'Marcus Bloom', email: 'marcus@seosuite.com', password: 'password123', role: 'us-strategy', emailNotificationsEnabled: false },
+  { id: 'seo-head-1', name: 'Robert Harrison', email: 'robert@seosuite.com', password: 'password123', role: 'seo-head', isDefaultAssociate: true, emailNotificationsEnabled: true },
+  { id: 'seo-head-2', name: 'Vikram Singh', email: 'vikram@seosuite.com', password: 'password123', role: 'seo-head', emailNotificationsEnabled: true },
+  { id: 'seo-junior-1', name: 'Jennifer Davis', email: 'jennifer@seosuite.com', password: 'password123', role: 'seo-junior', isDefaultAssociate: true, emailNotificationsEnabled: true },
+  { id: 'seo-junior-2', name: 'Amit Patel', email: 'amit@seosuite.com', password: 'password123', role: 'seo-junior', emailNotificationsEnabled: true },
   // Client users (linked to clients)
-  { id: 'client-1', name: 'John Martinez', email: 'john@acmeplumbing.com', password: 'password123', role: 'client' },
-  { id: 'client-2', name: 'Emily Chen', email: 'emily@greenscapelandscaping.com', password: 'password123', role: 'client' },
-  { id: 'client-3', name: 'Michael Brown', email: 'michael@eliteautorepair.com', password: 'password123', role: 'client' },
-  { id: 'client-4', name: 'Sarah Williams', email: 'sarah@homecleanpro.com', password: 'password123', role: 'client' },
-  { id: 'client-5', name: 'David Kim', email: 'david@techstart.io', password: 'password123', role: 'client' },
+  { id: 'client-1', name: 'John Martinez', email: 'john@acmeplumbing.com', password: 'password123', role: 'client', emailNotificationsEnabled: true },
+  { id: 'client-2', name: 'Emily Chen', email: 'emily@greenscapelandscaping.com', password: 'password123', role: 'client', emailNotificationsEnabled: true },
+  { id: 'client-3', name: 'Michael Brown', email: 'michael@eliteautorepair.com', password: 'password123', role: 'client', emailNotificationsEnabled: false },
+  { id: 'client-4', name: 'Sarah Williams', email: 'sarah@homecleanpro.com', password: 'password123', role: 'client', emailNotificationsEnabled: true },
+  { id: 'client-5', name: 'David Kim', email: 'david@techstart.io', password: 'password123', role: 'client', emailNotificationsEnabled: true },
 ];
 
 // Tasks now include clientId for multi-client support
